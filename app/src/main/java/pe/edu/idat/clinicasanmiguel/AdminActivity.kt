@@ -2,11 +2,10 @@ package pe.edu.idat.clinicasanmiguel
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.TextView
-import android.widget.Button
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
+import com.google.android.material.button.MaterialButton
 
 class AdminActivity : AppCompatActivity() {
 
@@ -22,60 +21,73 @@ class AdminActivity : AppCompatActivity() {
         val cardMiPerfil = findViewById<CardView>(R.id.cardMiPerfil)
         val cardCambiarPassword = findViewById<CardView>(R.id.cardCambiarPassword)
 
-        val btnCerrarSesion = findViewById<Button>(R.id.btnCerrarSesion)
+        val btnCerrarSesion =
+            findViewById<MaterialButton>(R.id.btnCerrarSesion)
 
-        // Especialidades
         cardEspecialidades.setOnClickListener {
 
-            // Próxima Activity
+            // Próxima pantalla
             // startActivity(Intent(this, RegistrarEspecialidadActivity::class.java))
 
         }
 
-        // Doctores
         cardDoctores.setOnClickListener {
 
-            // Próxima Activity
+            // Próxima pantalla
             // startActivity(Intent(this, RegistrarDoctorActivity::class.java))
 
         }
 
-        // Horarios
         cardHorarios.setOnClickListener {
 
-            // Sprint 2
+            AlertDialog.Builder(this)
+                .setTitle("Próximamente")
+                .setMessage("Módulo de horarios disponible en el siguiente sprint.")
+                .setPositiveButton("Aceptar", null)
+                .show()
 
         }
 
-        // Usuarios
         cardUsuarios.setOnClickListener {
 
-            // Sprint 2
+            AlertDialog.Builder(this)
+                .setTitle("Próximamente")
+                .setMessage("Módulo de usuarios disponible en el siguiente sprint.")
+                .setPositiveButton("Aceptar", null)
+                .show()
 
         }
 
-        // Citas
         cardCitas.setOnClickListener {
 
-            // Sprint 2
+            AlertDialog.Builder(this)
+                .setTitle("Próximamente")
+                .setMessage("Módulo de citas disponible en el siguiente sprint.")
+                .setPositiveButton("Aceptar", null)
+                .show()
 
         }
 
-        // Mi Perfil
         cardMiPerfil.setOnClickListener {
 
-            // Sprint 2
+            AlertDialog.Builder(this)
+                .setTitle("Mi Perfil")
+                .setMessage("Funcionalidad pendiente para la siguiente entrega.")
+                .setPositiveButton("Aceptar", null)
+                .show()
 
         }
 
-        // Cambiar Contraseña
         cardCambiarPassword.setOnClickListener {
 
-            // Sprint 2
+            AlertDialog.Builder(this)
+                .setTitle("Cambiar Contraseña")
+                .setMessage("Funcionalidad pendiente para la siguiente entrega.")
+                .setPositiveButton("Aceptar", null)
+                .show()
 
         }
 
-        // Cerrar Sesión
         btnCerrarSesion.setOnClickListener {
 
             AlertDialog.Builder(this)
