@@ -4,20 +4,41 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.textfield.TextInputEditText
 
 class RegistrarEspecialidadActivity : AppCompatActivity() {
+
+    private lateinit var etNombreEspecialidad: TextInputEditText
+    private lateinit var btnGuardar: Button
+    private lateinit var btnCancelar: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_registrar_especialidad)
 
-        val btnGuardar =
-            findViewById<Button>(R.id.btnGuardarEspecialidad)
+        etNombreEspecialidad =
+            findViewById(R.id.etNombreEspecialidad)
 
-        val btnCancelar =
-            findViewById<Button>(R.id.btnCancelarEspecialidad)
+        btnGuardar =
+            findViewById(R.id.btnGuardarEspecialidad)
+
+        btnCancelar =
+            findViewById(R.id.btnCancelarEspecialidad)
 
         btnGuardar.setOnClickListener {
+
+            val nombreEspecialidad =
+                etNombreEspecialidad.text.toString().trim()
+
+            if (nombreEspecialidad.isEmpty()) {
+
+                etNombreEspecialidad.error =
+                    "Ingrese el nombre de la especialidad"
+
+                etNombreEspecialidad.requestFocus()
+
+                return@setOnClickListener
+            }
 
             Toast.makeText(
                 this,
@@ -25,6 +46,7 @@ class RegistrarEspecialidadActivity : AppCompatActivity() {
                 Toast.LENGTH_SHORT
             ).show()
 
+            etNombreEspecialidad.setText("")
         }
 
         btnCancelar.setOnClickListener {
