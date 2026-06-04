@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:background="#FFFFFF"
+    android:orientation="vertical"
     tools:context=".LoginActivity">
 
 
@@ -21,38 +20,38 @@
             android:layout_height="0dp"
             android:src="@drawable/logo_principal"
             app:layout_constraintDimensionRatio="16:5"
-            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"/>
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
         android:text="Bienvenido de nuevo"
         android:textAlignment="center"
-        android:textSize="25sp"
         android:textColor="#000000"
-        android:textStyle="bold"
-        android:layout_marginTop="16dp"/>
+        android:textSize="25sp"
+        android:textStyle="bold" />
 
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/tilCorreo"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="16dp"
         android:layout_marginTop="24dp"
-        app:startIconDrawable="@android:drawable/sym_action_email"
-        app:startIconTint="#000000"
-        app:hintTextColor="#000000"
-        app:boxStrokeColor="#000000"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         app:boxCornerRadiusBottomEnd="16dp"
         app:boxCornerRadiusBottomStart="16dp"
         app:boxCornerRadiusTopEnd="16dp"
-        app:boxCornerRadiusTopStart="16dp">
+        app:boxCornerRadiusTopStart="16dp"
+        app:boxStrokeColor="#000000"
+        app:hintTextColor="#000000"
+        app:startIconDrawable="@android:drawable/sym_action_email"
+        app:startIconTint="#000000">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etCorreo"
@@ -60,82 +59,82 @@
             android:layout_height="wrap_content"
             android:hint="Correo electrónico"
             android:inputType="textEmailAddress"
+            android:paddingStart="48dp"
             android:textColor="#000000"
-            android:textColorHint="#555555"
-            android:paddingStart="48dp"/>
+            android:textColorHint="#555555" />
     </com.google.android.material.textfield.TextInputLayout>
 
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/tilContrasena"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="16dp"
         android:layout_marginTop="16dp"
-        app:startIconDrawable="@android:drawable/ic_lock_lock"
-        app:startIconTint="#000000"
+        app:boxCornerRadiusBottomEnd="16dp"
+        app:boxCornerRadiusBottomStart="16dp"
+        app:boxCornerRadiusTopEnd="16dp"
+        app:boxCornerRadiusTopStart="16dp"
+        app:boxStrokeColor="#000000"
+        app:hintTextColor="#000000"
         app:passwordToggleEnabled="true"
         app:passwordToggleTint="#000000"
-        app:hintTextColor="#000000"
-        app:boxStrokeColor="#000000"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        app:boxCornerRadiusTopEnd="16dp"
-        app:boxCornerRadiusBottomStart="16dp"
-        app:boxCornerRadiusBottomEnd="16dp"
-        app:boxCornerRadiusTopStart="16dp">
+        app:startIconDrawable="@android:drawable/ic_lock_lock"
+        app:startIconTint="#000000">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etContrasena"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="textPassword"
             android:hint="Contraseña"
+            android:inputType="textPassword"
+            android:paddingStart="48dp"
             android:textColor="#000000"
-            android:textColorHint="#555555"
-            android:paddingStart="48dp"/>
+            android:textColorHint="#555555" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnLogin"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Acceder"
         android:layout_gravity="center"
         android:layout_marginTop="24dp"
         android:paddingHorizontal="40dp"
+        android:text="Acceder"
         app:backgroundTint="#458890"
-        app:cornerRadius="8dp"/>
+        app:cornerRadius="8dp" />
 
     <TextView
         android:id="@+id/tvOlvidaste"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
         android:text="¿Olvidaste la contraseña?"
         android:textAlignment="center"
         android:textColor="#1976D2"
-        android:layout_marginTop="16dp"
-        android:textStyle="bold"/>
+        android:textStyle="bold" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:layout_marginTop="24dp"
         android:gravity="center"
-        android:layout_marginTop="24dp">
+        android:orientation="horizontal">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="#000000"
-            android:text="¿Aún no tienes una cuenta? "/>
+            android:text="¿Aún no tienes una cuenta? "
+            android:textColor="#000000" />
 
         <TextView
             android:id="@+id/tvRegistro"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Regístrate aquí"
-            android:textStyle="bold"
-            android:textColor="#458890"/>
+            android:textColor="#458890"
+            android:textStyle="bold" />
     </LinearLayout>
 
 </LinearLayout>

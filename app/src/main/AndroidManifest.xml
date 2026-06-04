@@ -37,6 +37,8 @@
             android:name=".AdminActivity"
             android:exported="false" />
 
+        <activity android:name=".MisCitasActivity" android:exported="false" />
+
     </application>
 
 </manifest>

@@ -1,22 +1,68 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#FFFFFF"
+    android:padding="24dp"
     tools:context=".PacienteActivity">
 
-    <TextView
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="¡Bienvenido Paciente!"
-        android:textColor="#000000"
-        android:textSize="26sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:orientation="vertical">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <TextView
+            android:id="@+id/tvTitulo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Panel del Paciente"
+            android:textSize="26sp"
+            android:textStyle="bold"
+            android:textColor="#333333"
+            android:layout_gravity="center"
+            android:layout_marginBottom="30dp"/>
+
+        <Button android:id="@+id/btnVerCitas" android:layout_width="match_parent" android:layout_height="55dp"
+            android:text="Ver mis citas" android:backgroundTint="#3F51B5" android:layout_marginBottom="16dp"/>
+
+        <Button android:id="@+id/btnHorarios" android:layout_width="match_parent" android:layout_height="55dp"
+            android:text="Registrar Cita Médica" android:backgroundTint="#3F51B5" android:layout_marginBottom="16dp"/>
+
+        <Button android:id="@+id/btnHistorial" android:layout_width="match_parent" android:layout_height="55dp"
+            android:text="Historial de citas" android:backgroundTint="#458890" android:layout_marginBottom="16dp"/>
+
+        <Button android:id="@+id/btnNotificaciones" android:layout_width="match_parent" android:layout_height="55dp"
+            android:text="Ver notificaciones" android:backgroundTint="#458890" android:layout_marginBottom="24dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Opciones de Cuenta"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="#333333"
+            android:layout_marginBottom="12dp"/>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Seleccionar acción"
+            app:boxBackgroundColor="#FFFFFF"
+            app:boxStrokeColor="#3F51B5">
+
+            <AutoCompleteTextView
+                android:id="@+id/acPerfil"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="none"
+                android:text="Mi Perfil"
+                android:padding="16dp"
+                android:dropDownHeight="wrap_content"
+                android:textColor="#333333" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+    </LinearLayout>
+</ScrollView>

@@ -47,11 +47,10 @@ class LoginActivity : AppCompatActivity() {
             if (correo.isEmpty() || contrasena.isEmpty()) {
                 Toast.makeText(this, "Por favor, ingrese sus datos", Toast.LENGTH_SHORT).show()
             } else {
-                // Simulación estática local de Roles (Mock Data)
                 if (correo == "paciente@idat.com" && contrasena == "123456") {
                     Toast.makeText(this, "Bienvenido PACIENTE", Toast.LENGTH_SHORT).show()
 
-                    // Navegación limpia hacia la interfaz del Paciente
+
                     val intent = Intent(this, PacienteActivity::class.java)
                     startActivity(intent)
                     finish()

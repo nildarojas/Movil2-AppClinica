@@ -1,21 +1,79 @@
 package pe.edu.idat.clinicasanmiguel
 
+import android.content.Intent
 import android.os.Bundle
-import androidx.activity.enableEdgeToEdge
+import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
+import android.widget.Button
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import pe.edu.idat.clinicasanmiguel.R
+import kotlin.jvm.java
 
 class PacienteActivity : AppCompatActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContentView(R.layout.activity_paciente)
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
+        val btnVerCitas = findViewById<Button>(R.id.btnVerCitas)
+        val btnHorarios = findViewById<Button>(R.id.btnHorarios)
+        val btnHistorial = findViewById<Button>(R.id.btnHistorial)
+        val btnNotificaciones = findViewById<Button>(R.id.btnNotificaciones)
+        val acPerfil = findViewById<AutoCompleteTextView>(R.id.acPerfil)
+
+        btnVerCitas.setOnClickListener {
+            startActivity(Intent(this, MisCitasActivity::class.java))
+        }
+        btnHorarios.setOnClickListener {
+            Toast.makeText(this, "Registrar Cita Médica (Sprint 2)", Toast.LENGTH_SHORT).show()
+        }
+        btnHistorial.setOnClickListener {
+            Toast.makeText(this, "Historial de citas (Sprint 2)", Toast.LENGTH_SHORT).show()
+        }
+        btnNotificaciones.setOnClickListener {
+            Toast.makeText(this, "Módulo de Alertas y Notificaciones (Sprint 2)", Toast.LENGTH_SHORT).show()
+        }
+
+        val opciones = arrayOf("👤 Datos personales", "🔑 Cambiar contraseña", "🚪 Cerrar sesión")
+
+
+        val adapter = ArrayAdapter(this, R.layout.spinner_perfil_item, opciones)
+        acPerfil.setAdapter(adapter)
+
+        acPerfil.setOnClickListener {
+            acPerfil.showDropDown()
+        }
+
+        acPerfil.setOnItemClickListener { parent, _, position, _ ->
+            val seleccion = parent.getItemAtPosition(position).toString()
+
+            when (seleccion) {
+                "👤 Datos personales" -> {
+                    Toast.makeText(this, "Datos Personales (Sprint 2)", Toast.LENGTH_SHORT).show()
+                }
+                "🔑 Cambiar contraseña" -> {
+                    Toast.makeText(this, "Cambiar Contraseña (Sprint 2)", Toast.LENGTH_SHORT).show()
+                }
+                "🚪 Cerrar sesión" -> {
+                    AlertDialog.Builder(this)
+                        .setTitle("Cerrar Sesión")
+                        .setMessage("¿Está seguro de que desea salir del sistema?")
+                        .setPositiveButton("Sí") { _, _ ->
+                            val prefs = getSharedPreferences("auth", MODE_PRIVATE)
+                            prefs.edit().clear().apply()
+
+                            val intent = Intent(this, LoginActivity::class.java)
+                            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                            startActivity(intent)
+                            finish()
+                        }
+                        .setNegativeButton("No", null)
+                        .show()
+                }
+            }
+            acPerfil.setText("Mi Perfil", false)
         }
     }
 }
