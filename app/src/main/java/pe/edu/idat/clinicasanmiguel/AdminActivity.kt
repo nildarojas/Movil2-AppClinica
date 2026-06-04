@@ -25,11 +25,13 @@ class AdminActivity : AppCompatActivity() {
             findViewById<AutoCompleteTextView>(R.id.acPerfilAdmin)
 
         btnEspecialidades.setOnClickListener {
-            Toast.makeText(
+
+            val intent = Intent(
                 this,
-                "Gestión de Especialidades (Próxima entrega)",
-                Toast.LENGTH_SHORT
-            ).show()
+                ListaEspecialidadesActivity::class.java
+            )
+
+            startActivity(intent)
         }
 
         btnDoctores.setOnClickListener {

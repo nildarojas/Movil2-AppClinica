@@ -11,34 +11,42 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.ClinicaSanMiguel">
-
         <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".LoginActivity"
             android:exported="false" />
-
         <activity
             android:name=".RegistroActivity"
             android:exported="false" />
-
         <activity
             android:name=".PacienteActivity"
             android:exported="false" />
-
         <activity
             android:name=".AdminActivity"
             android:exported="false" />
-
-        <activity android:name=".MisCitasActivity" android:exported="false" />
-
+        <activity
+            android:name=".MisCitasActivity"
+            android:exported="false" />
+        <activity
+            android:name=".adapter.ListaEspecialidadesActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".ListaEspecialidadesActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".RegistrarEspecialidadActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
     </application>
 
 </manifest>
