@@ -1,16 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://tools.android.com/tools"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#FFFFFF"
     tools:context=".RegistroActivity">
 
     <LinearLayout
         android:id="@+id/main"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:padding="12dp">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -21,7 +23,7 @@
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:src="@drawable/logo_principal"
-                app:layout_constraintDimensionRatio="16:5"
+                app:layout_constraintDimensionRatio="16:3"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"/>
@@ -34,16 +36,21 @@
             android:text="Registro de Paciente"
             android:textAlignment="center"
             android:textSize="25sp"
-            android:textColor="#d50000"
-            android:layout_marginTop="16dp"/>
+            android:textColor="#4DB6AC"
+            android:textStyle="bold"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"/>
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilNombre"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="16dp"
-            android:layout_marginTop="16dp"
             app:startIconDrawable="@android:drawable/ic_menu_edit"
+            app:startIconTint="#000000"
+            app:hintTextColor="#FFFFFF"
+            app:boxStrokeColor="#FFFFFF"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             app:boxCornerRadiusBottomEnd="16dp"
             app:boxCornerRadiusBottomStart="16dp"
             app:boxCornerRadiusTopEnd="16dp"
@@ -54,6 +61,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Nombres"
+                android:textColor="#000000"
+                android:textColorHint="#AAAAAA"
                 android:paddingStart="48dp"/>
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -64,6 +73,10 @@
             android:layout_marginHorizontal="16dp"
             android:layout_marginTop="16dp"
             app:startIconDrawable="@android:drawable/ic_menu_edit"
+            app:startIconTint="#000000"
+            app:hintTextColor="#FFFFFF"
+            app:boxStrokeColor="#FFFFFF"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             app:boxCornerRadiusBottomEnd="16dp"
             app:boxCornerRadiusBottomStart="16dp"
             app:boxCornerRadiusTopEnd="16dp"
@@ -74,6 +87,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Apellidos"
+                android:textColor="#000000"
+                android:textColorHint="#AAAAAA"
                 android:paddingStart="48dp"/>
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -84,6 +99,10 @@
             android:layout_marginHorizontal="16dp"
             android:layout_marginTop="16dp"
             app:startIconDrawable="@android:drawable/ic_dialog_info"
+            app:startIconTint="#000000"
+            app:hintTextColor="#FFFFFF"
+            app:boxStrokeColor="#FFFFFF"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             app:boxCornerRadiusBottomEnd="16dp"
             app:boxCornerRadiusBottomStart="16dp"
             app:boxCornerRadiusTopEnd="16dp"
@@ -96,6 +115,8 @@
                 android:hint="DNI"
                 android:inputType="number"
                 android:maxLength="8"
+                android:textColor="#000000"
+                android:textColorHint="#AAAAAA"
                 android:paddingStart="48dp"/>
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -106,6 +127,10 @@
             android:layout_marginHorizontal="16dp"
             android:layout_marginTop="16dp"
             app:startIconDrawable="@android:drawable/ic_menu_my_calendar"
+            app:startIconTint="#000000"
+            app:hintTextColor="#FFFFFF"
+            app:boxStrokeColor="#FFFFFF"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             app:boxCornerRadiusBottomEnd="16dp"
             app:boxCornerRadiusBottomStart="16dp"
             app:boxCornerRadiusTopEnd="16dp"
@@ -117,6 +142,8 @@
                 android:layout_height="wrap_content"
                 android:focusable="false"
                 android:hint="Fecha de nacimiento"
+                android:textColor="#000000"
+                android:textColorHint="#AAAAAA"
                 android:paddingStart="48dp"/>
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -124,6 +151,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Seleccione su género:"
+            android:textColor="#000000"
+            android:textStyle="bold"
             android:layout_marginHorizontal="16dp"
             android:layout_marginTop="16dp"/>
 
@@ -139,21 +168,27 @@
                 android:id="@+id/rbFemenino"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Femenino" />
+                android:text="Femenino"
+                android:textColor="#000000"
+                android:buttonTint="#458890" />
 
             <RadioButton
                 android:id="@+id/rbMasculino"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
-                android:text="Masculino" />
+                android:text="Masculino"
+                android:textColor="#000000"
+                android:buttonTint="#FFFFFF" />
 
             <RadioButton
                 android:id="@+id/rbOtro"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
-                android:text="Otro" />
+                android:text="Otro"
+                android:textColor="#000000"
+                android:buttonTint="#FFFFFF" />
         </RadioGroup>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -163,7 +198,10 @@
             android:layout_marginHorizontal="16dp"
             android:layout_marginTop="16dp"
             app:startIconDrawable="@android:drawable/ic_menu_call"
+            app:startIconTint="#000000"
+            app:hintTextColor="#FFFFFF"
             app:prefixText="+51 "
+            app:prefixTextColor="#000000"
             app:boxCornerRadiusTopStart="16dp"
             app:boxCornerRadiusTopEnd="16dp"
             app:boxCornerRadiusBottomStart="16dp"
@@ -179,6 +217,8 @@
                 android:hint="Celular"
                 android:inputType="number"
                 android:maxLength="9"
+                android:textColor="#000000"
+                android:textColorHint="#AAAAAA"
                 android:paddingStart="48dp"/>
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -189,6 +229,10 @@
             android:layout_marginHorizontal="16dp"
             android:layout_marginTop="16dp"
             app:startIconDrawable="@android:drawable/sym_action_email"
+            app:startIconTint="#000000"
+            app:hintTextColor="#FFFFFF"
+            app:boxStrokeColor="#000000"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             app:boxCornerRadiusBottomEnd="16dp"
             app:boxCornerRadiusBottomStart="16dp"
             app:boxCornerRadiusTopEnd="16dp"
@@ -200,6 +244,8 @@
                 android:layout_height="wrap_content"
                 android:hint="Correo electrónico"
                 android:inputType="textEmailAddress"
+                android:textColor="#000000"
+                android:textColorHint="#AAAAAA"
                 android:paddingStart="48dp"/>
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -210,7 +256,12 @@
             android:layout_marginHorizontal="16dp"
             android:layout_marginTop="16dp"
             app:startIconDrawable="@android:drawable/ic_lock_lock"
+            app:startIconTint="#000000"
             app:passwordToggleEnabled="true"
+            app:passwordToggleTint="#FFFFFF"
+            app:hintTextColor="#FFFFFF"
+            app:boxStrokeColor="#FFFFFF"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             app:boxCornerRadiusTopEnd="16dp"
             app:boxCornerRadiusBottomStart="16dp"
             app:boxCornerRadiusBottomEnd="16dp"
@@ -222,6 +273,8 @@
                 android:layout_height="wrap_content"
                 android:inputType="textPassword"
                 android:hint="Contraseña"
+                android:textColor="#000000"
+                android:textColorHint="#AAAAAA"
                 android:paddingStart="48dp"/>
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -232,7 +285,12 @@
             android:layout_marginHorizontal="16dp"
             android:layout_marginTop="16dp"
             app:startIconDrawable="@android:drawable/ic_lock_lock"
+            app:startIconTint="#000000"
             app:passwordToggleEnabled="true"
+            app:passwordToggleTint="#FFFFFF"
+            app:hintTextColor="#FFFFFF"
+            app:boxStrokeColor="#FFFFFF"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             app:boxCornerRadiusTopEnd="16dp"
             app:boxCornerRadiusBottomStart="16dp"
             app:boxCornerRadiusBottomEnd="16dp"
@@ -244,6 +302,8 @@
                 android:layout_height="wrap_content"
                 android:inputType="textPassword"
                 android:hint="Confirmar contraseña"
+                android:textColor="#000000"
+                android:textColorHint="#AAAAAA"
                 android:paddingStart="48dp"/>
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -252,6 +312,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Acepto los Términos y Condiciones"
+            android:textColor="#000000"
+            android:buttonTint="#000000"
             android:layout_marginHorizontal="16dp"
             android:layout_marginTop="16dp"/>
 
@@ -261,8 +323,9 @@
             android:layout_height="wrap_content"
             android:text="REGISTRAR"
             android:layout_gravity="center"
-            android:layout_marginTop="16dp"
-            app:backgroundTint="#d50000"
+            android:layout_marginTop="24dp"
+            android:paddingHorizontal="40dp"
+            app:backgroundTint="#458890"
             app:cornerRadius="8dp"/>
 
         <LinearLayout
@@ -270,20 +333,22 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="24dp"
             android:layout_marginBottom="16dp">
 
             <TextView
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:text="¿Ya tienes una cuenta?"/>
+                android:layout_height="wrap_content"
+                android:textColor="#000000"
+                android:text="¿Ya tienes una cuenta? "/>
 
             <TextView
                 android:id="@+id/tvIrLogin"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:text="¿Inicia sesión aquí?"
-                android:textStyle="bold"/>
+                android:layout_height="wrap_content"
+                android:text="Inicia sesión aquí"
+                android:textStyle="bold"
+                android:textColor="#458890"/>
         </LinearLayout>
 
     </LinearLayout>

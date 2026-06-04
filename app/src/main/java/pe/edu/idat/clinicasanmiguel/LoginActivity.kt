@@ -47,6 +47,7 @@ class LoginActivity : AppCompatActivity() {
             if (correo.isEmpty() || contrasena.isEmpty()) {
                 Toast.makeText(this, "Por favor, ingrese sus datos", Toast.LENGTH_SHORT).show()
             } else {
+
                 if (correo == "paciente@idat.com" && contrasena == "123456") {
                     Toast.makeText(this, "Bienvenido PACIENTE", Toast.LENGTH_SHORT).show()
 

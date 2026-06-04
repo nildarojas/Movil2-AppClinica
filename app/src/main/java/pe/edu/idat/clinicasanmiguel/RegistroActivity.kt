@@ -15,10 +15,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import java.util.Calendar
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.button.MaterialButton
 
 class RegistroActivity : AppCompatActivity() {
 
-    private lateinit var etNombre: EditText
+    private lateinit var etNombre: TextInputEditText
     private lateinit var etApellidos: EditText
     private lateinit var etDni: EditText
     private lateinit var etTelefono: EditText
@@ -28,7 +30,7 @@ class RegistroActivity : AppCompatActivity() {
     private lateinit var etPassword: EditText
     private lateinit var etPassword2: EditText
     private lateinit var cbTerminos: CheckBox
-    private lateinit var btnRegistrar: Button
+    private lateinit var btnRegistrar: MaterialButton
     private lateinit var tvIrLogin: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
