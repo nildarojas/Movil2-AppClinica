@@ -2,10 +2,12 @@ package pe.edu.idat.clinicasanmiguel
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
+import android.widget.Button
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.cardview.widget.CardView
-import com.google.android.material.button.MaterialButton
 
 class AdminActivity : AppCompatActivity() {
 
@@ -13,97 +15,123 @@ class AdminActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_admin)
 
-        val cardEspecialidades = findViewById<CardView>(R.id.cardEspecialidades)
-        val cardDoctores = findViewById<CardView>(R.id.cardDoctores)
-        val cardHorarios = findViewById<CardView>(R.id.cardHorarios)
-        val cardUsuarios = findViewById<CardView>(R.id.cardUsuarios)
-        val cardCitas = findViewById<CardView>(R.id.cardCitas)
-        val cardMiPerfil = findViewById<CardView>(R.id.cardMiPerfil)
-        val cardCambiarPassword = findViewById<CardView>(R.id.cardCambiarPassword)
+        val btnEspecialidades = findViewById<Button>(R.id.btnEspecialidades)
+        val btnDoctores = findViewById<Button>(R.id.btnDoctores)
+        val btnHorarios = findViewById<Button>(R.id.btnHorarios)
+        val btnUsuarios = findViewById<Button>(R.id.btnUsuarios)
+        val btnCitas = findViewById<Button>(R.id.btnCitas)
 
-        val btnCerrarSesion =
-            findViewById<MaterialButton>(R.id.btnCerrarSesion)
+        val acPerfilAdmin =
+            findViewById<AutoCompleteTextView>(R.id.acPerfilAdmin)
 
-        cardEspecialidades.setOnClickListener {
-
-            // Próxima pantalla
-            // startActivity(Intent(this, RegistrarEspecialidadActivity::class.java))
-
+        btnEspecialidades.setOnClickListener {
+            Toast.makeText(
+                this,
+                "Gestión de Especialidades (Próxima entrega)",
+                Toast.LENGTH_SHORT
+            ).show()
         }
 
-        cardDoctores.setOnClickListener {
-
-            // Próxima pantalla
-            // startActivity(Intent(this, RegistrarDoctorActivity::class.java))
-
+        btnDoctores.setOnClickListener {
+            Toast.makeText(
+                this,
+                "Gestión de Doctores (Próxima entrega)",
+                Toast.LENGTH_SHORT
+            ).show()
         }
 
-        cardHorarios.setOnClickListener {
-
-            AlertDialog.Builder(this)
-                .setTitle("Próximamente")
-                .setMessage("Módulo de horarios disponible en el siguiente sprint.")
-                .setPositiveButton("Aceptar", null)
-                .show()
-
+        btnHorarios.setOnClickListener {
+            Toast.makeText(
+                this,
+                "Gestión de Horarios (Sprint 2)",
+                Toast.LENGTH_SHORT
+            ).show()
         }
 
-        cardUsuarios.setOnClickListener {
-
-            AlertDialog.Builder(this)
-                .setTitle("Próximamente")
-                .setMessage("Módulo de usuarios disponible en el siguiente sprint.")
-                .setPositiveButton("Aceptar", null)
-                .show()
-
+        btnUsuarios.setOnClickListener {
+            Toast.makeText(
+                this,
+                "Lista de Usuarios (Sprint 2)",
+                Toast.LENGTH_SHORT
+            ).show()
         }
 
-        cardCitas.setOnClickListener {
-
-            AlertDialog.Builder(this)
-                .setTitle("Próximamente")
-                .setMessage("Módulo de citas disponible en el siguiente sprint.")
-                .setPositiveButton("Aceptar", null)
-                .show()
-
+        btnCitas.setOnClickListener {
+            Toast.makeText(
+                this,
+                "Citas Médicas (Sprint 2)",
+                Toast.LENGTH_SHORT
+            ).show()
         }
 
-        cardMiPerfil.setOnClickListener {
+        val opciones = arrayOf(
+            "👤 Mi Perfil",
+            "🔑 Cambiar Contraseña",
+            "🚪 Cerrar Sesión"
+        )
 
-            AlertDialog.Builder(this)
-                .setTitle("Mi Perfil")
-                .setMessage("Funcionalidad pendiente para la siguiente entrega.")
-                .setPositiveButton("Aceptar", null)
-                .show()
+        val adapter = ArrayAdapter(
+            this,
+            R.layout.spinner_perfil_item,
+            opciones
+        )
 
+        acPerfilAdmin.setAdapter(adapter)
+
+        acPerfilAdmin.setOnClickListener {
+            acPerfilAdmin.showDropDown()
         }
 
-        cardCambiarPassword.setOnClickListener {
+        acPerfilAdmin.setOnItemClickListener { parent, _, position, _ ->
 
-            AlertDialog.Builder(this)
-                .setTitle("Cambiar Contraseña")
-                .setMessage("Funcionalidad pendiente para la siguiente entrega.")
-                .setPositiveButton("Aceptar", null)
-                .show()
+            val seleccion =
+                parent.getItemAtPosition(position).toString()
 
-        }
+            when (seleccion) {
 
-        btnCerrarSesion.setOnClickListener {
+                "👤 Mi Perfil" -> {
 
-            AlertDialog.Builder(this)
-                .setTitle("Cerrar Sesión")
-                .setMessage("¿Está seguro de que desea salir del sistema?")
-                .setPositiveButton("Sí") { _, _ ->
+                    Toast.makeText(
+                        this,
+                        "Mi Perfil (Sprint 2)",
+                        Toast.LENGTH_SHORT
+                    ).show()
 
-                    val intent = Intent(this, LoginActivity::class.java)
-                    intent.flags =
-                        Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-
-                    startActivity(intent)
-                    finish()
                 }
-                .setNegativeButton("No", null)
-                .show()
+
+                "🔑 Cambiar Contraseña" -> {
+
+                    Toast.makeText(
+                        this,
+                        "Cambiar Contraseña (Sprint 2)",
+                        Toast.LENGTH_SHORT
+                    ).show()
+
+                }
+
+                "🚪 Cerrar Sesión" -> {
+
+                    AlertDialog.Builder(this)
+                        .setTitle("Cerrar Sesión")
+                        .setMessage("¿Está seguro de que desea salir del sistema?")
+                        .setPositiveButton("Sí") { _, _ ->
+
+                            val intent =
+                                Intent(this, LoginActivity::class.java)
+
+                            intent.flags =
+                                Intent.FLAG_ACTIVITY_NEW_TASK or
+                                        Intent.FLAG_ACTIVITY_CLEAR_TASK
+
+                            startActivity(intent)
+                            finish()
+                        }
+                        .setNegativeButton("No", null)
+                        .show()
+                }
+            }
+
+            acPerfilAdmin.setText("Mi Perfil", false)
         }
     }
 }
