@@ -7,7 +7,7 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import pe.edu.idat.clinicasanmiguel.R
-//prueba nada
+//final
 data class CitaMock(val especialidad: String, val doctor: String, val fechaHora: String, val estado: String)
 class CitasAdapter(
     private val listaCitas: List<CitaMock>,

@@ -37,7 +37,8 @@ class LoginActivity : AppCompatActivity() {
         }
 
         tvOlvidaste.setOnClickListener {
-            Toast.makeText(this, "Flujo de recuperación (Próxima entrega)", Toast.LENGTH_SHORT).show()
+            val intent = Intent(this, SolicitarRecuperacionActivity::class.java)
+            startActivity(intent)
         }
 
         btnLogin.setOnClickListener {
@@ -50,7 +51,6 @@ class LoginActivity : AppCompatActivity() {
 
                 if (correo == "paciente@idat.com" && contrasena == "123456") {
                     Toast.makeText(this, "Bienvenido PACIENTE", Toast.LENGTH_SHORT).show()
-
 
                     val intent = Intent(this, PacienteActivity::class.java)
                     startActivity(intent)

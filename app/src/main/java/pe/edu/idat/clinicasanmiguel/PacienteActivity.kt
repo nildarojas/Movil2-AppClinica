@@ -5,23 +5,27 @@ import android.os.Bundle
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.Button
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import pe.edu.idat.clinicasanmiguel.R
-import kotlin.jvm.java
 
 class PacienteActivity : AppCompatActivity() {
+
+    private lateinit var tvSaludoBienvenida: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_paciente)
 
+        tvSaludoBienvenida = findViewById(R.id.tvSaludoBienvenida)
         val btnVerCitas = findViewById<Button>(R.id.btnVerCitas)
         val btnHorarios = findViewById<Button>(R.id.btnHorarios)
         val btnHistorial = findViewById<Button>(R.id.btnHistorial)
         val btnNotificaciones = findViewById<Button>(R.id.btnNotificaciones)
         val acPerfil = findViewById<AutoCompleteTextView>(R.id.acPerfil)
+
+        tvSaludoBienvenida.text = "¡Bienvenido, Franklin Elias!"
 
         btnVerCitas.setOnClickListener {
             startActivity(Intent(this, MisCitasActivity::class.java))
@@ -38,7 +42,6 @@ class PacienteActivity : AppCompatActivity() {
 
         val opciones = arrayOf("👤 Datos personales", "🔑 Cambiar contraseña", "🚪 Cerrar sesión")
 
-
         val adapter = ArrayAdapter(this, R.layout.spinner_perfil_item, opciones)
         acPerfil.setAdapter(adapter)
 
@@ -51,7 +54,8 @@ class PacienteActivity : AppCompatActivity() {
 
             when (seleccion) {
                 "👤 Datos personales" -> {
-                    Toast.makeText(this, "Datos Personales (Sprint 2)", Toast.LENGTH_SHORT).show()
+                    val intent = Intent(this, MiPerfilActivity::class.java)
+                    startActivity(intent)
                 }
                 "🔑 Cambiar contraseña" -> {
                     Toast.makeText(this, "Cambiar Contraseña (Sprint 2)", Toast.LENGTH_SHORT).show()

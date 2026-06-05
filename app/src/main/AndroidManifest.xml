@@ -12,6 +12,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ClinicaSanMiguel">
         <activity
+            android:name=".ResetearPasswordActivity"
+            android:exported="false" />
+        <activity
+            android:name=".SolicitarRecuperacionActivity"
+            android:exported="false" />
+        <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
@@ -36,10 +42,6 @@
             android:name=".MisCitasActivity"
             android:exported="false" />
         <activity
-            android:name=".adapter.ListaEspecialidadesActivity"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
-        <activity
             android:name=".ListaEspecialidadesActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
@@ -47,6 +49,21 @@
             android:name=".RegistrarEspecialidadActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".RegistrarDoctorActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ListaDoctoresAdminActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".MiPerfilActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ReprogramarCitaActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

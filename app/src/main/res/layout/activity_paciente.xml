@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:tools="http://tools.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#FFFFFF"
@@ -22,13 +22,24 @@
             android:textStyle="bold"
             android:textColor="#333333"
             android:layout_gravity="center"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/tvSaludoBienvenida"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="¡Bienvenido, Paciente!"
+            android:textAlignment="center"
+            android:textSize="18sp"
+            android:textColor="#458890"
+            android:textStyle="bold"
             android:layout_marginBottom="30dp"/>
 
         <Button android:id="@+id/btnVerCitas" android:layout_width="match_parent" android:layout_height="55dp"
-            android:text="Ver mis citas" android:backgroundTint="#3F51B5" android:layout_marginBottom="16dp"/>
+            android:text="Ver mis citas" android:backgroundTint="#458890" android:layout_marginBottom="16dp"/>
 
         <Button android:id="@+id/btnHorarios" android:layout_width="match_parent" android:layout_height="55dp"
-            android:text="Registrar Cita Médica" android:backgroundTint="#3F51B5" android:layout_marginBottom="16dp"/>
+            android:text="Registrar Cita Médica" android:backgroundTint="#458890" android:layout_marginBottom="16dp"/>
 
         <Button android:id="@+id/btnHistorial" android:layout_width="match_parent" android:layout_height="55dp"
             android:text="Historial de citas" android:backgroundTint="#458890" android:layout_marginBottom="16dp"/>
@@ -51,7 +62,7 @@
             android:layout_height="wrap_content"
             android:hint="Seleccionar acción"
             app:boxBackgroundColor="#FFFFFF"
-            app:boxStrokeColor="#3F51B5">
+            app:boxStrokeColor="#458890">
 
             <AutoCompleteTextView
                 android:id="@+id/acPerfil"

@@ -35,11 +35,8 @@ class AdminActivity : AppCompatActivity() {
         }
 
         btnDoctores.setOnClickListener {
-            Toast.makeText(
-                this,
-                "Gestión de Doctores (Próxima entrega)",
-                Toast.LENGTH_SHORT
-            ).show()
+            val intent = Intent(this, ListaDoctoresAdminActivity::class.java)
+            startActivity(intent)
         }
 
         btnHorarios.setOnClickListener {

@@ -1,5 +1,6 @@
 package pe.edu.idat.clinicasanmiguel
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -33,7 +34,8 @@ class MisCitasActivity : AppCompatActivity() {
                 mostrarConfirmacionCancelacion(posicion)
             },
             onReprogramarClick = { cita ->
-                Toast.makeText(this, "Redirección a Reprogramar: ${cita.especialidad} (Sprint 2)", Toast.LENGTH_SHORT).show()
+                val intent = Intent(this, ReprogramarCitaActivity::class.java)
+                startActivity(intent)
             }
         )
 
