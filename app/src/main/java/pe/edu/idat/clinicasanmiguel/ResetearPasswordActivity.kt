@@ -115,13 +115,7 @@ class ResetearPasswordActivity : AppCompatActivity() {
             override fun onFinish() {
                 tvTemporizador.text = "Código expirado"
                 bloquearNuevaPassword()
-
                 Toast.makeText(this@ResetearPasswordActivity, "Código expirado, vuelva a intentarlo", Toast.LENGTH_LONG).show()
-
-                val intent = Intent(this@ResetearPasswordActivity, SolicitarRecuperacionActivity::class.java)
-                intent.putExtra("correo", etCorreo.text.toString().trim())
-                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-                startActivity(intent)
                 finish()
             }
         }.start()
@@ -163,7 +157,6 @@ class ResetearPasswordActivity : AppCompatActivity() {
         }
 
         Toast.makeText(this, "Contraseña restablecida correctamente", Toast.LENGTH_LONG).show()
-
         val intent = Intent(this, LoginActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
