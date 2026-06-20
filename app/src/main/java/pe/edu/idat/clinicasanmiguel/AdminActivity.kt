@@ -90,14 +90,8 @@ class AdminActivity : AppCompatActivity() {
 
                 }
 
-                "🔑 Cambiar Contraseña" -> {
-
-                    Toast.makeText(
-                        this,
-                        "Cambiar Contraseña (Sprint 2)",
-                        Toast.LENGTH_SHORT
-                    ).show()
-
+                "🔑 Cambiar contraseña" -> {
+                    startActivity(Intent(this, CambiarPasswordInternoActivity::class.java))
                 }
 
                 "🚪 Cerrar Sesión" -> {

@@ -59,7 +59,7 @@ class PacienteActivity : AppCompatActivity() {
                     startActivity(intent)
                 }
                 "🔑 Cambiar contraseña" -> {
-                    Toast.makeText(this, "Cambiar Contraseña (Sprint 2)", Toast.LENGTH_SHORT).show()
+                    startActivity(Intent(this, CambiarPasswordInternoActivity::class.java))
                 }
                 "🚪 Cerrar sesión" -> {
                     AlertDialog.Builder(this)
