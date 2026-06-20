@@ -47,20 +47,12 @@ class AdminActivity : AppCompatActivity() {
             ).show()
         }
 
-        btnUsuarios.setOnClickListener {
-            Toast.makeText(
-                this,
-                "Lista de Usuarios (Sprint 2)",
-                Toast.LENGTH_SHORT
-            ).show()
+        findViewById<Button>(R.id.btnUsuarios).setOnClickListener {
+            startActivity(Intent(this, ListaUsuariosActivity::class.java))
         }
 
-        btnCitas.setOnClickListener {
-            Toast.makeText(
-                this,
-                "Citas Médicas (Sprint 2)",
-                Toast.LENGTH_SHORT
-            ).show()
+        findViewById<Button>(R.id.btnCitas).setOnClickListener {
+            startActivity(Intent(this, MaestroCitasAdminActivity::class.java))
         }
 
         val opciones = arrayOf(

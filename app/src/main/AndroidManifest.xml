@@ -72,6 +72,14 @@
         <activity
             android:name=".SeleccionarMedicoHorarioActivity"
             android:exported="false" />
+
+
+        <activity
+            android:name=".ListaUsuariosActivity"
+            android:exported="false" />
+        <activity
+            android:name=".MaestroCitasAdminActivity"
+            android:exported="false" />
     </application>
 
 </manifest>
