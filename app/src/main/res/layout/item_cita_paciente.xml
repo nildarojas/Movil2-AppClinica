@@ -2,6 +2,7 @@
 <com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/cardCitaPaciente"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginHorizontal="16dp"
@@ -23,7 +24,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Especialidad"
-            android:textColor="#3F51B5"
+            android:textColor="#458890"
             android:textSize="18sp"
             android:textStyle="bold" />
 
@@ -65,16 +66,16 @@
             android:layout_marginTop="12dp"
             android:weightSum="2">
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnReprogramarItem"
                 style="@style/Widget.MaterialComponents.Button.TextButton"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="Reprogramar"
-                android:textColor="#3F51B5"/>
+                android:textColor="#458890"/>
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnCancelarItem"
                 style="@style/Widget.MaterialComponents.Button.TextButton"
                 android:layout_width="0dp"

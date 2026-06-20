@@ -61,6 +61,9 @@ class PacienteActivity : AppCompatActivity() {
                 "🔑 Cambiar contraseña" -> {
                     startActivity(Intent(this, CambiarPasswordInternoActivity::class.java))
                 }
+                "📜 Historial Clínico" -> {
+                    startActivity(Intent(this, HistorialCompletoActivity::class.java))
+                }
                 "🚪 Cerrar sesión" -> {
                     AlertDialog.Builder(this)
                         .setTitle("Cerrar Sesión")

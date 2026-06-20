@@ -1,51 +1,37 @@
 package pe.edu.idat.clinicasanmiguel
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.widget.ArrayAdapter
-import android.widget.Spinner
+import android.widget.AutoCompleteTextView
+import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.google.android.material.button.MaterialButton
 
 class ReprogramarCitaActivity : AppCompatActivity() {
-
-    private lateinit var spnMedicos: Spinner
-    private lateinit var spnHorarios: Spinner
-    private lateinit var btnConfirmar: MaterialButton
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_reprogramar_cita)
 
-        spnMedicos = findViewById(R.id.spnMedicosReprogramar)
-        spnHorarios = findViewById(R.id.spnHorariosReprogramar)
-        btnConfirmar = findViewById(R.id.btnConfirmarReprogramacion)
+        val acMedico = findViewById<AutoCompleteTextView>(R.id.acNuevoMedico)
+        val acHorario = findViewById<AutoCompleteTextView>(R.id.acNuevoHorario)
+        val btnConfirmar = findViewById<Button>(R.id.btnConfirmarReprogramacion)
 
-        cargarDatosLocales()
+        val medicos = listOf("Dr. Bryant Yacila (Cardiología)", "Dra. Abigail Valdez (Pediatría)")
+        val horarios = listOf("2026-06-26 | 09:00 AM", "2026-06-27 | 11:30 AM")
+
+        acMedico.setAdapter(ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, medicos))
+        acHorario.setAdapter(ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, horarios))
+
+        val posicion = intent.getIntExtra("posicion", -1)
 
         btnConfirmar.setOnClickListener {
-            Toast.makeText(this, "Cita modificada y reprogramada con éxito", Toast.LENGTH_LONG).show()
+            val resultIntent = Intent()
+            resultIntent.putExtra("posicion", posicion)
+            setResult(Activity.RESULT_OK, resultIntent)
+            Toast.makeText(this, "Cita reprogramada con éxito en caliente", Toast.LENGTH_LONG).show()
             finish()
         }
-    }
-
-    private fun cargarDatosLocales() {
-        val medicos = listOf(
-            "Dr. Carlos Mendoza (Cardiología)",
-            "Dra. Ana Torres (Pediatría)",
-            "Dr. Luis Gómez (Medicina General)"
-        )
-
-        val horarios = listOf(
-            "Lunes 08 de Junio - 09:00 AM",
-            "Lunes 08 de Junio - 11:30 AM",
-            "Martes 09 de Junio - 04:00 PM"
-        )
-
-        val adapterMedicos = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, medicos)
-        spnMedicos.adapter = adapterMedicos
-
-        val adapterHorarios = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, horarios)
-        spnHorarios.adapter = adapterHorarios
     }
 }
