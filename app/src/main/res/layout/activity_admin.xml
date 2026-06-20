@@ -29,16 +29,14 @@
             android:layout_width="match_parent"
             android:layout_height="55dp"
             android:text="Gestionar Especialidades"
-            android:backgroundTint="#3F51B5"
-            android:layout_marginBottom="16dp"/>
+            android:backgroundTint="#458890" android:layout_marginBottom="16dp"/>
 
         <Button
             android:id="@+id/btnDoctores"
             android:layout_width="match_parent"
             android:layout_height="55dp"
             android:text="Gestionar Doctores"
-            android:backgroundTint="#3F51B5"
-            android:layout_marginBottom="16dp"/>
+            android:backgroundTint="#458890" android:layout_marginBottom="16dp"/>
 
         <Button
             android:id="@+id/btnHorarios"
@@ -78,17 +76,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Seleccionar acción"
-            app:boxBackgroundColor="#FFFFFF"
-            app:boxStrokeColor="#3F51B5">
-
-            <AutoCompleteTextView
-                android:id="@+id/acPerfilAdmin"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="none"
-                android:text="Mi Perfil"
-                android:padding="16dp"
-                android:textColor="#333333" />
+            app:boxStrokeColor="#458890" app:hintTextColor="#458890"> <AutoCompleteTextView
+            android:id="@+id/acPerfilAdmin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="none"
+            android:text="Mi Perfil"
+            android:padding="16dp"
+            android:textColor="#333333" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
