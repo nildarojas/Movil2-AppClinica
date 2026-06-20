@@ -64,6 +64,14 @@
         <activity
             android:name=".ReprogramarCitaActivity"
             android:exported="false" />
+
+        <activity
+            android:name=".SeleccionarEspecialidadActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".SeleccionarMedicoHorarioActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

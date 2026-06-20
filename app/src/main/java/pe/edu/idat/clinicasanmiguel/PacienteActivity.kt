@@ -31,7 +31,8 @@ class PacienteActivity : AppCompatActivity() {
             startActivity(Intent(this, MisCitasActivity::class.java))
         }
         btnHorarios.setOnClickListener {
-            Toast.makeText(this, "Registrar Cita Médica (Sprint 2)", Toast.LENGTH_SHORT).show()
+
+            startActivity(Intent(this, SeleccionarEspecialidadActivity::class.java))
         }
         btnHistorial.setOnClickListener {
             Toast.makeText(this, "Historial de citas (Sprint 2)", Toast.LENGTH_SHORT).show()
