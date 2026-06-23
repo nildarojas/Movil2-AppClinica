@@ -29,11 +29,30 @@ class DoctorAdminAdapter(private var listaDoctores: List<DoctorMock>) :
         holder.tvNombre.text = "${doctor.apellido}, ${doctor.nombre}"
         holder.tvEspecialidad.text = doctor.especialidad
 
-        holder.tvEstado.text = if (doctor.estado) "Estado: Activo" else "Estado: Inactivo"
-        holder.tvEstado.setTextColor(
-            if (doctor.estado) android.graphics.Color.parseColor("#2E7D32")
-            else android.graphics.Color.RED
-        )
+        if (doctor.estado) {
+
+            holder.tvEstado.text = "ACTIVO"
+
+            holder.tvEstado.setTextColor(
+                android.graphics.Color.parseColor("#2E7D32")
+            )
+
+            holder.tvEstado.setBackgroundColor(
+                android.graphics.Color.parseColor("#E8F5E9")
+            )
+
+        } else {
+
+            holder.tvEstado.text = "INACTIVO"
+
+            holder.tvEstado.setTextColor(
+                android.graphics.Color.parseColor("#D50000")
+            )
+
+            holder.tvEstado.setBackgroundColor(
+                android.graphics.Color.parseColor("#FFEBEE")
+            )
+        }
     }
 
     override fun getItemCount(): Int = listaDoctores.size
