@@ -35,7 +35,8 @@
             android:textStyle="bold"
             android:layout_marginBottom="30dp"/>
 
-        <Button android:id="@+id/btnVerCitas" android:layout_width="match_parent" android:layout_height="55dp"
+        <Button android:id="@+id/btnVerCitas"
+            android:layout_width="match_parent" android:layout_height="55dp"
             android:text="Ver mis citas" android:backgroundTint="#458890" android:layout_marginBottom="16dp"/>
 
         <Button android:id="@+id/btnHorarios" android:layout_width="match_parent" android:layout_height="55dp"
@@ -77,3 +78,7 @@
         </com.google.android.material.textfield.TextInputLayout>
     </LinearLayout>
 </ScrollView>
+
+
+
+
