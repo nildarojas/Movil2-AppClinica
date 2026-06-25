@@ -18,19 +18,22 @@
             android:textAlignment="center"
             android:textSize="24sp"
             android:textStyle="bold"
-            android:textColor="#333333"
+            android:textColor="#458890"
             android:layout_marginBottom="24dp"/>
 
         <com.google.android.material.textfield.TextInputLayout
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            app:boxStrokeColor="#458890"
+            app:hintTextColor="#458890">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etNombreEspecialidad"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Nombre de la especialidad"/>
+                android:hint="Nombre de la especialidad"
+                android:textColor="#000000" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -48,7 +51,8 @@
                 android:layout_weight="1"
                 android:layout_marginEnd="8dp"
                 android:text="Guardar"
-                android:backgroundTint="#458890"/>
+                android:backgroundTint="#458890"
+                android:textStyle="bold" />
 
             <Button
                 android:id="@+id/btnCancelarEspecialidad"
@@ -57,7 +61,8 @@
                 android:layout_weight="1"
                 android:layout_marginStart="8dp"
                 android:text="Cancelar"
-                android:backgroundTint="#D50000"/>
+                android:backgroundTint="#D50000"
+                android:textStyle="bold" />
 
         </LinearLayout>
 
