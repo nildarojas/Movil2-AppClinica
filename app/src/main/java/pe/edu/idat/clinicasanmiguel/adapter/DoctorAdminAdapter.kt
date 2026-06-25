@@ -30,28 +30,13 @@ class DoctorAdminAdapter(private var listaDoctores: List<DoctorMock>) :
         holder.tvEspecialidad.text = doctor.especialidad
 
         if (doctor.estado) {
-
             holder.tvEstado.text = "ACTIVO"
-
-            holder.tvEstado.setTextColor(
-                android.graphics.Color.parseColor("#2E7D32")
-            )
-
-            holder.tvEstado.setBackgroundColor(
-                android.graphics.Color.parseColor("#E8F5E9")
-            )
-
+            holder.tvEstado.setTextColor(0xFF2E7D32.toInt())
+            holder.tvEstado.setBackgroundColor(0xFFE8F5E9.toInt())
         } else {
-
             holder.tvEstado.text = "INACTIVO"
-
-            holder.tvEstado.setTextColor(
-                android.graphics.Color.parseColor("#D50000")
-            )
-
-            holder.tvEstado.setBackgroundColor(
-                android.graphics.Color.parseColor("#FFEBEE")
-            )
+            holder.tvEstado.setTextColor(0xFFD50000.toInt())
+            holder.tvEstado.setBackgroundColor(0xFFFFEBEE.toInt())
         }
     }
 

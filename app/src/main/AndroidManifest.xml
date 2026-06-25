@@ -88,6 +88,10 @@
             android:name=".HistorialCompletoActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".ListaHorariosAdminActivity"
+            android:exported="false" />
+
     </application>
 
 </manifest>

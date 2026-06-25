@@ -40,11 +40,7 @@ class AdminActivity : AppCompatActivity() {
         }
 
         btnHorarios.setOnClickListener {
-            Toast.makeText(
-                this,
-                "Gestión de Horarios (Sprint 2)",
-                Toast.LENGTH_SHORT
-            ).show()
+            startActivity(Intent(this, ListaHorariosAdminActivity::class.java))
         }
 
         findViewById<Button>(R.id.btnUsuarios).setOnClickListener {
