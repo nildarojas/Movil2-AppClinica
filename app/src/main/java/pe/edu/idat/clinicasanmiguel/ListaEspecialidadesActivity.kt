@@ -2,48 +2,33 @@ package pe.edu.idat.clinicasanmiguel
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.ArrayAdapter
-import android.widget.ListView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import pe.edu.idat.clinicasanmiguel.adapter.EspecialidadAdminAdapter
+import pe.edu.idat.clinicasanmiguel.adapter.EspecialidadMock
 
 class ListaEspecialidadesActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_lista_especialidades)
-
-        val lvEspecialidades =
-            findViewById<ListView>(R.id.lvEspecialidades)
-
-        val fabNuevaEspecialidad =
-            findViewById<FloatingActionButton>(R.id.fabNuevaEspecialidad)
-
-        val especialidades = listOf(
-            "Cardiología",
-            "Pediatría",
-            "Dermatología",
-            "Neurología",
-            "Medicina General"
+        val rvEspecialidades = findViewById<RecyclerView>(R.id.rvEspecialidades)
+        rvEspecialidades.layoutManager = LinearLayoutManager(this)
+        val dataSimulada = listOf(
+            EspecialidadMock("Cardiología", "Piso 2 - Bloque A", "ACTIVO"),
+            EspecialidadMock("Pediatría", "Piso 1 - Área Infantil", "ACTIVO"),
+            EspecialidadMock("Ginecología", "Piso 3 - Bloque B", "ACTIVO"),
+            EspecialidadMock("Gastroenterología", "Piso 2 - Consultorio 204", "ACTIVO")
         )
+        rvEspecialidades.adapter = EspecialidadAdminAdapter(dataSimulada)
 
-        val adapter = ArrayAdapter(
-            this,
-            android.R.layout.simple_list_item_1,
-            especialidades
-        )
-
-        lvEspecialidades.adapter = adapter
+        val fabNuevaEspecialidad = findViewById<FloatingActionButton>(R.id.fabNuevaEspecialidad)
 
         fabNuevaEspecialidad.setOnClickListener {
-
-            startActivity(
-                Intent(
-                    this,
-                    RegistrarEspecialidadActivity::class.java
-                )
-            )
-
+            val intent = Intent(this, RegistrarEspecialidadActivity::class.java)
+            startActivity(intent)
         }
     }
 }

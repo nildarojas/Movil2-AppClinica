@@ -91,6 +91,9 @@
         <activity
             android:name=".ListaHorariosAdminActivity"
             android:exported="false" />
+        <activity
+            android:name=".RegistrarHorarioActivity"
+            android:exported="false" />
 
     </application>
 

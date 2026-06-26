@@ -2,6 +2,7 @@ package pe.edu.idat.clinicasanmiguel
 
 import android.os.Bundle
 import android.widget.Button
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.textfield.TextInputEditText
@@ -12,10 +13,19 @@ class CambiarPasswordInternoActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_cambiar_password_interno)
 
+        val tvTitulo = findViewById<TextView>(R.id.tvTituloCambioInterno)
         val etActual = findViewById<TextInputEditText>(R.id.etPasswordActual)
         val etNueva1 = findViewById<TextInputEditText>(R.id.etPasswordNueva1)
         val etNueva2 = findViewById<TextInputEditText>(R.id.etPasswordNueva2)
         val btnActualizar = findViewById<Button>(R.id.btnActualizarPasswordInterno)
+
+        val rol = intent.getStringExtra("ROL_USUARIO") ?: "PACIENTE"
+
+        if (rol == "ADMIN") {
+            tvTitulo.text = "Seguridad: Admin Hub"
+        } else {
+            tvTitulo.text = "Seguridad de la Cuenta"
+        }
 
         btnActualizar.setOnClickListener {
             val txtActual = etActual.text.toString().trim()
@@ -37,7 +47,7 @@ class CambiarPasswordInternoActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            Toast.makeText(this, "Contraseña actualizada correctamente", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Contraseña de $rol actualizada correctamente en caliente", Toast.LENGTH_LONG).show()
             finish()
         }
     }

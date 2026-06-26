@@ -78,16 +78,15 @@ class AdminActivity : AppCompatActivity() {
 
                 "👤 Mi Perfil" -> {
 
-                    Toast.makeText(
-                        this,
-                        "Mi Perfil (Sprint 2)",
-                        Toast.LENGTH_SHORT
-                    ).show()
-
+                    val intent = Intent(this, MiPerfilActivity::class.java)
+                    intent.putExtra("ROL_USUARIO", "ADMIN")
+                    startActivity(intent)
                 }
 
-                "🔑 Cambiar contraseña" -> {
-                    startActivity(Intent(this, CambiarPasswordInternoActivity::class.java))
+                "🔑 Cambiar Contraseña" -> {
+                    val intent = Intent(this, CambiarPasswordInternoActivity::class.java)
+                    intent.putExtra("ROL_USUARIO", "ADMIN")
+                    startActivity(intent)
                 }
 
                 "🚪 Cerrar Sesión" -> {

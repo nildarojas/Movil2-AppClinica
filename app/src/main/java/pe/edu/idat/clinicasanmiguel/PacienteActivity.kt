@@ -35,13 +35,17 @@ class PacienteActivity : AppCompatActivity() {
             startActivity(Intent(this, SeleccionarEspecialidadActivity::class.java))
         }
         btnHistorial.setOnClickListener {
-            Toast.makeText(this, "Historial de citas (Sprint 2)", Toast.LENGTH_SHORT).show()
+            startActivity(Intent(this, HistorialCompletoActivity::class.java))
         }
         btnNotificaciones.setOnClickListener {
             Toast.makeText(this, "Módulo de Alertas y Notificaciones (Sprint 2)", Toast.LENGTH_SHORT).show()
         }
 
-        val opciones = arrayOf("👤 Datos personales", "🔑 Cambiar contraseña", "🚪 Cerrar sesión")
+        val opciones = arrayOf(
+            "👤 Mi Perfil",
+            "🔑 Cambiar contraseña",
+            "🚪 Cerrar sesión"
+        )
 
         val adapter = ArrayAdapter(this, R.layout.spinner_perfil_item, opciones)
         acPerfil.setAdapter(adapter)
@@ -54,16 +58,17 @@ class PacienteActivity : AppCompatActivity() {
             val seleccion = parent.getItemAtPosition(position).toString()
 
             when (seleccion) {
-                "👤 Datos personales" -> {
+                "👤 Mi Perfil" -> {
                     val intent = Intent(this, MiPerfilActivity::class.java)
+                    intent.putExtra("ROL_USUARIO", "PACIENTE")
                     startActivity(intent)
                 }
                 "🔑 Cambiar contraseña" -> {
-                    startActivity(Intent(this, CambiarPasswordInternoActivity::class.java))
+                    val intent = Intent(this, CambiarPasswordInternoActivity::class.java)
+                    intent.putExtra("ROL_USUARIO", "PACIENTE")
+                    startActivity(intent)
                 }
-                "📜 Historial Clínico" -> {
-                    startActivity(Intent(this, HistorialCompletoActivity::class.java))
-                }
+
                 "🚪 Cerrar sesión" -> {
                     AlertDialog.Builder(this)
                         .setTitle("Cerrar Sesión")
