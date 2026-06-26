@@ -49,13 +49,14 @@ class LoginActivity : AppCompatActivity() {
                 Toast.makeText(this, "Por favor, ingrese sus datos", Toast.LENGTH_SHORT).show()
             } else {
 
+
                 if (correo == "paciente@idat.com" && contrasena == "123456") {
                     Toast.makeText(this, "Bienvenido PACIENTE", Toast.LENGTH_SHORT).show()
 
-                    val intent = Intent(this, PacienteActivity::class.java)
+
+                    val intent = Intent(this, InicioActivity::class.java)
                     startActivity(intent)
                     finish()
-
                 } else if (correo == "admin@idat.com" && contrasena == "admin") {
                     Toast.makeText(this, "Bienvenido ADMIN", Toast.LENGTH_SHORT).show()
 

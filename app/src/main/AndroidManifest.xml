@@ -98,6 +98,10 @@
         <activity
             android:name=".NotificacionesActivity"
             android:exported="false" />
+
+        <activity
+            android:name=".InicioActivity"
+            android:exported="false" />
     </application>
 
 </manifest>
