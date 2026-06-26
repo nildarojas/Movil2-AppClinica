@@ -20,6 +20,6 @@ class HistorialCompletoActivity : AppCompatActivity() {
             CitaPacienteMock(102, "Cardiología", "Dr. Bryant Yacila", "2026-06-01 | 04:30 PM", "CANCELADA")
         )
 
-        rv.adapter = CitasAdapter(datosPasados)
+        rv.adapter = CitasAdapter(datosPasados, true)
     }
 }

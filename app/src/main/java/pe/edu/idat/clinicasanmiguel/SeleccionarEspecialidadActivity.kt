@@ -5,20 +5,29 @@ import android.os.Bundle
 import android.widget.ArrayAdapter
 import android.widget.ListView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import pe.edu.idat.clinicasanmiguel.adapter.EspecialidadAdminAdapter
+import pe.edu.idat.clinicasanmiguel.adapter.EspecialidadMock
 
 class SeleccionarEspecialidadActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_seleccionar_especialidad)
 
-        val lvEspecialidades = findViewById<ListView>(R.id.lvEspecialidadesReserva)
-        val especialidades = listOf("Cardiología", "Pediatría", "Dermatología", "Neurología", "Medicina General")
+        val rv = findViewById<RecyclerView>(R.id.lvEspecialidadesReserva)
+        rv.layoutManager = LinearLayoutManager(this)
 
-        val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, especialidades)
-        lvEspecialidades.adapter = adapter
+        val lista = listOf(
+            EspecialidadMock("Cardiología", "", ""),
+            EspecialidadMock("Pediatría", "", "")
+        )
 
-        lvEspecialidades.setOnItemClickListener { _, _, _, _ ->
-            startActivity(Intent(this, SeleccionarMedicoHorarioActivity::class.java))
+        rv.adapter = EspecialidadAdminAdapter(lista, false) { especialidadSeleccionada ->
+
+            val intent = Intent(this, SeleccionarMedicoHorarioActivity::class.java)
+            intent.putExtra("NOMBRE_ESPECIALIDAD", especialidadSeleccionada.nombre)
+            startActivity(intent)
             finish()
         }
     }

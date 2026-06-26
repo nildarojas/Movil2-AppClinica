@@ -95,6 +95,9 @@
             android:name=".RegistrarHorarioActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".NotificacionesActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

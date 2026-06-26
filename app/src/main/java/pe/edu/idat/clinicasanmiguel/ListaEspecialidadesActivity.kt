@@ -10,25 +10,22 @@ import pe.edu.idat.clinicasanmiguel.adapter.EspecialidadAdminAdapter
 import pe.edu.idat.clinicasanmiguel.adapter.EspecialidadMock
 
 class ListaEspecialidadesActivity : AppCompatActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_lista_especialidades)
+
         val rvEspecialidades = findViewById<RecyclerView>(R.id.rvEspecialidades)
         rvEspecialidades.layoutManager = LinearLayoutManager(this)
+
         val dataSimulada = listOf(
             EspecialidadMock("Cardiología", "Piso 2 - Bloque A", "ACTIVO"),
-            EspecialidadMock("Pediatría", "Piso 1 - Área Infantil", "ACTIVO"),
-            EspecialidadMock("Ginecología", "Piso 3 - Bloque B", "ACTIVO"),
-            EspecialidadMock("Gastroenterología", "Piso 2 - Consultorio 204", "ACTIVO")
+            EspecialidadMock("Pediatría", "Piso 1 - Área Infantil", "ACTIVO")
         )
-        rvEspecialidades.adapter = EspecialidadAdminAdapter(dataSimulada)
 
-        val fabNuevaEspecialidad = findViewById<FloatingActionButton>(R.id.fabNuevaEspecialidad)
+        rvEspecialidades.adapter = EspecialidadAdminAdapter(dataSimulada, true)
 
-        fabNuevaEspecialidad.setOnClickListener {
-            val intent = Intent(this, RegistrarEspecialidadActivity::class.java)
-            startActivity(intent)
+        findViewById<FloatingActionButton>(R.id.fabNuevaEspecialidad).setOnClickListener {
+            startActivity(Intent(this, RegistrarEspecialidadActivity::class.java))
         }
     }
 }

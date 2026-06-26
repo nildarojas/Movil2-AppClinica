@@ -9,7 +9,7 @@
         android:id="@+id/tvTituloCitasGlobal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Maestro de Citas Médicas"
+        android:text="Historial de Citas Médicas"
         android:textSize="24sp"
         android:textStyle="bold"
         android:textColor="#458890"

@@ -38,7 +38,8 @@ class PacienteActivity : AppCompatActivity() {
             startActivity(Intent(this, HistorialCompletoActivity::class.java))
         }
         btnNotificaciones.setOnClickListener {
-            Toast.makeText(this, "Módulo de Alertas y Notificaciones (Sprint 2)", Toast.LENGTH_SHORT).show()
+            val intent = Intent(this, NotificacionesActivity::class.java)
+            startActivity(intent)
         }
 
         val opciones = arrayOf(
