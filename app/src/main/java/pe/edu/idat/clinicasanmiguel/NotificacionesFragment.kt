@@ -1,19 +1,20 @@
 package pe.edu.idat.clinicasanmiguel
 
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
+import android.view.View
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import pe.edu.idat.clinicasanmiguel.adapter.NotificacionesAdapter
 import pe.edu.idat.clinicasanmiguel.adapter.NotificacionMock
 
-class NotificacionesActivity : AppCompatActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_notificaciones)
+class NotificacionesFragment : Fragment(R.layout.activity_notificaciones) {
 
-        val rv = findViewById<RecyclerView>(R.id.rvNotificaciones)
-        rv.layoutManager = LinearLayoutManager(this)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        val rv = view.findViewById<RecyclerView>(R.id.rvNotificaciones)
+        rv.layoutManager = LinearLayoutManager(requireContext())
 
         val listaNotificaciones = listOf(
             NotificacionMock(1, "Recordatorio: Cita de Cardiología mañana a las 9:30 AM", "2026-06-25"),

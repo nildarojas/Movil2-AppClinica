@@ -43,39 +43,30 @@ class CitasAdapter(
         holder.tvFechaHora.text = item.fechaHora
         holder.tvEstado.text = item.estado
 
-        if (esHistorial) {
+        if (item.estado == "CANCELADA") {
+            holder.card.alpha = 0.5f
             holder.btnReprogramar.visibility = View.GONE
             holder.btnCancelar.visibility = View.GONE
+            holder.tvEstado.setBackgroundColor(0xFFFFEBEE.toInt())
+            holder.tvEstado.setTextColor(0xFFC62828.toInt())
         } else {
-            holder.btnReprogramar.visibility = View.VISIBLE
-            holder.btnCancelar.visibility = View.VISIBLE
-        }
-
-        when (item.estado) {
-            "CANCELADA" -> {
-                holder.card.alpha = 0.5f
+            holder.card.alpha = 1.0f
+            if (esHistorial) {
                 holder.btnReprogramar.visibility = View.GONE
                 holder.btnCancelar.visibility = View.GONE
-                holder.tvEstado.setBackgroundColor(0xFFFFEBEE.toInt())
-                holder.tvEstado.setTextColor(0xFFC62828.toInt())
+            } else {
+                holder.btnReprogramar.visibility = View.VISIBLE
+                holder.btnCancelar.visibility = View.VISIBLE
             }
-            else -> {
-                holder.card.alpha = 1.0f
-                if (!esHistorial) {
-                    holder.btnReprogramar.visibility = View.VISIBLE
-                    holder.btnCancelar.visibility = View.VISIBLE
-                }
 
-                if (item.estado == "REPROGRAMADA") {
-                    holder.tvEstado.setBackgroundColor(0xFFE0F2F1.toInt())
-                    holder.tvEstado.setTextColor(0xFF004D40.toInt())
-                } else {
-                    holder.tvEstado.setBackgroundColor(0xFFE8F5E9.toInt())
-                    holder.tvEstado.setTextColor(0xFF2E7D32.toInt())
-                }
+            if (item.estado == "REPROGRAMADA") {
+                holder.tvEstado.setBackgroundColor(0xFFE0F2F1.toInt())
+                holder.tvEstado.setTextColor(0xFF004D40.toInt())
+            } else {
+                holder.tvEstado.setBackgroundColor(0xFFE8F5E9.toInt())
+                holder.tvEstado.setTextColor(0xFF2E7D32.toInt())
             }
         }
-
         if (!esHistorial && item.estado != "CANCELADA") {
             holder.btnReprogramar.setOnClickListener {
                 val context = holder.itemView.context as Activity
@@ -91,6 +82,7 @@ class CitasAdapter(
                     .setTitle("Confirmar cancelación")
                     .setMessage("¿Seguro que deseas cancelar esta cita?")
                     .setPositiveButton("Sí") { _, _ ->
+                        // Modificación de datos y refresco reactivo inmediato del contenedor
                         item.estado = "CANCELADA"
                         notifyItemChanged(position)
                         Toast.makeText(context, "Cita cancelada con éxito", Toast.LENGTH_SHORT).show()
@@ -99,7 +91,6 @@ class CitasAdapter(
                     .show()
             }
         } else {
-
             holder.btnReprogramar.setOnClickListener(null)
             holder.btnCancelar.setOnClickListener(null)
         }

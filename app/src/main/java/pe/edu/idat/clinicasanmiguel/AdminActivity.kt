@@ -76,18 +76,9 @@ class AdminActivity : AppCompatActivity() {
 
             when (seleccion) {
 
-                "👤 Mi Perfil" -> {
 
-                    val intent = Intent(this, MiPerfilActivity::class.java)
-                    intent.putExtra("ROL_USUARIO", "ADMIN")
-                    startActivity(intent)
-                }
 
-                "🔑 Cambiar Contraseña" -> {
-                    val intent = Intent(this, CambiarPasswordInternoActivity::class.java)
-                    intent.putExtra("ROL_USUARIO", "ADMIN")
-                    startActivity(intent)
-                }
+
 
                 "🚪 Cerrar Sesión" -> {
 

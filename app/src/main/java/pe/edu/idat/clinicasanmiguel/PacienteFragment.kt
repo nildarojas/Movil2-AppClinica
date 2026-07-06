@@ -26,37 +26,34 @@ class PacienteFragment : Fragment(R.layout.activity_paciente) {
         val acPerfil = view.findViewById<AutoCompleteTextView>(R.id.acPerfil)
 
         tvSaludoBienvenida.text = "¡Bienvenido, Franklin Elias!"
-
         btnVerCitas.setOnClickListener {
-
-            startActivity(Intent(requireContext(), MisCitasActivity::class.java))
+            cambiarPantallaDesdeInicio(MisCitasFragment())
         }
         btnHorarios.setOnClickListener {
-            startActivity(Intent(requireContext(), SeleccionarEspecialidadActivity::class.java))
+            cambiarPantallaDesdeInicio(SeleccionarEspecialidadFragment())
         }
         btnHistorial.setOnClickListener {
-            startActivity(Intent(requireContext(), HistorialCompletoActivity::class.java))
+            cambiarPantallaDesdeInicio(HistorialCompletoFragment())
         }
         btnNotificaciones.setOnClickListener {
-            startActivity(Intent(requireContext(), NotificacionesActivity::class.java))
+            cambiarPantallaDesdeInicio(NotificacionesFragment())
         }
 
         val opciones = arrayOf("👤 Mi Perfil", "🔑 Cambiar contraseña", "🚪 Cerrar sesión")
-
-
         val adapter = ArrayAdapter(requireContext(), R.layout.spinner_perfil_item, opciones)
         acPerfil.setAdapter(adapter)
-
         acPerfil.setOnClickListener { acPerfil.showDropDown() }
-
         acPerfil.setOnItemClickListener { parent, _, position, _ ->
             val seleccion = parent.getItemAtPosition(position).toString()
             when (seleccion) {
                 "👤 Mi Perfil" -> {
-                    startActivity(Intent(requireContext(), MiPerfilActivity::class.java).putExtra("ROL_USUARIO", "PACIENTE"))
+                    cambiarPantallaDesdeInicio(PerfilFragment())
                 }
                 "🔑 Cambiar contraseña" -> {
-                    startActivity(Intent(requireContext(), CambiarPasswordInternoActivity::class.java).putExtra("ROL_USUARIO", "PACIENTE"))
+                    val fragmentClave = CambiarPasswordInternoFragment().apply {
+                        arguments = Bundle().apply { putString("ROL_USUARIO", "PACIENTE") }
+                    }
+                    cambiarPantallaDesdeInicio(fragmentClave)
                 }
                 "🚪 Cerrar sesión" -> {
                     AlertDialog.Builder(requireContext())
@@ -65,6 +62,7 @@ class PacienteFragment : Fragment(R.layout.activity_paciente) {
                         .setPositiveButton("Sí") { _, _ ->
                             val prefs = requireActivity().getSharedPreferences("auth", AppCompatActivity.MODE_PRIVATE)
                             prefs.edit().clear().apply()
+
                             val intent = Intent(requireContext(), LoginActivity::class.java)
                             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                             startActivity(intent)
@@ -76,5 +74,12 @@ class PacienteFragment : Fragment(R.layout.activity_paciente) {
             }
             acPerfil.setText("Mi Perfil", false)
         }
+    }
+    private fun cambiarPantallaDesdeInicio(fragment: Fragment) {
+        parentFragmentManager.beginTransaction()
+            .replace(R.id.flContenedor, fragment)
+            .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+            .addToBackStack(null)
+            .commit()
     }
 }

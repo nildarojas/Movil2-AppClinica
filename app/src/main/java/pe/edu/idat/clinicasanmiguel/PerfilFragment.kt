@@ -40,10 +40,15 @@ class PerfilFragment : Fragment(R.layout.activity_perfil) {
             tvFechaNacimiento.text = "Fecha de nacimiento: 15/08/2000"
             tvGenero.text = "Género: Masculino"
         }
+
         btnRegresar.setOnClickListener {
-            parentFragmentManager.beginTransaction()
-                .replace(R.id.flContenedor, PacienteFragment())
-                .commit()
+            if (parentFragmentManager.backStackEntryCount > 0) {
+                parentFragmentManager.popBackStack()
+            } else {
+                parentFragmentManager.beginTransaction()
+                    .replace(R.id.flContenedor, PacienteFragment())
+                    .commit()
+            }
         }
     }
 }

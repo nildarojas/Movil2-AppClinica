@@ -33,13 +33,7 @@
             android:name=".RegistroActivity"
             android:exported="false" />
         <activity
-            android:name=".PacienteActivity"
-            android:exported="false" />
-        <activity
             android:name=".AdminActivity"
-            android:exported="false" />
-        <activity
-            android:name=".MisCitasActivity"
             android:exported="false" />
         <activity
             android:name=".ListaEspecialidadesActivity"
@@ -49,56 +43,27 @@
             android:name=".RegistrarEspecialidadActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
-
         <activity
             android:name=".RegistrarDoctorActivity"
             android:exported="false" />
         <activity
             android:name=".ListaDoctoresAdminActivity"
             android:exported="false" />
-
-        <activity
-            android:name=".MiPerfilActivity"
-            android:exported="false" />
-
         <activity
             android:name=".ReprogramarCitaActivity"
             android:exported="false" />
-
-        <activity
-            android:name=".SeleccionarEspecialidadActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".SeleccionarMedicoHorarioActivity"
-            android:exported="false" />
-
         <activity
             android:name=".ListaUsuariosActivity"
             android:exported="false" />
         <activity
             android:name=".MaestroCitasAdminActivity"
             android:exported="false" />
-
-        <activity
-            android:name=".CambiarPasswordInternoActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".HistorialCompletoActivity"
-            android:exported="false" />
-
         <activity
             android:name=".ListaHorariosAdminActivity"
             android:exported="false" />
         <activity
             android:name=".RegistrarHorarioActivity"
             android:exported="false" />
-
-        <activity
-            android:name=".NotificacionesActivity"
-            android:exported="false" />
-
         <activity
             android:name=".InicioActivity"
             android:exported="false" />

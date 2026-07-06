@@ -1,11 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item
-        android:id="@+id/itInicio"
-        android:title="Inicio"
-        android:icon="@drawable/ic_home" />
-    <item
-        android:id="@+id/itPerfil"
-        android:title="Mi Perfil"
-        android:icon="@drawable/ic_person" />
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/itInicio"
+            android:title="Inicio"
+            android:icon="@drawable/ic_home" />
+        <item
+            android:id="@+id/itNuevaCita"
+            android:title="Reservar Cita Médica"
+            android:icon="@android:drawable/ic_menu_add" />
+    </group>
+
+    <item android:title="Mi Ficha y Agenda">
+        <menu>
+            <group android:checkableBehavior="single">
+                <item
+                    android:id="@+id/itPerfil"
+                    android:title="Datos Personales"
+                    android:icon="@drawable/ic_person" />
+                <item
+                    android:id="@+id/itMisCitas"
+                    android:title="Mis Citas Activas"
+                    android:icon="@android:drawable/ic_menu_agenda" />
+                <item
+                    android:id="@+id/itHistorial"
+                    android:title="Historial de Citas"
+                    android:icon="@android:drawable/ic_menu_recent_history" />
+                <item
+                    android:id="@+id/itSeguridad"
+                    android:title="Cambiar Contraseña"
+                    android:icon="@android:drawable/ic_lock_lock" />
+            </group>
+        </menu>
+    </item>
+
+    <item android:title="Módulo de Utilidades">
+        <menu>
+            <group android:checkableBehavior="single">
+                <item
+                    android:id="@+id/itNotificaciones"
+                    android:title="Notificaciones y Alertas"
+                    android:icon="@android:drawable/ic_popup_reminder" />
+            </group>
+
+            <item
+                android:id="@+id/itCerrarSesion"
+                android:title="Cerrar Sesión"
+                android:icon="@android:drawable/ic_lock_power_off" />
+        </menu>
+    </item>
 </menu>
