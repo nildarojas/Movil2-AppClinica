@@ -32,6 +32,13 @@ class InicioActivity : AppCompatActivity() {
             drawerLayout.openDrawer(GravityCompat.START)
         }
 
+        // Boton para Marcos
+        val fabTriggerMenu = findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.fabTriggerMenu)
+
+        fabTriggerMenu.setOnClickListener {
+            drawerLayout.openDrawer(GravityCompat.START)
+        }
+
         configurarMenuPorRol()
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()

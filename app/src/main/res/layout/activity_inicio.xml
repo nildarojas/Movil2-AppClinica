@@ -12,17 +12,40 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:background="@android:color/white"> <ImageView
-        android:id="@+id/ivMenu"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:padding="12dp"
-        android:src="@drawable/ic_menu" />
+        android:background="@android:color/white">
 
-        <FrameLayout
-            android:id="@+id/flContenedor"
+        <ImageView
+            android:id="@+id/ivMenu"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:padding="12dp"
+            android:src="@drawable/ic_menu" />
+
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent">
+
+            <FrameLayout
+                android:id="@+id/flContenedor"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/fabTriggerMenu"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="0dp"
+                android:contentDescription="Abrir Menú Auxiliar"
+                android:src="@android:drawable/ic_menu_help"
+                app:backgroundTint="#458890"
+                app:tint="#FFFFFF"
+                app:fabSize="mini"
+                app:elevation="8dp"
+                app:maxImageSize="24dp" />
+
+        </RelativeLayout>
     </LinearLayout>
 
     <com.google.android.material.navigation.NavigationView
