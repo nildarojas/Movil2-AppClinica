@@ -106,4 +106,12 @@ class CitaRepository(context: Context) {
         }
         return lista
     }
+
+    fun cancelarCita(idCita: Int): Int {
+        val db = dbHelper.writableDatabase
+        val valores = android.content.ContentValues().apply {
+            put("estado", "CANCELADA")
+        }
+        return db.update("csma_citas", valores, "id = ?", arrayOf(idCita.toString()))
+    }
 }

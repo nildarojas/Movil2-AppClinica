@@ -13,12 +13,14 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
 import pe.edu.idat.clinicasanmiguel.R
 import pe.edu.idat.clinicasanmiguel.ReprogramarCitaActivity
+import pe.edu.idat.clinicasanmiguel.repository.CitaRepository
 
 data class CitaPacienteMock(val id: Int, val especialidad: String, val medico: String, val fechaHora: String, var estado: String)
 
 class CitasAdapter(
     private val lista: List<CitaPacienteMock>,
-    private val esHistorial: Boolean = false
+    private val esHistorial: Boolean = false,
+    private val onCitaCancelada: () -> Unit
 ) : RecyclerView.Adapter<CitasAdapter.CitaViewHolder>() {
 
     class CitaViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -67,6 +69,7 @@ class CitasAdapter(
                 holder.tvEstado.setTextColor(0xFF2E7D32.toInt())
             }
         }
+
         if (!esHistorial && item.estado != "CANCELADA") {
             holder.btnReprogramar.setOnClickListener {
                 val context = holder.itemView.context as Activity
@@ -78,14 +81,20 @@ class CitasAdapter(
 
             holder.btnCancelar.setOnClickListener {
                 val context = holder.itemView.context
+
                 AlertDialog.Builder(context)
                     .setTitle("Confirmar cancelación")
                     .setMessage("¿Seguro que deseas cancelar esta cita?")
                     .setPositiveButton("Sí") { _, _ ->
-                        // Modificación de datos y refresco reactivo inmediato del contenedor
-                        item.estado = "CANCELADA"
-                        notifyItemChanged(position)
-                        Toast.makeText(context, "Cita cancelada con éxito", Toast.LENGTH_SHORT).show()
+                        val citaRepository = CitaRepository(context)
+                        val filasAfectadas = citaRepository.cancelarCita(item.id)
+
+                        if (filasAfectadas > 0) {
+                            Toast.makeText(context, "Cita cancelada físicamente en SQLite", Toast.LENGTH_SHORT).show()
+                            onCitaCancelada()
+                        } else {
+                            Toast.makeText(context, "Error al cancelar la cita", Toast.LENGTH_SHORT).show()
+                        }
                     }
                     .setNegativeButton("No", null)
                     .show()

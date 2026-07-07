@@ -23,18 +23,20 @@ class MisCitasFragment : Fragment(R.layout.activity_mis_citas) {
         citaRepository = CitaRepository(requireContext())
         rvMisCitas = view.findViewById(R.id.rvMisCitas)
         rvMisCitas.layoutManager = LinearLayoutManager(requireContext())
-
-        adapter = CitasAdapter(listaCitasLocales)
+        adapter = CitasAdapter(listaCitasLocales, esHistorial = false) {
+            cargarCitasDesdePersistencia()
+        }
         rvMisCitas.adapter = adapter
     }
+
     override fun onResume() {
         super.onResume()
         cargarCitasDesdePersistencia()
     }
 
     private fun cargarCitasDesdePersistencia() {
-        val preferencias = requireContext().getSharedPreferences("sesion_clinica", Context.MODE_PRIVATE)
-        val idPacienteLogueado = preferencias.getInt("ID_USUARIO", -1)
+        val preferences = requireContext().getSharedPreferences("sesion_clinica", Context.MODE_PRIVATE)
+        val idPacienteLogueado = preferences.getInt("ID_USUARIO", -1)
 
         if (idPacienteLogueado != -1) {
             val citasDb = citaRepository.obtenerCitasActivasPorPaciente(idPacienteLogueado)
