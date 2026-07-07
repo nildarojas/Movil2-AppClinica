@@ -1,6 +1,7 @@
 package pe.edu.idat.clinicasanmiguel
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.TextView
@@ -11,6 +12,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
+import pe.edu.idat.clinicasanmiguel.repository.UsuarioRepository
 
 class LoginActivity : AppCompatActivity() {
     private lateinit var tvRegistro: TextView
@@ -18,12 +20,15 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var btnLogin: MaterialButton
     private lateinit var etCorreo: TextInputEditText
     private lateinit var etContrasena: TextInputEditText
+    private lateinit var usuarioRepository: UsuarioRepository
 
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_login)
+
+        usuarioRepository = UsuarioRepository(this)
 
         tvRegistro = findViewById(R.id.tvRegistro)
         tvOlvidaste = findViewById(R.id.tvOlvidaste)
@@ -48,24 +53,27 @@ class LoginActivity : AppCompatActivity() {
             if (correo.isEmpty() || contrasena.isEmpty()) {
                 Toast.makeText(this, "Por favor, ingrese sus datos", Toast.LENGTH_SHORT).show()
             } else {
+                val usuarioLogueado = usuarioRepository.login(correo, contrasena)
 
+                if (usuarioLogueado != null) {
+                    val preferencias = getSharedPreferences("sesion_clinica", Context.MODE_PRIVATE)
+                    preferencias.edit().apply {
+                        putInt("ID_USUARIO", usuarioLogueado.id)
+                        putString("ROL_USUARIO", usuarioLogueado.rol)
+                        putString("NOMBRE_USUARIO", "${usuarioLogueado.nombre} ${usuarioLogueado.apellido}")
+                        apply()
+                    }
 
-                if (correo == "paciente@idat.com" && contrasena == "123456") {
-                    Toast.makeText(this, "Bienvenido PACIENTE", Toast.LENGTH_SHORT).show()
-
-
-                    val intent = Intent(this, InicioActivity::class.java)
-                    startActivity(intent)
+                    if (usuarioLogueado.rol == "ADMIN") {
+                        Toast.makeText(this, "Bienvenido ADMIN: ${usuarioLogueado.nombre}", Toast.LENGTH_SHORT).show()
+                        startActivity(Intent(this, AdminActivity::class.java))
+                    } else {
+                        Toast.makeText(this, "Bienvenido PACIENTE: ${usuarioLogueado.nombre}", Toast.LENGTH_SHORT).show()
+                        startActivity(Intent(this, InicioActivity::class.java))
+                    }
                     finish()
-                } else if (correo == "admin@idat.com" && contrasena == "admin") {
-                    Toast.makeText(this, "Bienvenido ADMIN", Toast.LENGTH_SHORT).show()
-
-                    val intent = Intent(this, AdminActivity::class.java)
-                    startActivity(intent)
-                    finish()
-
                 } else {
-                    Toast.makeText(this, "Credenciales incorrectas", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Correo o contraseña incorrectos", Toast.LENGTH_SHORT).show()
                 }
             }
         }

@@ -4,7 +4,6 @@ import android.app.DatePickerDialog
 import android.content.Intent
 import android.os.Bundle
 import android.util.Patterns
-import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.RadioGroup
@@ -17,6 +16,8 @@ import androidx.core.view.WindowInsetsCompat
 import java.util.Calendar
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.button.MaterialButton
+import pe.edu.idat.clinicasanmiguel.entity.Usuario
+import pe.edu.idat.clinicasanmiguel.repository.UsuarioRepository
 
 class RegistroActivity : AppCompatActivity() {
 
@@ -32,11 +33,14 @@ class RegistroActivity : AppCompatActivity() {
     private lateinit var cbTerminos: CheckBox
     private lateinit var btnRegistrar: MaterialButton
     private lateinit var tvIrLogin: TextView
+    private lateinit var usuarioRepository: UsuarioRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_registro)
+
+        usuarioRepository = UsuarioRepository(this)
 
         etNombre = findViewById(R.id.etNombre)
         etApellidos = findViewById(R.id.etApellidos)
@@ -107,7 +111,6 @@ class RegistroActivity : AppCompatActivity() {
         if (nombre.isEmpty() || apellido.isEmpty() || dni.isEmpty() || telefono.isEmpty()
             || fechaNacimiento.isEmpty() || genero.isEmpty()
             || correo.isEmpty() || password.isEmpty() || password2.isEmpty()) {
-
             Toast.makeText(this, "Completa todos los campos", Toast.LENGTH_SHORT).show()
             return
         }
@@ -131,11 +134,27 @@ class RegistroActivity : AppCompatActivity() {
             Toast.makeText(this, "Debe aceptar los términos y condiciones", Toast.LENGTH_SHORT).show()
             return
         }
+        val nuevoUsuario = Usuario(
+            dni = dni,
+            nombre = nombre,
+            apellido = apellido,
+            correo = correo,
+            password = password,
+            telefono = telefono,
+            fechaNacimiento = fechaNacimiento,
+            genero = genero,
+            rol = "PACIENTE"
+        )
 
-        Toast.makeText(this, "Paciente registrado correctamente (Local)", Toast.LENGTH_SHORT).show()
+        val idGenerado = usuarioRepository.registrarUsuario(nuevoUsuario)
 
-        val intent = Intent(this, LoginActivity::class.java)
-        startActivity(intent)
-        finish()
+        if (idGenerado != -1L) {
+            Toast.makeText(this, "Paciente registrado con ID real: $idGenerado", Toast.LENGTH_LONG).show()
+            val intent = Intent(this, LoginActivity::class.java)
+            startActivity(intent)
+            finish()
+        } else {
+            Toast.makeText(this, "Error: El DNI o Correo ya se encuentran registrados", Toast.LENGTH_LONG).show()
+        }
     }
 }
