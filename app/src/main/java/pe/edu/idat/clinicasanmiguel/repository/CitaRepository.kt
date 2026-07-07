@@ -114,4 +114,13 @@ class CitaRepository(context: Context) {
         }
         return db.update("csma_citas", valores, "id = ?", arrayOf(idCita.toString()))
     }
+
+    fun reprogramarCita(idCita: Int, nuevoHorario: String): Int {
+        val db = dbHelper.writableDatabase
+        val valores = android.content.ContentValues().apply {
+            put("fecha_hora", nuevoHorario)
+            put("estado", "REPROGRAMADA")
+        }
+        return db.update("csma_citas", valores, "id = ?", arrayOf(idCita.toString()))
+    }
 }
