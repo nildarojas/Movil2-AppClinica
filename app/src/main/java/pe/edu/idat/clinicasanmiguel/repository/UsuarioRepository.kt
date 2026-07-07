@@ -55,4 +55,25 @@ class UsuarioRepository(context: Context) {
         val filasAfectadas = db.update("csma_usuarios", valores, "id = ?", arrayOf(idUsuario.toString()))
         return filasAfectadas
     }
+    fun obtenerUsuarioPorId(idUsuario: Int): Usuario? {
+        var usuario: Usuario? = null
+        val db = dbHelper.readableDatabase
+        val cursor: Cursor = db.rawQuery("SELECT * FROM csma_usuarios WHERE id = ?", arrayOf(idUsuario.toString()))
+
+        if (cursor.moveToFirst()) {
+            usuario = Usuario(
+                id = cursor.getInt(cursor.getColumnIndexOrThrow("id")),
+                dni = cursor.getString(cursor.getColumnIndexOrThrow("dni")),
+                nombre = cursor.getString(cursor.getColumnIndexOrThrow("nombre")),
+                apellido = cursor.getString(cursor.getColumnIndexOrThrow("apellido")),
+                correo = cursor.getString(cursor.getColumnIndexOrThrow("correo")),
+                password = cursor.getString(cursor.getColumnIndexOrThrow("password")),
+                telefono = cursor.getString(cursor.getColumnIndexOrThrow("telefono")),
+                fechaNacimiento = cursor.getString(cursor.getColumnIndexOrThrow("fecha_nacimiento")),
+                genero = cursor.getString(cursor.getColumnIndexOrThrow("genero")),
+                rol = cursor.getString(cursor.getColumnIndexOrThrow("rol"))
+            )
+        }
+        return usuario
+    }
 }
