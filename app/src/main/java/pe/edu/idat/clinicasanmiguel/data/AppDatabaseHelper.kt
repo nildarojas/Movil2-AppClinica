@@ -8,7 +8,7 @@ class AppDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_N
 
     companion object {
         private const val DATABASE_NAME = "clinica_san_miguel.db"
-        private const val DATABASE_VERSION = 1
+        private const val DATABASE_VERSION = 2
     }
 
     override fun onCreate(db: SQLiteDatabase) {
@@ -49,11 +49,13 @@ class AppDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_N
                 id_paciente INTEGER NOT NULL,
                 id_medico INTEGER NOT NULL,
                 fecha_hora TEXT NOT NULL,
-                estado TEXT NOT NULL, -- 'Activa', 'Finalizada', 'Cancelada'
+                estado TEXT NOT NULL,
+                id_cita_anterior INTEGER NULL, 
                 FOREIGN KEY(id_paciente) REFERENCES csma_usuarios(id),
                 FOREIGN KEY(id_medico) REFERENCES csma_medicos(id)
             );
         """.trimIndent())
+
         insertarDatosIniciales(db)
     }
 

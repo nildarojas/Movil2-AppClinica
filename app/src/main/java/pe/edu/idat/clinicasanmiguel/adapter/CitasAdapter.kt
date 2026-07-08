@@ -42,25 +42,32 @@ class CitasAdapter(
         val item = lista[position]
         holder.tvEspecialidad.text = item.especialidad
         holder.tvMedico.text = item.medico
-        holder.tvFechaHora.text = item.fechaHora
         holder.tvEstado.text = item.estado
 
-        // 🎨 GESTIÓN ESTRICTA DE COLORES BASADO EN REGLA v3
+        if (position == 0) {
+            holder.card.strokeColor = 0xFF458890.toInt()
+            holder.card.strokeWidth = 6
+        } else {
+            holder.card.strokeColor = 0xFFE2E8F0.toInt()
+            holder.card.strokeWidth = 2
+        }
+
         if (item.estado == "CANCELADA") {
+            holder.tvFechaHora.text = item.fechaHora
             holder.card.alpha = 0.5f
             holder.btnReprogramar.visibility = View.GONE
             holder.btnCancelar.visibility = View.GONE
             holder.tvEstado.setBackgroundColor(0xFFFFEBEE.toInt())
             holder.tvEstado.setTextColor(0xFFC62828.toInt())
         } else if (item.estado == "REPROGRAMADA") {
-            // El estado archivado REPROGRAMADA solo vive en el historial con color grisáceo de auditoría
+            holder.tvFechaHora.text = "Fecha anterior: " + item.fechaHora
             holder.card.alpha = 0.6f
             holder.btnReprogramar.visibility = View.GONE
             holder.btnCancelar.visibility = View.GONE
             holder.tvEstado.setBackgroundColor(0xFFF5F5F5.toInt())
             holder.tvEstado.setTextColor(0xFF616161.toInt())
         } else {
-            // Citas normales ('Activa' o que simulen 'Pendiente')
+            holder.tvFechaHora.text = item.fechaHora
             holder.card.alpha = 1.0f
             if (esHistorial) {
                 holder.btnReprogramar.visibility = View.GONE
@@ -79,6 +86,9 @@ class CitasAdapter(
                 val intent = Intent(context, ReprogramarCitaActivity::class.java)
                 intent.putExtra("id_cita", item.id)
                 intent.putExtra("posicion", position)
+                intent.putExtra("especialidad", item.especialidad)
+                intent.putExtra("medico", item.medico)
+                intent.putExtra("fecha_hora", item.fechaHora)
                 context.startActivityForResult(intent, 100)
             }
 
@@ -91,10 +101,8 @@ class CitasAdapter(
                         val citaRepository = CitaRepository(context)
                         val filasAfectadas = citaRepository.cancelarCita(item.id)
                         if (filasAfectadas > 0) {
-                            Toast.makeText(context, "Cita cancelada físicamente en SQLite", Toast.LENGTH_SHORT).show()
-                            onCitaCancelada() // Refresca la vista
-                        } else {
-                            Toast.makeText(context, "Error al cancelar la cita", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Cita cancelada físicamente", Toast.LENGTH_SHORT).show()
+                            onCitaCancelada()
                         }
                     }
                     .setNegativeButton("No", null)

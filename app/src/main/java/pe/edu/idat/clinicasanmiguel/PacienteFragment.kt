@@ -1,85 +1,95 @@
 package pe.edu.idat.clinicasanmiguel
 
-import android.content.Intent
+import android.content.Context
 import android.os.Bundle
 import android.view.View
-import android.widget.ArrayAdapter
-import android.widget.AutoCompleteTextView
-import android.widget.Button
+import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
+import android.widget.Toast
 import androidx.fragment.app.Fragment
+import com.google.android.material.button.MaterialButton
+import pe.edu.idat.clinicasanmiguel.repository.CitaRepository
 
 class PacienteFragment : Fragment(R.layout.activity_paciente) {
 
     private lateinit var tvSaludoBienvenida: TextView
+    private lateinit var citaRepository: CitaRepository
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        tvSaludoBienvenida = view.findViewById(R.id.tvSaludoBienvenida)
-        val btnVerCitas = view.findViewById<Button>(R.id.btnVerCitas)
-        val btnHorarios = view.findViewById<Button>(R.id.btnHorarios)
-        val btnHistorial = view.findViewById<Button>(R.id.btnHistorial)
-        val btnNotificaciones = view.findViewById<Button>(R.id.btnNotificaciones)
-        val acPerfil = view.findViewById<AutoCompleteTextView>(R.id.acPerfil)
+        citaRepository = CitaRepository(requireContext())
 
-        tvSaludoBienvenida.text = "¡Bienvenido, Franklin Elias!"
-        btnVerCitas.setOnClickListener {
-            cambiarPantallaDesdeInicio(MisCitasFragment())
+        tvSaludoBienvenida = view.findViewById(R.id.tvSaludoBienvenida)
+        val ivCampanaNotificacion = view.findViewById<ImageView>(R.id.ivCampanaNotificacion)
+
+        // Mapeo de ambos botones
+        val btnHorarios = view.findViewById<MaterialButton>(R.id.btnHorarios)
+        val btnHorariosVacio = view.findViewById<MaterialButton>(R.id.btnHorariosVacio)
+        val btnVerOtrasCitas = view.findViewById<MaterialButton>(R.id.btnVerOtrasCitas)
+
+        val layoutVacio = view.findViewById<LinearLayout>(R.id.layoutEstadoVacio)
+        val layoutCita = view.findViewById<LinearLayout>(R.id.layoutUltimaCita)
+
+        val tvHomeEspecialidad = view.findViewById<TextView>(R.id.tvHomeEspecialidad)
+        val tvHomeMedico = view.findViewById<TextView>(R.id.tvHomeMedico)
+        val tvHomeFechaHora = view.findViewById<TextView>(R.id.tvHomeFechaHora)
+        val tvHomeEstado = view.findViewById<TextView>(R.id.tvHomeEstado)
+
+        val preferencias = requireContext().getSharedPreferences("sesion_clinica", Context.MODE_PRIVATE)
+        val idPacienteLogueado = preferencias.getInt("ID_USUARIO", -1)
+        val nombreUsuario = preferencias.getString("NOMBRE_USUARIO", "Paciente")
+
+        tvSaludoBienvenida.text = "¡Bienvenido,\n$nombreUsuario!"
+
+        if (idPacienteLogueado != -1) {
+            val ultimaCita = citaRepository.obtenerUltimaCitaPorPaciente(idPacienteLogueado)
+
+            if (ultimaCita != null) {
+                layoutVacio.visibility = View.GONE
+                layoutCita.visibility = View.VISIBLE
+                btnHorarios.visibility = View.VISIBLE
+                btnHorariosVacio.visibility = View.GONE
+                tvHomeEspecialidad.text = ultimaCita.especialidad
+                tvHomeMedico.text = "Médico: " + ultimaCita.medico
+                tvHomeFechaHora.text = "Horario: " + ultimaCita.fechaHora
+                tvHomeEstado.text = ultimaCita.estado
+            } else {
+                layoutCita.visibility = View.GONE
+                layoutVacio.visibility = View.VISIBLE
+
+                btnHorarios.visibility = View.GONE
+                btnHorariosVacio.visibility = View.VISIBLE
+            }
         }
+
         btnHorarios.setOnClickListener {
             cambiarPantallaDesdeInicio(SeleccionarEspecialidadFragment())
         }
-        btnHistorial.setOnClickListener {
-            cambiarPantallaDesdeInicio(HistorialCompletoFragment())
-        }
-        btnNotificaciones.setOnClickListener {
-            cambiarPantallaDesdeInicio(NotificacionesFragment())
+
+        btnHorariosVacio.setOnClickListener {
+            cambiarPantallaDesdeInicio(SeleccionarEspecialidadFragment())
         }
 
-        val opciones = arrayOf("👤 Mi Perfil", "🔑 Cambiar contraseña", "🚪 Cerrar sesión")
-        val adapter = ArrayAdapter(requireContext(), R.layout.spinner_perfil_item, opciones)
-        acPerfil.setAdapter(adapter)
-        acPerfil.setOnClickListener { acPerfil.showDropDown() }
-        acPerfil.setOnItemClickListener { parent, _, position, _ ->
-            val seleccion = parent.getItemAtPosition(position).toString()
-            when (seleccion) {
-                "👤 Mi Perfil" -> {
-                    cambiarPantallaDesdeInicio(PerfilFragment())
-                }
-                "🔑 Cambiar contraseña" -> {
-                    val fragmentClave = CambiarPasswordInternoFragment().apply {
-                        arguments = Bundle().apply { putString("ROL_USUARIO", "PACIENTE") }
-                    }
-                    cambiarPantallaDesdeInicio(fragmentClave)
-                }
-                "🚪 Cerrar sesión" -> {
-                    AlertDialog.Builder(requireContext())
-                        .setTitle("Cerrar Sesión")
-                        .setMessage("¿Está seguro de que desea salir del sistema?")
-                        .setPositiveButton("Sí") { _, _ ->
-                            val prefs = requireActivity().getSharedPreferences("auth", AppCompatActivity.MODE_PRIVATE)
-                            prefs.edit().clear().apply()
+        btnVerOtrasCitas.setOnClickListener {
+            cambiarPantallaDesdeInicio(MisCitasFragment())
+        }
 
-                            val intent = Intent(requireContext(), LoginActivity::class.java)
-                            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                            startActivity(intent)
-                            requireActivity().finish()
-                        }
-                        .setNegativeButton("No", null)
-                        .show()
-                }
-            }
-            acPerfil.setText("Mi Perfil", false)
+        ivCampanaNotificacion.setOnClickListener {
+            Toast.makeText(
+                requireContext(),
+                "Notificaciones: Próxima entrega con SqLite",
+                Toast.LENGTH_LONG
+            ).show()
         }
     }
+
     private fun cambiarPantallaDesdeInicio(fragment: Fragment) {
         parentFragmentManager.beginTransaction()
             .replace(R.id.flContenedor, fragment)
             .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
-            .addToBackStack(null)
+            .addToBackStack(fragment::class.java.simpleName)
             .commit()
     }
 }

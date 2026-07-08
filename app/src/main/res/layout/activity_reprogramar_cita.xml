@@ -15,29 +15,55 @@
         android:textStyle="bold"
         android:textColor="#458890"
         android:gravity="center"
-        android:layout_marginBottom="32dp"/>
+        android:layout_marginBottom="24dp"/>
 
-    <com.google.android.material.textfield.TextInputLayout
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Seleccionar Nuevo Médico"
-        android:layout_marginBottom="16dp"
-        app:boxStrokeColor="#458890"
-        app:hintTextColor="#458890">
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:layout_marginBottom="24dp"
+        android:background="#F9F9F9">
 
-        <AutoCompleteTextView
-            android:id="@+id/acNuevoMedico"
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="none"/>
-    </com.google.android.material.textfield.TextInputLayout>
+            android:text="DETALLES DE LA CITA ANTERIOR"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:textColor="#616161"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/tvEspecialidadAnterior"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textColor="#212121"
+            android:layout_marginBottom="4dp"/>
+
+        <TextView
+            android:id="@+id/tvMedicoAnterior"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textColor="#212121"
+            android:layout_marginBottom="4dp"/>
+
+        <TextView
+            android:id="@+id/tvHorarioAnterior"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textColor="#C62828"
+            android:textStyle="bold"/>
+    </LinearLayout>
 
     <com.google.android.material.textfield.TextInputLayout
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Seleccionar Nuevo Horario"
+        android:hint="Seleccionar Nueva Fecha y Horario"
         android:layout_marginBottom="32dp"
         app:boxStrokeColor="#458890"
         app:hintTextColor="#458890">

@@ -1,84 +1,179 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://tools.android.com/tools"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#FFFFFF"
     android:padding="24dp"
-    tools:context=".PacienteActivity">
+    tools:context=".PacienteFragment">
 
     <LinearLayout
+        android:id="@+id/lyCabeceraInterna"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
-
-        <TextView
-            android:id="@+id/tvTitulo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Panel del Paciente"
-            android:textSize="26sp"
-            android:textStyle="bold"
-            android:textColor="#333333"
-            android:layout_gravity="center"
-            android:layout_marginBottom="8dp"/>
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
         <TextView
             android:id="@+id/tvSaludoBienvenida"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="¡Bienvenido, Paciente!"
-            android:textAlignment="center"
-            android:textSize="18sp"
-            android:textColor="#458890"
+            android:layout_weight="1"
+            android:text="¡Bienvenido!"
+            android:textSize="20sp"
             android:textStyle="bold"
-            android:layout_marginBottom="30dp"/>
+            android:textColor="#333333" />
 
-        <Button android:id="@+id/btnVerCitas"
-            android:layout_width="match_parent" android:layout_height="55dp"
-            android:text="Ver mis citas" android:backgroundTint="#458890" android:layout_marginBottom="16dp"/>
+        <ImageView
+            android:id="@+id/ivCampanaNotificacion"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:padding="8dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:focusable="true"
+            android:src="@android:drawable/ic_popup_reminder"
+            app:tint="#458890" />
+    </LinearLayout>
 
-        <Button android:id="@+id/btnHorarios" android:layout_width="match_parent" android:layout_height="55dp"
-            android:text="Registrar Cita Médica" android:backgroundTint="#458890" android:layout_marginBottom="16dp"/>
-
-        <Button android:id="@+id/btnHistorial" android:layout_width="match_parent" android:layout_height="55dp"
-            android:text="Historial de citas" android:backgroundTint="#458890" android:layout_marginBottom="16dp"/>
-
-        <Button android:id="@+id/btnNotificaciones" android:layout_width="match_parent" android:layout_height="55dp"
-            android:text="Ver notificaciones" android:backgroundTint="#458890" android:layout_marginBottom="24dp"/>
+    <LinearLayout
+        android:id="@+id/layoutEstadoVacio"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/lyCabeceraInterna"
+        app:layout_constraintBottom_toTopOf="@id/btnHorarios"
+        app:layout_constraintVertical_bias="0.4">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Opciones de Cuenta"
-            android:textSize="18sp"
+            android:text="AUN NO TIENES NINGUNA CITA REGISTRADA"
+            android:textSize="15sp"
             android:textStyle="bold"
-            android:textColor="#333333"
-            android:layout_marginBottom="12dp"/>
+            android:textColor="#64748B"
+            android:gravity="center" />
 
-        <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnHorariosVacio"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="REGISTRA TU CITA"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:cornerRadius="12dp"
+            android:backgroundTint="#458890"
+            app:icon="@android:drawable/ic_menu_add"
+            app:iconGravity="textStart"
+            android:layout_marginTop="16dp"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/layoutUltimaCita"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone"
+        android:layout_marginTop="32dp"
+        app:layout_constraintTop_toBottomOf="@id/lyCabeceraInterna"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Seleccionar acción"
-            app:boxBackgroundColor="#FFFFFF"
-            app:boxStrokeColor="#458890">
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp"
+            app:strokeWidth="2dp"
+            app:strokeColor="#458890"
+            app:cardBackgroundColor="#F8FAFC"
+            android:layout_marginBottom="16dp">
 
-            <AutoCompleteTextView
-                android:id="@+id/acPerfil"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="none"
-                android:text="Mi Perfil"
-                android:padding="16dp"
-                android:dropDownHeight="wrap_content"
-                android:textColor="#333333" />
+                android:orientation="vertical"
+                android:padding="20dp">
 
-        </com.google.android.material.textfield.TextInputLayout>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="ÚLTIMA CITA REGISTRADA"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:textColor="#458890"
+                    android:layout_marginBottom="12dp"/>
+
+                <TextView
+                    android:id="@+id/tvHomeEspecialidad"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="#1E293B"
+                    android:layout_marginBottom="4dp"/>
+
+                <TextView
+                    android:id="@+id/tvHomeMedico"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:textColor="#475569"
+                    android:layout_marginBottom="4dp"/>
+
+                <TextView
+                    android:id="@+id/tvHomeFechaHora"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:textColor="#475569"
+                    android:layout_marginBottom="12dp"/>
+
+                <TextView
+                    android:id="@+id/tvHomeEstado"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="4dp"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:textColor="#FFFFFF"
+                    android:background="#458890"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnVerOtrasCitas"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="¿Buscas otras citas? Mira las que tienes"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:textColor="#458890"/>
     </LinearLayout>
-</ScrollView>
 
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnHorarios"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:text="REGISTRAR NUEVA CITA"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:cornerRadius="12dp"
+        android:backgroundTint="#458890"
+        app:icon="@android:drawable/ic_menu_add"
+        app:iconGravity="textStart"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginBottom="8dp"/>
 
-
-
+</androidx.constraintlayout.widget.ConstraintLayout>

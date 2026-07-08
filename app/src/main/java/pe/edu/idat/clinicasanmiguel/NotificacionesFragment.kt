@@ -17,8 +17,8 @@ class NotificacionesFragment : Fragment(R.layout.activity_notificaciones) {
         rv.layoutManager = LinearLayoutManager(requireContext())
 
         val listaNotificaciones = listOf(
-            NotificacionMock(1, "Recordatorio: Cita de Cardiología mañana a las 9:30 AM", "2026-06-25"),
-            NotificacionMock(2, "Actualización: La Dra. Abigail ha sido asignada a tu cita", "2026-06-24")
+            NotificacionMock(1, "Registrado: su cita de La Dra. Abigail ha sido Registrado correctamente", "2026-06-24" ),
+            NotificacionMock(2, "Reprogramado: La Dra. Abigail ha sido reporgramado correctamente", "2026-06-22")
         )
 
         rv.adapter = NotificacionesAdapter(listaNotificaciones)
