@@ -23,11 +23,13 @@ class ReprogramarCitaActivity : AppCompatActivity() {
         val acMedico = findViewById<AutoCompleteTextView>(R.id.acNuevoMedico)
         val acHorario = findViewById<AutoCompleteTextView>(R.id.acNuevoHorario)
         val btnConfirmar = findViewById<Button>(R.id.btnConfirmarReprogramacion)
+
         val medicos = listOf("Dr. Bryant Yacila (Cardiología)", "Dra. Abigail Valdez (Pediatría)")
         val horarios = listOf("Lunes 08 de Junio - 08:30 AM", "Miércoles 10 de Junio - 10:15 AM", "Viernes 12 de Junio - 04:00 PM")
 
         acMedico.setAdapter(ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, medicos))
         acHorario.setAdapter(ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, horarios))
+
         val idCita = intent.getIntExtra("id_cita", -1)
         val posicion = intent.getIntExtra("posicion", -1)
 
@@ -41,17 +43,18 @@ class ReprogramarCitaActivity : AppCompatActivity() {
             }
 
             if (idCita != -1) {
-                val filasAfectadas = citaRepository.reprogramarCita(idCita, horarioSeleccionado)
 
-                if (filasAfectadas > 0) {
+                val exitoTransaccion = citaRepository.reprogramarCitaTransaccional(idCita, horarioSeleccionado)
+
+                if (exitoTransaccion) {
                     val resultIntent = Intent()
                     resultIntent.putExtra("posicion", posicion)
                     setResult(Activity.RESULT_OK, resultIntent)
 
-                    Toast.makeText(this, "Cita N° $idCita reprogramada en SQLite con éxito", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, "Cita archivada y nueva cita generada en SQLite", Toast.LENGTH_LONG).show()
                     finish()
                 } else {
-                    Toast.makeText(this, "Error al actualizar la persistencia de datos", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Error al procesar la transacción en SQLite", Toast.LENGTH_SHORT).show()
                 }
             } else {
                 Toast.makeText(this, "Error: Identificador de cita inválido", Toast.LENGTH_SHORT).show()

@@ -115,12 +115,44 @@ class CitaRepository(context: Context) {
         return db.update("csma_citas", valores, "id = ?", arrayOf(idCita.toString()))
     }
 
-    fun reprogramarCita(idCita: Int, nuevoHorario: String): Int {
+    fun reprogramarCitaTransaccional(idCitaVieja: Int, nuevoHorario: String): Boolean {
         val db = dbHelper.writableDatabase
-        val valores = android.content.ContentValues().apply {
-            put("fecha_hora", nuevoHorario)
-            put("estado", "REPROGRAMADA")
+        db.beginTransaction() // 🔒 Iniciamos bloque seguro de hilos
+        try {
+            // Paso A: Obtener la data de la cita vieja para clonar id_paciente e id_medico
+            var idPaciente = -1
+            var idMedico = -1
+            val cursor = db.rawQuery("SELECT id_paciente, id_medico FROM csma_citas WHERE id = ?", arrayOf(idCitaVieja.toString()))
+            if (cursor.moveToFirst()) {
+                idPaciente = cursor.getInt(cursor.getColumnIndexOrThrow("id_paciente"))
+                idMedico = cursor.getInt(cursor.getColumnIndexOrThrow("id_medico"))
+            }
+            cursor.close()
+
+            if (idPaciente == -1 || idMedico == -1) return false
+
+            // Paso B: Cambiar el estado de la cita antigua a 'REPROGRAMADA'
+            val valoresUpdate = android.content.ContentValues().apply {
+                put("estado", "REPROGRAMADA")
+            }
+            db.update("csma_citas", valoresUpdate, "id = ?", arrayOf(idCitaVieja.toString()))
+
+            // Paso C: Insertar la nueva cita clonada con el nuevo bloque horario en estado 'Activa'
+            val valoresInsert = android.content.ContentValues().apply {
+                put("id_paciente", idPaciente)
+                put("id_medico", idMedico)
+                put("fecha_hora", nuevoHorario)
+                put("estado", "Activa") // Vuelve a nacer como Activa/Pendiente
+            }
+            db.insert("csma_citas", null, valoresInsert)
+
+            db.setTransactionSuccessful() // 🔓 Si todo salió bien, guardamos cambios físicos
+            return true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return false
+        } finally {
+            db.endTransaction() // Cierra el canal transaccional
         }
-        return db.update("csma_citas", valores, "id = ?", arrayOf(idCita.toString()))
     }
 }

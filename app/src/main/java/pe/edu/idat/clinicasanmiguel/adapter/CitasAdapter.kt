@@ -45,13 +45,22 @@ class CitasAdapter(
         holder.tvFechaHora.text = item.fechaHora
         holder.tvEstado.text = item.estado
 
+        // 🎨 GESTIÓN ESTRICTA DE COLORES BASADO EN REGLA v3
         if (item.estado == "CANCELADA") {
             holder.card.alpha = 0.5f
             holder.btnReprogramar.visibility = View.GONE
             holder.btnCancelar.visibility = View.GONE
             holder.tvEstado.setBackgroundColor(0xFFFFEBEE.toInt())
             holder.tvEstado.setTextColor(0xFFC62828.toInt())
+        } else if (item.estado == "REPROGRAMADA") {
+            // El estado archivado REPROGRAMADA solo vive en el historial con color grisáceo de auditoría
+            holder.card.alpha = 0.6f
+            holder.btnReprogramar.visibility = View.GONE
+            holder.btnCancelar.visibility = View.GONE
+            holder.tvEstado.setBackgroundColor(0xFFF5F5F5.toInt())
+            holder.tvEstado.setTextColor(0xFF616161.toInt())
         } else {
+            // Citas normales ('Activa' o que simulen 'Pendiente')
             holder.card.alpha = 1.0f
             if (esHistorial) {
                 holder.btnReprogramar.visibility = View.GONE
@@ -60,17 +69,11 @@ class CitasAdapter(
                 holder.btnReprogramar.visibility = View.VISIBLE
                 holder.btnCancelar.visibility = View.VISIBLE
             }
-
-            if (item.estado == "REPROGRAMADA") {
-                holder.tvEstado.setBackgroundColor(0xFFE0F2F1.toInt())
-                holder.tvEstado.setTextColor(0xFF004D40.toInt())
-            } else {
-                holder.tvEstado.setBackgroundColor(0xFFE8F5E9.toInt())
-                holder.tvEstado.setTextColor(0xFF2E7D32.toInt())
-            }
+            holder.tvEstado.setBackgroundColor(0xFFE8F5E9.toInt())
+            holder.tvEstado.setTextColor(0xFF2E7D32.toInt())
         }
 
-        if (!esHistorial && item.estado != "CANCELADA") {
+        if (!esHistorial && item.estado != "CANCELADA" && item.estado != "REPROGRAMADA") {
             holder.btnReprogramar.setOnClickListener {
                 val context = holder.itemView.context as Activity
                 val intent = Intent(context, ReprogramarCitaActivity::class.java)
@@ -81,17 +84,15 @@ class CitasAdapter(
 
             holder.btnCancelar.setOnClickListener {
                 val context = holder.itemView.context
-
                 AlertDialog.Builder(context)
                     .setTitle("Confirmar cancelación")
                     .setMessage("¿Seguro que deseas cancelar esta cita?")
                     .setPositiveButton("Sí") { _, _ ->
                         val citaRepository = CitaRepository(context)
                         val filasAfectadas = citaRepository.cancelarCita(item.id)
-
                         if (filasAfectadas > 0) {
                             Toast.makeText(context, "Cita cancelada físicamente en SQLite", Toast.LENGTH_SHORT).show()
-                            onCitaCancelada()
+                            onCitaCancelada() // Refresca la vista
                         } else {
                             Toast.makeText(context, "Error al cancelar la cita", Toast.LENGTH_SHORT).show()
                         }
