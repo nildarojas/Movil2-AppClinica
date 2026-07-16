@@ -63,6 +63,7 @@
             android:layout_marginBottom="24dp"/>
 
         <TextView
+            android:id="@+id/tvOpcionesCuenta"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Opciones de Cuenta"
@@ -72,11 +73,14 @@
             android:layout_marginBottom="12dp"/>
 
         <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilPerfilAdmin"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Seleccionar acción"
-            app:boxStrokeColor="#458890" app:hintTextColor="#458890"> <AutoCompleteTextView
+            app:boxStrokeColor="#458890"
+            app:hintTextColor="#458890">
+            <AutoCompleteTextView
             android:id="@+id/acPerfilAdmin"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

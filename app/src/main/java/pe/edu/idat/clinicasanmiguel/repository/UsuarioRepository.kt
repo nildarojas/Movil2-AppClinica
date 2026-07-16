@@ -76,4 +76,78 @@ class UsuarioRepository(context: Context) {
         }
         return usuario
     }
+
+    fun obtenerTodosLosUsuarios(): List<Usuario> {
+
+        val listaUsuarios =
+            mutableListOf<Usuario>()
+
+        val db =
+            dbHelper.readableDatabase
+
+        val cursor: Cursor =
+            db.rawQuery(
+                """
+            SELECT *
+            FROM csma_usuarios
+            ORDER BY id DESC
+            """.trimIndent(),
+                null
+            )
+
+        if (cursor.moveToFirst()) {
+
+            do {
+
+                val usuario = Usuario(
+                    id = cursor.getInt(
+                        cursor.getColumnIndexOrThrow("id")
+                    ),
+
+                    dni = cursor.getString(
+                        cursor.getColumnIndexOrThrow("dni")
+                    ),
+
+                    nombre = cursor.getString(
+                        cursor.getColumnIndexOrThrow("nombre")
+                    ),
+
+                    apellido = cursor.getString(
+                        cursor.getColumnIndexOrThrow("apellido")
+                    ),
+
+                    correo = cursor.getString(
+                        cursor.getColumnIndexOrThrow("correo")
+                    ),
+
+                    password = cursor.getString(
+                        cursor.getColumnIndexOrThrow("password")
+                    ),
+
+                    telefono = cursor.getString(
+                        cursor.getColumnIndexOrThrow("telefono")
+                    ),
+
+                    fechaNacimiento = cursor.getString(
+                        cursor.getColumnIndexOrThrow("fecha_nacimiento")
+                    ),
+
+                    genero = cursor.getString(
+                        cursor.getColumnIndexOrThrow("genero")
+                    ),
+
+                    rol = cursor.getString(
+                        cursor.getColumnIndexOrThrow("rol")
+                    )
+                )
+
+                listaUsuarios.add(usuario)
+
+            } while (cursor.moveToNext())
+        }
+
+        cursor.close()
+
+        return listaUsuarios
+    }
 }

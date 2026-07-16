@@ -1,26 +1,54 @@
 package pe.edu.idat.clinicasanmiguel
-import pe.edu.idat.clinicasanmiguel.adapter.UsuariosAdminAdapter
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import pe.edu.idat.clinicasanmiguel.adapter.UsuarioMock
+import pe.edu.idat.clinicasanmiguel.adapter.UsuariosAdminAdapter
+import pe.edu.idat.clinicasanmiguel.repository.UsuarioRepository
 
 class ListaUsuariosActivity : AppCompatActivity() {
+
+    private lateinit var rvUsuarios: RecyclerView
+    private lateinit var usuarioRepository: UsuarioRepository
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_lista_usuarios)
 
-        val rv = findViewById<RecyclerView>(R.id.rvUsuariosAdmin)
-        rv.layoutManager = LinearLayoutManager(this)
+        rvUsuarios = findViewById(R.id.rvUsuariosAdmin)
 
-        val datosSimulados = listOf(
-            UsuarioMock("Franklin Elias", "Canchanya Sullca", "elias@idat.edu.pe", "PACIENTE"),
-            UsuarioMock("Nilda", "Rojas Campos", "nilda@idat.edu.pe", "PACIENTE"),
-            UsuarioMock("Abigail", "Valdez Ramos", "abigail@idat.edu.pe", "ADMIN")
-        )
+        rvUsuarios.layoutManager =
+            LinearLayoutManager(this)
 
-        rv.adapter = UsuariosAdminAdapter(datosSimulados)
+        usuarioRepository =
+            UsuarioRepository(this)
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        cargarUsuariosDesdeSQLite()
+    }
+
+    private fun cargarUsuariosDesdeSQLite() {
+        val usuariosReales =
+            usuarioRepository.obtenerTodosLosUsuarios()
+        val usuariosParaMostrar =
+            usuariosReales.map { usuario ->
+
+                UsuarioMock(
+                    usuario.nombre,
+                    usuario.apellido,
+                    usuario.correo,
+                    usuario.rol
+                )
+            }
+
+        rvUsuarios.adapter =
+            UsuariosAdminAdapter(
+                usuariosParaMostrar
+            )
     }
 }

@@ -56,24 +56,75 @@ class LoginActivity : AppCompatActivity() {
                 val usuarioLogueado = usuarioRepository.login(correo, contrasena)
 
                 if (usuarioLogueado != null) {
-                    val preferencias = getSharedPreferences("sesion_clinica", Context.MODE_PRIVATE)
+
+                    val preferencias =
+                        getSharedPreferences(
+                            "sesion_clinica",
+                            Context.MODE_PRIVATE
+                        )
+
                     preferencias.edit().apply {
-                        putInt("ID_USUARIO", usuarioLogueado.id)
-                        putString("ROL_USUARIO", usuarioLogueado.rol)
-                        putString("NOMBRE_USUARIO", "${usuarioLogueado.nombre} ${usuarioLogueado.apellido}")
+
+                        putInt(
+                            "ID_USUARIO",
+                            usuarioLogueado.id
+                        )
+
+                        putString(
+                            "ROL_USUARIO",
+                            usuarioLogueado.rol
+                        )
+
+                        putString(
+                            "NOMBRE_USUARIO",
+                            "${usuarioLogueado.nombre} ${usuarioLogueado.apellido}"
+                        )
+
                         apply()
                     }
 
-                    if (usuarioLogueado.rol == "ADMIN") {
-                        Toast.makeText(this, "Bienvenido ADMIN: ${usuarioLogueado.nombre}", Toast.LENGTH_SHORT).show()
-                        startActivity(Intent(this, AdminActivity::class.java))
-                    } else {
-                        Toast.makeText(this, "Bienvenido PACIENTE: ${usuarioLogueado.nombre}", Toast.LENGTH_SHORT).show()
-                        startActivity(Intent(this, InicioActivity::class.java))
-                    }
+                    val esAdministrador =
+                        usuarioLogueado.rol.equals(
+                            "ADMIN",
+                            ignoreCase = true
+                        )
+
+                    val mensajeBienvenida =
+                        if (esAdministrador) {
+                            "Bienvenido ADMIN: ${usuarioLogueado.nombre}"
+                        } else {
+                            "Bienvenido PACIENTE: ${usuarioLogueado.nombre}"
+                        }
+
+                    Toast.makeText(
+                        this,
+                        mensajeBienvenida,
+                        Toast.LENGTH_SHORT
+                    ).show()
+
+                    val intentInicio =
+                        Intent(
+                            this,
+                            InicioActivity::class.java
+                        ).apply {
+
+                            putExtra(
+                                "ROL_USUARIO",
+                                usuarioLogueado.rol
+                            )
+                        }
+
+                    startActivity(intentInicio)
+
                     finish()
+
                 } else {
-                    Toast.makeText(this, "Correo o contraseña incorrectos", Toast.LENGTH_SHORT).show()
+
+                    Toast.makeText(
+                        this,
+                        "Correo o contraseña incorrectos",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
         }

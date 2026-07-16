@@ -1,25 +1,59 @@
 package pe.edu.idat.clinicasanmiguel
-import pe.edu.idat.clinicasanmiguel.adapter.CitaGlobalMock
-import pe.edu.idat.clinicasanmiguel.adapter.CitasGlobalAdminAdapter
+
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import pe.edu.idat.clinicasanmiguel.adapter.CitaGlobalMock
+import pe.edu.idat.clinicasanmiguel.adapter.CitasGlobalAdminAdapter
+import pe.edu.idat.clinicasanmiguel.repository.CitaRepository
 
 class MaestroCitasAdminActivity : AppCompatActivity() {
+
+    private lateinit var rvCitasGlobales: RecyclerView
+    private lateinit var citaRepository: CitaRepository
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_maestro_citas_admin)
 
-        val rv = findViewById<RecyclerView>(R.id.rvCitasGlobalAdmin)
-        rv.layoutManager = LinearLayoutManager(this)
+        rvCitasGlobales =
+            findViewById(R.id.rvCitasGlobalAdmin)
 
-        val citasSimuladas = listOf(
-            CitaGlobalMock("Franklin Elias", "Dr. Bryant Yacila (Cardiología)", "2026-06-22 | 08:30 AM", "PENDIENTE"),
-            CitaGlobalMock("Nilda Rojas", "Dra. Abigail Valdez (Pediatría)", "2026-06-23 | 10:15 AM", "CONFIRMADA"),
-            CitaGlobalMock("Marcos Huamán", "Dr. Bryant Yacila (Cardiología)", "2026-06-24 | 04:00 PM", "CANCELADA")
-        )
+        rvCitasGlobales.layoutManager =
+            LinearLayoutManager(this)
 
-        rv.adapter = CitasGlobalAdminAdapter(citasSimuladas)
+        citaRepository =
+            CitaRepository(this)
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        cargarCitasDesdeSQLite()
+    }
+
+    private fun cargarCitasDesdeSQLite() {
+        val citasReales =
+            citaRepository.obtenerTodasLasCitas()
+
+        val citasParaMostrar =
+            citasReales.map { cita ->
+
+                CitaGlobalMock(
+                    cita.paciente,
+
+                    "${cita.medico} (${cita.especialidad})",
+
+                    cita.fechaHora,
+
+                    cita.estado
+                )
+            }
+
+        rvCitasGlobales.adapter =
+            CitasGlobalAdminAdapter(
+                citasParaMostrar
+            )
     }
 }

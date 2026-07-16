@@ -1,52 +1,116 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
+
     <group android:checkableBehavior="single">
+
         <item
             android:id="@+id/itInicio"
-            android:title="Inicio"
-            android:icon="@drawable/ic_home" />
-        <item
-            android:id="@+id/itNuevaCita"
-            android:title="Reservar Cita Médica"
-            android:icon="@android:drawable/ic_menu_add" />
+            android:icon="@drawable/ic_home"
+            android:title="Inicio" />
+
     </group>
 
-    <item android:title="Mi Ficha y Agenda">
+    <item
+        android:id="@+id/itModuloPaciente"
+        android:title="Mi Ficha y Agenda">
+
         <menu>
+
             <group android:checkableBehavior="single">
+
                 <item
-                    android:id="@+id/itPerfil"
-                    android:title="Datos Personales"
-                    android:icon="@drawable/ic_person" />
+                    android:id="@+id/itNuevaCita"
+                    android:icon="@android:drawable/ic_menu_add"
+                    android:title="Reservar Cita Médica" />
+
                 <item
                     android:id="@+id/itMisCitas"
-                    android:title="Mis Citas Activas"
-                    android:icon="@android:drawable/ic_menu_agenda" />
+                    android:icon="@android:drawable/ic_menu_agenda"
+                    android:title="Mis Citas Activas" />
+
                 <item
                     android:id="@+id/itHistorial"
-                    android:title="Historial de Citas"
-                    android:icon="@android:drawable/ic_menu_recent_history" />
-                <item
-                    android:id="@+id/itSeguridad"
-                    android:title="Cambiar Contraseña"
-                    android:icon="@android:drawable/ic_lock_lock" />
-            </group>
-        </menu>
-    </item>
+                    android:icon="@android:drawable/ic_menu_recent_history"
+                    android:title="Historial de Citas" />
 
-    <item android:title="Módulo de Utilidades">
-        <menu>
-            <group android:checkableBehavior="single">
                 <item
                     android:id="@+id/itNotificaciones"
-                    android:title="Notificaciones y Alertas"
-                    android:icon="@android:drawable/ic_popup_reminder" />
+                    android:icon="@android:drawable/ic_popup_reminder"
+                    android:title="Notificaciones y Alertas" />
+
+            </group>
+
+        </menu>
+
+    </item>
+
+    <item
+        android:id="@+id/itModuloAdministrador"
+        android:title="Administración de la Clínica">
+
+        <menu>
+
+            <group android:checkableBehavior="single">
+
+                <item
+                    android:id="@+id/itEspecialidades"
+                    android:icon="@android:drawable/ic_menu_manage"
+                    android:title="Gestionar Especialidades" />
+
+                <item
+                    android:id="@+id/itDoctores"
+                    android:icon="@drawable/ic_person"
+                    android:title="Gestionar Doctores" />
+
+                <item
+                    android:id="@+id/itHorarios"
+                    android:icon="@android:drawable/ic_menu_agenda"
+                    android:title="Gestionar Horarios" />
+
+                <item
+                    android:id="@+id/itUsuarios"
+                    android:icon="@drawable/ic_person"
+                    android:title="Lista Global de Usuarios" />
+
+                <item
+                    android:id="@+id/itCitasGlobales"
+                    android:icon="@android:drawable/ic_menu_recent_history"
+                    android:title="Citas Médicas Globales" />
+
+            </group>
+
+        </menu>
+
+    </item>
+
+    <item
+        android:id="@+id/itModuloCuenta"
+        android:title="Mi Cuenta">
+
+        <menu>
+
+            <group android:checkableBehavior="single">
+
+                <item
+                    android:id="@+id/itPerfil"
+                    android:icon="@drawable/ic_person"
+                    android:title="Datos Personales" />
+
+                <item
+                    android:id="@+id/itSeguridad"
+                    android:icon="@android:drawable/ic_lock_lock"
+                    android:title="Cambiar Contraseña" />
+
             </group>
 
             <item
                 android:id="@+id/itCerrarSesion"
-                android:title="Cerrar Sesión"
-                android:icon="@android:drawable/ic_lock_power_off" />
+                android:icon="@android:drawable/ic_lock_power_off"
+                android:title="Cerrar Sesión" />
+
         </menu>
+
     </item>
+
 </menu>

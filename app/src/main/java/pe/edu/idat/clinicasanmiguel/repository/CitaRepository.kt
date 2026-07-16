@@ -5,6 +5,7 @@ import android.content.Context
 import android.database.Cursor
 import pe.edu.idat.clinicasanmiguel.data.AppDatabaseHelper
 import pe.edu.idat.clinicasanmiguel.entity.Especialidad
+import pe.edu.idat.clinicasanmiguel.entity.CitaGlobalCard
 
 class CitaRepository(context: Context) {
 
@@ -265,5 +266,79 @@ class CitaRepository(context: Context) {
         }
         cursor.close()
         return cita
+    }
+
+    fun obtenerTodasLasCitas(): List<CitaGlobalCard> {
+
+        val listaCitas =
+            mutableListOf<CitaGlobalCard>()
+
+        val db =
+            dbHelper.readableDatabase
+
+        val query = """
+        SELECT
+            c.id AS id_cita,
+            u.nombre || ' ' || u.apellido AS paciente,
+            e.nombre AS especialidad,
+            m.nombre AS medico,
+            c.fecha_hora,
+            c.estado
+
+        FROM csma_citas c
+
+        INNER JOIN csma_usuarios u
+            ON c.id_paciente = u.id
+
+        INNER JOIN csma_medicos m
+            ON c.id_medico = m.id
+
+        INNER JOIN csma_especialidades e
+            ON m.id_especialidad = e.id
+
+        ORDER BY c.id DESC
+    """.trimIndent()
+
+        val cursor: Cursor =
+            db.rawQuery(query, null)
+
+        if (cursor.moveToFirst()) {
+
+            do {
+
+                val cita = CitaGlobalCard(
+                    idCita = cursor.getInt(
+                        cursor.getColumnIndexOrThrow("id_cita")
+                    ),
+
+                    paciente = cursor.getString(
+                        cursor.getColumnIndexOrThrow("paciente")
+                    ),
+
+                    especialidad = cursor.getString(
+                        cursor.getColumnIndexOrThrow("especialidad")
+                    ),
+
+                    medico = cursor.getString(
+                        cursor.getColumnIndexOrThrow("medico")
+                    ),
+
+                    fechaHora = cursor.getString(
+                        cursor.getColumnIndexOrThrow("fecha_hora")
+                    ),
+
+                    estado = cursor.getString(
+                        cursor.getColumnIndexOrThrow("estado")
+                    )
+                )
+
+                listaCitas.add(cita)
+
+            } while (cursor.moveToNext())
+        }
+
+        cursor.close()
+
+        return listaCitas
     }
 }
