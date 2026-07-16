@@ -8,7 +8,12 @@ class AppDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_N
 
     companion object {
         private const val DATABASE_NAME = "clinica_san_miguel.db"
-        private const val DATABASE_VERSION = 2
+        private const val DATABASE_VERSION = 3
+    }
+
+    override fun onConfigure(db: SQLiteDatabase) {
+        super.onConfigure(db)
+        db.setForeignKeyConstraintsEnabled(true)
     }
 
     override fun onCreate(db: SQLiteDatabase) {
@@ -43,6 +48,21 @@ class AppDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_N
             );
         """.trimIndent())
 
+
+        db.execSQL("""
+        CREATE TABLE csma_horarios_disponibles (
+            id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+            id_medico INTEGER NOT NULL,
+            fecha_hora_texto TEXT NOT NULL,
+            estado TEXT NOT NULL DEFAULT 'DISPONIBLE',
+    
+            FOREIGN KEY(id_medico)
+                REFERENCES csma_medicos(id),
+    
+            UNIQUE(id_medico, fecha_hora_texto)
+        );
+        """.trimIndent())
+
         db.execSQL("""
             CREATE TABLE csma_citas (
                 id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
@@ -59,11 +79,17 @@ class AppDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_N
         insertarDatosIniciales(db)
     }
 
-    override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
+    override fun onUpgrade(
+        db: SQLiteDatabase,
+        oldVersion: Int,
+        newVersion: Int
+    ) {
         db.execSQL("DROP TABLE IF EXISTS csma_citas")
+        db.execSQL("DROP TABLE IF EXISTS csma_horarios_disponibles")
         db.execSQL("DROP TABLE IF EXISTS csma_medicos")
         db.execSQL("DROP TABLE IF EXISTS csma_especialidades")
         db.execSQL("DROP TABLE IF EXISTS csma_usuarios")
+
         onCreate(db)
     }
 

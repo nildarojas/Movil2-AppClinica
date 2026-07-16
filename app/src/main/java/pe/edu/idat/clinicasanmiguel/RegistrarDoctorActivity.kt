@@ -9,16 +9,19 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
+import pe.edu.idat.clinicasanmiguel.entity.Especialidad
+import pe.edu.idat.clinicasanmiguel.repository.AdminRepository
 
 class RegistrarDoctorActivity : AppCompatActivity() {
-
-    private var listaEspecialidadesLocal: List<String> = listOf()
 
     private lateinit var spnEspecialidades: Spinner
     private lateinit var btnGuardar: MaterialButton
     private lateinit var etNombre: TextInputEditText
     private lateinit var etApellido: TextInputEditText
-    private lateinit var pb: ProgressBar
+    private lateinit var pbCargando: ProgressBar
+
+    private lateinit var adminRepository: AdminRepository
+    private var listaEspecialidades: List<Especialidad> = emptyList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,58 +31,163 @@ class RegistrarDoctorActivity : AppCompatActivity() {
         btnGuardar = findViewById(R.id.btnGuardarDoc)
         etNombre = findViewById(R.id.etNombreDoc)
         etApellido = findViewById(R.id.etApellidoDoc)
-        pb = findViewById(R.id.pbCargandoDoc)
+        pbCargando = findViewById(R.id.pbCargandoDoc)
 
-        cargarEspecialidadesLocales()
+        adminRepository = AdminRepository(this)
+
+        cargarEspecialidadesDesdeSQLite()
 
         btnGuardar.setOnClickListener {
-            ejecutarRegistroDoctorLocal()
+            registrarDoctor()
         }
     }
 
-    private fun cargarEspecialidadesLocales() {
-        listaEspecialidadesLocal = listOf(
-            "Cardiología",
-            "Pediatría",
-            "Dermatología",
-            "Neurología",
-            "Medicina General"
-        )
+    private fun cargarEspecialidadesDesdeSQLite() {
+
+        listaEspecialidades =
+            adminRepository.obtenerEspecialidades()
+
+        if (listaEspecialidades.isEmpty()) {
+
+            btnGuardar.isEnabled = false
+
+            Toast.makeText(
+                this,
+                "No existen especialidades registradas",
+                Toast.LENGTH_LONG
+            ).show()
+
+            return
+        }
+
+        val nombresEspecialidades =
+            listaEspecialidades.map { especialidad ->
+                especialidad.nombre
+            }
 
         val adapter = ArrayAdapter(
             this,
-            android.R.layout.simple_spinner_dropdown_item,
-            listaEspecialidadesLocal
+            android.R.layout.simple_spinner_item,
+            nombresEspecialidades
         )
+
+        adapter.setDropDownViewResource(
+            android.R.layout.simple_spinner_dropdown_item
+        )
+
         spnEspecialidades.adapter = adapter
+        btnGuardar.isEnabled = true
     }
 
-    private fun ejecutarRegistroDoctorLocal() {
-        val nombre = etNombre.text.toString().trim()
-        val apellido = etApellido.text.toString().trim()
+    private fun registrarDoctor() {
 
-        if (nombre.isEmpty() || apellido.isEmpty()) {
-            Toast.makeText(this, "Complete todos los campos", Toast.LENGTH_SHORT).show()
+        val nombre =
+            etNombre.text
+                ?.toString()
+                ?.trim()
+                .orEmpty()
+
+        val apellido =
+            etApellido.text
+                ?.toString()
+                ?.trim()
+                .orEmpty()
+
+        if (nombre.isEmpty()) {
+
+            etNombre.error = "Ingrese los nombres del médico"
+            etNombre.requestFocus()
+
             return
         }
 
-        val pos = spnEspecialidades.selectedItemPosition
-        if (pos < 0 || listaEspecialidadesLocal.isEmpty()) {
-            Toast.makeText(this, "Seleccione una especialidad", Toast.LENGTH_SHORT).show()
+        if (apellido.isEmpty()) {
+
+            etApellido.error = "Ingrese los apellidos del médico"
+            etApellido.requestFocus()
+
             return
         }
 
-        pb.visibility = View.VISIBLE
-        btnGuardar.isEnabled = false
-        btnGuardar.text = "Registrando..."
+        if (listaEspecialidades.isEmpty()) {
 
-        pb.postDelayed({
-            pb.visibility = View.GONE
-            btnGuardar.isEnabled = true
-            btnGuardar.text = "REGISTRAR DOCTOR"
+            Toast.makeText(
+                this,
+                "Primero debe registrar una especialidad",
+                Toast.LENGTH_SHORT
+            ).show()
 
-            Toast.makeText(this, "Médico registrado correctamente de forma local", Toast.LENGTH_LONG).show()
+            return
+        }
+
+        val posicionSeleccionada =
+            spnEspecialidades.selectedItemPosition
+
+        if (
+            posicionSeleccionada < 0 ||
+            posicionSeleccionada >= listaEspecialidades.size
+        ) {
+
+            Toast.makeText(
+                this,
+                "Seleccione una especialidad",
+                Toast.LENGTH_SHORT
+            ).show()
+
+            return
+        }
+
+        val especialidadSeleccionada =
+            listaEspecialidades[posicionSeleccionada]
+
+        val nombreCompleto =
+            "$nombre $apellido"
+                .trim()
+                .replace(Regex("\\s+"), " ")
+
+        mostrarCargando(true)
+
+        val resultado =
+            adminRepository.registrarMedico(
+                nombreCompleto = nombreCompleto,
+                idEspecialidad = especialidadSeleccionada.id
+            )
+
+        mostrarCargando(false)
+
+        if (resultado > 0) {
+
+            Toast.makeText(
+                this,
+                "Médico registrado en ${especialidadSeleccionada.nombre}",
+                Toast.LENGTH_LONG
+            ).show()
+            setResult(RESULT_OK)
+
             finish()
-        }, 1500)
+
+        } else {
+
+            Toast.makeText(
+                this,
+                "No se pudo registrar el médico",
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    }
+
+    private fun mostrarCargando(cargando: Boolean) {
+
+        pbCargando.visibility =
+            if (cargando) View.VISIBLE else View.GONE
+
+        btnGuardar.isEnabled = !cargando
+
+        btnGuardar.text =
+            if (cargando) {
+                "REGISTRANDO..."
+            } else {
+                "REGISTRAR DOCTOR"
+            }
     }
 }

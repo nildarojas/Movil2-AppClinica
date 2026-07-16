@@ -8,24 +8,63 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import pe.edu.idat.clinicasanmiguel.adapter.EspecialidadAdminAdapter
 import pe.edu.idat.clinicasanmiguel.adapter.EspecialidadMock
+import pe.edu.idat.clinicasanmiguel.repository.AdminRepository
 
 class ListaEspecialidadesActivity : AppCompatActivity() {
+
+    private lateinit var rvEspecialidades: RecyclerView
+    private lateinit var adminRepository: AdminRepository
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_lista_especialidades)
 
-        val rvEspecialidades = findViewById<RecyclerView>(R.id.rvEspecialidades)
-        rvEspecialidades.layoutManager = LinearLayoutManager(this)
+        rvEspecialidades =
+            findViewById(R.id.rvEspecialidades)
 
-        val dataSimulada = listOf(
-            EspecialidadMock("Cardiología", "Piso 2 - Bloque A", "ACTIVO"),
-            EspecialidadMock("Pediatría", "Piso 1 - Área Infantil", "ACTIVO")
-        )
+        rvEspecialidades.layoutManager =
+            LinearLayoutManager(this)
 
-        rvEspecialidades.adapter = EspecialidadAdminAdapter(dataSimulada, true)
+        adminRepository =
+            AdminRepository(this)
 
-        findViewById<FloatingActionButton>(R.id.fabNuevaEspecialidad).setOnClickListener {
-            startActivity(Intent(this, RegistrarEspecialidadActivity::class.java))
+        findViewById<FloatingActionButton>(
+            R.id.fabNuevaEspecialidad
+        ).setOnClickListener {
+
+            val intent = Intent(
+                this,
+                RegistrarEspecialidadActivity::class.java
+            )
+
+            startActivity(intent)
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        cargarEspecialidades()
+    }
+
+    private fun cargarEspecialidades() {
+
+        val especialidadesReales =
+            adminRepository.obtenerEspecialidades()
+
+        val especialidadesParaMostrar =
+            especialidadesReales.map { especialidad ->
+
+                EspecialidadMock(
+                    especialidad.nombre,
+                    "Área no asignada",
+                    "ACTIVO"
+                )
+            }
+
+        rvEspecialidades.adapter =
+            EspecialidadAdminAdapter(
+                especialidadesParaMostrar,
+                true
+            )
     }
 }

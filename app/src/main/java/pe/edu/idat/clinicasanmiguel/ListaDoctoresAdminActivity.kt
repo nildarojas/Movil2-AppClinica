@@ -7,38 +7,99 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import pe.edu.idat.clinicasanmiguel.adapter.DoctorAdminAdapter
+import pe.edu.idat.clinicasanmiguel.repository.AdminRepository
 
 class ListaDoctoresAdminActivity : AppCompatActivity() {
 
     private lateinit var rvDoctores: RecyclerView
-    private lateinit var adapter: DoctorAdminAdapter
     private lateinit var fabAddDoctor: FloatingActionButton
-    private val listaDoctoresLocales = mutableListOf<DoctorMock>()
+    private lateinit var adminRepository: AdminRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_lista_doctores_admin)
 
-        rvDoctores = findViewById(R.id.rvDoctoresAdmin)
-        fabAddDoctor = findViewById(R.id.fabAddDoctor)
+        rvDoctores =
+            findViewById(R.id.rvDoctoresAdmin)
 
-        rvDoctores.layoutManager = LinearLayoutManager(this)
+        fabAddDoctor =
+            findViewById(R.id.fabAddDoctor)
 
-        if (listaDoctoresLocales.isEmpty()) {
-            inicializarDoctoresLocales()
-        }
+        rvDoctores.layoutManager =
+            LinearLayoutManager(this)
 
-        adapter = DoctorAdminAdapter(listaDoctoresLocales)
-        rvDoctores.adapter = adapter
+        adminRepository =
+            AdminRepository(this)
 
         fabAddDoctor.setOnClickListener {
-            startActivity(Intent(this, RegistrarDoctorActivity::class.java))
+
+            val intent = Intent(
+                this,
+                RegistrarDoctorActivity::class.java
+            )
+
+            startActivity(intent)
         }
     }
 
-    private fun inicializarDoctoresLocales() {
-        listaDoctoresLocales.add(DoctorMock("Bryant", "Yacila", "Cardiología", true))
-        listaDoctoresLocales.add(DoctorMock("Abigail", "Valdez", "Pediatría", true))
-        listaDoctoresLocales.add(DoctorMock("Nilda", "Rojas", "Medicina General", false))
+    override fun onResume() {
+        super.onResume()
+        cargarDoctoresDesdeSQLite()
+    }
+
+    private fun cargarDoctoresDesdeSQLite() {
+
+        val medicosReales =
+            adminRepository.obtenerMedicos()
+
+        val doctoresParaMostrar =
+            medicosReales.map { medico ->
+
+                val nombreSeparado =
+                    separarNombreCompleto(medico.nombre)
+
+                DoctorMock(
+                    nombre = nombreSeparado.first,
+                    apellido = nombreSeparado.second,
+                    especialidad = medico.especialidad,
+                    estado = true
+                )
+            }
+
+        rvDoctores.adapter =
+            DoctorAdminAdapter(doctoresParaMostrar)
+    }
+
+    private fun separarNombreCompleto(
+        nombreCompleto: String
+    ): Pair<String, String> {
+
+        val nombreLimpio =
+            nombreCompleto
+                .trim()
+                .replace(Regex("\\s+"), " ")
+
+        val partes =
+            nombreLimpio.split(" ")
+
+        if (partes.size <= 1) {
+            return Pair(
+                nombreLimpio,
+                ""
+            )
+        }
+
+        val apellido =
+            partes.last()
+
+        val nombre =
+            partes
+                .dropLast(1)
+                .joinToString(" ")
+
+        return Pair(
+            nombre,
+            apellido
+        )
     }
 }

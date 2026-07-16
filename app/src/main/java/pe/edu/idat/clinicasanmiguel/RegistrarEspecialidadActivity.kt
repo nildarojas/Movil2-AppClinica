@@ -5,12 +5,15 @@ import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.textfield.TextInputEditText
+import pe.edu.idat.clinicasanmiguel.repository.AdminRepository
 
 class RegistrarEspecialidadActivity : AppCompatActivity() {
 
     private lateinit var etNombreEspecialidad: TextInputEditText
     private lateinit var btnGuardar: Button
     private lateinit var btnCancelar: Button
+
+    private lateinit var adminRepository: AdminRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,10 +28,15 @@ class RegistrarEspecialidadActivity : AppCompatActivity() {
         btnCancelar =
             findViewById(R.id.btnCancelarEspecialidad)
 
+        adminRepository = AdminRepository(this)
+
         btnGuardar.setOnClickListener {
 
             val nombreEspecialidad =
-                etNombreEspecialidad.text.toString().trim()
+                etNombreEspecialidad
+                    .text
+                    .toString()
+                    .trim()
 
             if (nombreEspecialidad.isEmpty()) {
 
@@ -40,13 +48,42 @@ class RegistrarEspecialidadActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            Toast.makeText(
-                this,
-                "Especialidad registrada correctamente",
-                Toast.LENGTH_SHORT
-            ).show()
+            val resultado =
+                adminRepository.registrarEspecialidad(
+                    nombreEspecialidad
+                )
 
-            etNombreEspecialidad.setText("")
+            when {
+
+                resultado > 0 -> {
+
+                    Toast.makeText(
+                        this,
+                        "Especialidad registrada correctamente",
+                        Toast.LENGTH_SHORT
+                    ).show()
+
+                    setResult(RESULT_OK)
+                    finish()
+                }
+
+                resultado == AdminRepository.RESULTADO_DUPLICADO -> {
+
+                    etNombreEspecialidad.error =
+                        "Esta especialidad ya está registrada"
+
+                    etNombreEspecialidad.requestFocus()
+                }
+
+                else -> {
+
+                    Toast.makeText(
+                        this,
+                        "No se pudo registrar la especialidad",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
         }
 
         btnCancelar.setOnClickListener {
