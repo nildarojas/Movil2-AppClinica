@@ -276,38 +276,23 @@ class InicioActivity : AppCompatActivity() {
             }
 
             R.id.itEspecialidades -> {
-
-                abrirActividad(
-                    ListaEspecialidadesActivity::class.java
-                )
+                fragmentSeleccionado = ListaEspecialidadesFragment()
             }
 
             R.id.itDoctores -> {
-
-                abrirActividad(
-                    ListaDoctoresAdminActivity::class.java
-                )
+                fragmentSeleccionado = ListaDoctoresAdminFragment()
             }
 
             R.id.itHorarios -> {
-
-                abrirActividad(
-                    ListaHorariosAdminActivity::class.java
-                )
+                fragmentSeleccionado = ListaHorariosAdminFragment()
             }
 
             R.id.itUsuarios -> {
-
-                abrirActividad(
-                    ListaUsuariosActivity::class.java
-                )
+                fragmentSeleccionado = ListaUsuariosFragment()
             }
 
             R.id.itCitasGlobales -> {
-
-                abrirActividad(
-                    MaestroCitasAdminActivity::class.java
-                )
+                fragmentSeleccionado = CitasGlobalesFragment()
             }
         }
         if (fragmentSeleccionado != null) {

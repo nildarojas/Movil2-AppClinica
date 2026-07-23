@@ -33,13 +33,6 @@
             android:name=".RegistroActivity"
             android:exported="false" />
         <activity
-            android:name=".AdminActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ListaEspecialidadesActivity"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
-        <activity
             android:name=".RegistrarEspecialidadActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
@@ -47,19 +40,7 @@
             android:name=".RegistrarDoctorActivity"
             android:exported="false" />
         <activity
-            android:name=".ListaDoctoresAdminActivity"
-            android:exported="false" />
-        <activity
             android:name=".ReprogramarCitaActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ListaUsuariosActivity"
-            android:exported="false" />
-        <activity
-            android:name=".MaestroCitasAdminActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ListaHorariosAdminActivity"
             android:exported="false" />
         <activity
             android:name=".RegistrarHorarioActivity"

@@ -6,9 +6,9 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import pe.edu.idat.clinicasanmiguel.R
-import pe.edu.idat.clinicasanmiguel.HorarioMock
+import pe.edu.idat.clinicasanmiguel.entity.HorarioAdmin
 
-class HorarioAdminAdapter(private val listaHorarios: List<HorarioMock>) :
+class HorarioAdminAdapter(private val listaHorarios: List<HorarioAdmin>) :
     RecyclerView.Adapter<HorarioAdminAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -25,9 +25,10 @@ class HorarioAdminAdapter(private val listaHorarios: List<HorarioMock>) :
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val horario = listaHorarios[position]
-        holder.tvMedico.text = horario.medico
-        holder.tvFecha.text = "Fecha: ${horario.fecha}"
-        holder.tvRango.text = horario.rango
+
+        holder.tvMedico.text = "${horario.medico} (${horario.especialidad})"
+        holder.tvFecha.text = "Fecha / Hora: ${horario.fechaHoraTexto}"
+        holder.tvRango.text = "DISPONIBLE"
         holder.tvRango.setTextColor(0xFF458890.toInt())
         holder.tvRango.setBackgroundColor(0xFFE0F2F1.toInt())
     }

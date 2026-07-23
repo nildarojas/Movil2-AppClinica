@@ -1,13 +1,14 @@
 package pe.edu.idat.clinicasanmiguel.adapter
-import pe.edu.idat.clinicasanmiguel.adapter.UsuarioMock
-import pe.edu.idat.clinicasanmiguel.R
+
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import pe.edu.idat.clinicasanmiguel.R
+import pe.edu.idat.clinicasanmiguel.entity.Usuario
 
-class UsuariosAdminAdapter(private val lista: List<UsuarioMock>) :
+class UsuariosAdminAdapter(private val lista: List<Usuario>) :
     RecyclerView.Adapter<UsuariosAdminAdapter.UsuarioViewHolder>() {
 
     class UsuarioViewHolder(view: View) : RecyclerView.ViewHolder(view) {

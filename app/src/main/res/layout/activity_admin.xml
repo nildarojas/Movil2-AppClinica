@@ -1,96 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#FFFFFF"
+    android:gravity="center"
+    android:orientation="vertical"
     android:padding="24dp"
-    tools:context=".AdminActivity">
+    tools:context=".AdminFragment">
 
-    <LinearLayout
-        android:layout_width="match_parent"
+    <TextView
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:text="hola bro 👋"
+        android:textColor="#333333"
+        android:textSize="24sp"
+        android:textStyle="bold" />
 
-        <TextView
-            android:id="@+id/tvTitulo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Panel Administrador"
-            android:textSize="26sp"
-            android:textStyle="bold"
-            android:textColor="#333333"
-            android:layout_gravity="center"
-            android:layout_marginBottom="30dp"/>
-
-        <Button
-            android:id="@+id/btnEspecialidades"
-            android:layout_width="match_parent"
-            android:layout_height="55dp"
-            android:text="Gestionar Especialidades"
-            android:backgroundTint="#458890" android:layout_marginBottom="16dp"/>
-
-        <Button
-            android:id="@+id/btnDoctores"
-            android:layout_width="match_parent"
-            android:layout_height="55dp"
-            android:text="Gestionar Doctores"
-            android:backgroundTint="#458890" android:layout_marginBottom="16dp"/>
-
-        <Button
-            android:id="@+id/btnHorarios"
-            android:layout_width="match_parent"
-            android:layout_height="55dp"
-            android:text="Gestionar Horarios"
-            android:backgroundTint="#458890"
-            android:layout_marginBottom="16dp"/>
-
-        <Button
-            android:id="@+id/btnUsuarios"
-            android:layout_width="match_parent"
-            android:layout_height="55dp"
-            android:text="Lista de Usuarios"
-            android:backgroundTint="#458890"
-            android:layout_marginBottom="16dp"/>
-
-        <Button
-            android:id="@+id/btnCitas"
-            android:layout_width="match_parent"
-            android:layout_height="55dp"
-            android:text="Citas Médicas"
-            android:backgroundTint="#458890"
-            android:layout_marginBottom="24dp"/>
-
-        <TextView
-            android:id="@+id/tvOpcionesCuenta"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Opciones de Cuenta"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:textColor="#333333"
-            android:layout_marginBottom="12dp"/>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/tilPerfilAdmin"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Seleccionar acción"
-            app:boxStrokeColor="#458890"
-            app:hintTextColor="#458890">
-            <AutoCompleteTextView
-            android:id="@+id/acPerfilAdmin"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="none"
-            android:text="Mi Perfil"
-            android:padding="16dp"
-            android:textColor="#333333" />
-
-        </com.google.android.material.textfield.TextInputLayout>
-
-    </LinearLayout>
-
-</ScrollView>
+</LinearLayout>

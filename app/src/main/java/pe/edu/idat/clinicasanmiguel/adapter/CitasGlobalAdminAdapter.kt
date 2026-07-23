@@ -6,7 +6,9 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import pe.edu.idat.clinicasanmiguel.R
-class CitasGlobalAdminAdapter(private val lista: List<CitaGlobalMock>) :
+import pe.edu.idat.clinicasanmiguel.entity.CitaGlobalCard
+
+class CitasGlobalAdminAdapter(private val lista: List<CitaGlobalCard>) :
     RecyclerView.Adapter<CitasGlobalAdminAdapter.CitaViewHolder>() {
 
     class CitaViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -17,15 +19,16 @@ class CitasGlobalAdminAdapter(private val lista: List<CitaGlobalMock>) :
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CitaViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_cita_admin, parent, false)
+        val view = LayoutInflater.from(parent.context)
+            .inflate(R.layout.item_cita_admin, parent, false)
         return CitaViewHolder(view)
     }
 
     override fun onBindViewHolder(holder: CitaViewHolder, position: Int) {
         val item = lista[position]
         holder.tvPaciente.text = "Paciente: ${item.paciente}"
-        holder.tvMedico.text = "Médico: ${item.medico}"
-        holder.tvHorario.text = "Horario: ${item.horario}"
+        holder.tvMedico.text = "Médico: ${item.medico} (${item.especialidad})"
+        holder.tvHorario.text = "Horario: ${item.fechaHora}"
         holder.tvEstado.text = item.estado
 
         if (item.estado == "CANCELADA") {
