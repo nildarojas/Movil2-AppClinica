@@ -5,7 +5,6 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
 import android.view.MenuItem
-import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
@@ -14,7 +13,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.navigation.NavigationView
 import java.util.Locale
 
@@ -22,8 +20,9 @@ class InicioActivity : AppCompatActivity() {
 
     private lateinit var drawerLayout: DrawerLayout
     private lateinit var nvMenu: NavigationView
-    private lateinit var ivMenu: ImageView
-    private lateinit var fabTriggerMenu: FloatingActionButton
+    private lateinit var btnMenuCentro: LinearLayout
+    private lateinit var btnInicioBottom: LinearLayout
+    private lateinit var btnSalirBottom: LinearLayout
 
     private var rolUsuario: String = "PACIENTE"
 
@@ -53,18 +52,21 @@ class InicioActivity : AppCompatActivity() {
         nvMenu =
             findViewById(R.id.nvMenu)
 
-        ivMenu =
-            findViewById(R.id.ivMenu)
+        btnMenuCentro = findViewById(R.id.btnMenuCentro)
+        btnInicioBottom = findViewById(R.id.btnInicioBottom)
+        btnSalirBottom = findViewById(R.id.btnSalirBottom)
 
-        fabTriggerMenu =
-            findViewById(R.id.fabTriggerMenu)
-
-        ivMenu.setOnClickListener {
+        btnMenuCentro.setOnClickListener {
             abrirMenuLateral()
         }
 
-        fabTriggerMenu.setOnClickListener {
-            abrirMenuLateral()
+        btnInicioBottom.setOnClickListener {
+            cargarPantallaInicial()
+            nvMenu.setCheckedItem(R.id.itInicio)
+        }
+
+        btnSalirBottom.setOnClickListener {
+            desplegarCierreSesion()
         }
 
         configurarMenuPorRol()
@@ -84,6 +86,7 @@ class InicioActivity : AppCompatActivity() {
 
         configurarBotonAtras()
     }
+
     private fun configurarMenuPorRol() {
 
         val menu =
@@ -184,12 +187,8 @@ class InicioActivity : AppCompatActivity() {
             }
         nvMenu.itemIconTintList =
             ColorStateList.valueOf(colorRol)
-
-        fabTriggerMenu.backgroundTintList =
-            ColorStateList.valueOf(colorRol)
-
-        ivMenu.setColorFilter(colorRol)
     }
+
     private fun cargarPantallaInicial() {
 
         val fragmentInicial: Fragment =
@@ -333,25 +332,13 @@ class InicioActivity : AppCompatActivity() {
         return true
     }
 
-    private fun abrirActividad(
-        activityDestino: Class<out AppCompatActivity>
-    ) {
-
-        val intent =
-            Intent(
-                this,
-                activityDestino
-            )
-
-        startActivity(intent)
-    }
-
     private fun abrirMenuLateral() {
 
         drawerLayout.openDrawer(
             GravityCompat.START
         )
     }
+
     private fun configurarBotonAtras() {
 
         onBackPressedDispatcher.addCallback(
@@ -414,6 +401,7 @@ class InicioActivity : AppCompatActivity() {
             }
         )
     }
+
     private fun androidx.fragment.app.FragmentManager
             .popBackStackComplete() {
 

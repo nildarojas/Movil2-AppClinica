@@ -8,45 +8,108 @@
     android:layout_height="match_parent"
     tools:context=".InicioActivity">
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
         android:background="@android:color/white">
 
-        <ImageView
-            android:id="@+id/ivMenu"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:padding="12dp"
-            android:src="@drawable/ic_menu" />
-
-        <RelativeLayout
+        <FrameLayout
+            android:id="@+id/flContenedor"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:layout_above="@id/bottomBar" />
 
-            <FrameLayout
-                android:id="@+id/flContenedor"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+        <LinearLayout
+            android:id="@+id/bottomBar"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:layout_alignParentBottom="true"
+            android:background="#121212"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:elevation="12dp">
 
-            <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/fabTriggerMenu"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:layout_marginEnd="0dp"
-                android:contentDescription="Abrir Menú Auxiliar"
-                android:src="@android:drawable/ic_menu_help"
-                app:backgroundTint="#458890"
-                app:tint="#FFFFFF"
-                app:fabSize="mini"
-                app:elevation="8dp"
-                app:maxImageSize="24dp" />
+            <LinearLayout
+                android:id="@+id/btnInicioBottom"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
+                android:orientation="vertical">
 
-        </RelativeLayout>
-    </LinearLayout>
+                <ImageView
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:src="@drawable/ic_home"
+                    app:tint="#A0A0A0" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="3dp"
+                    android:text="Inicio"
+                    android:textColor="#A0A0A0"
+                    android:textSize="11sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/btnMenuCentro"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_menu"
+                    app:tint="#458890" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="3dp"
+                    android:text="Menú"
+                    android:textColor="#458890"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+            <LinearLayout
+                android:id="@+id/btnSalirBottom"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:src="@drawable/ic_salir"
+                    app:tint="#FF5252" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="3dp"
+                    android:text="Salir"
+                    android:textColor="#FF5252"
+                    android:textSize="11sp" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </RelativeLayout>
 
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/nvMenu"
