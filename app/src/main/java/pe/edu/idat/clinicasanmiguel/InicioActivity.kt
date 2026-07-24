@@ -5,6 +5,7 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
 import android.view.MenuItem
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
@@ -58,14 +59,17 @@ class InicioActivity : AppCompatActivity() {
 
         btnMenuCentro.setOnClickListener {
             abrirMenuLateral()
+            actualizarEstadoBarraInferior("MENU")
         }
 
         btnInicioBottom.setOnClickListener {
             cargarPantallaInicial()
             nvMenu.setCheckedItem(R.id.itInicio)
+            actualizarEstadoBarraInferior("INICIO")
         }
 
         btnSalirBottom.setOnClickListener {
+            actualizarEstadoBarraInferior("SALIR")
             desplegarCierreSesion()
         }
 
@@ -77,6 +81,7 @@ class InicioActivity : AppCompatActivity() {
             cargarPantallaInicial()
 
             nvMenu.setCheckedItem(R.id.itInicio)
+            actualizarEstadoBarraInferior("INICIO")
         }
 
         nvMenu.setNavigationItemSelectedListener { menuItem ->
@@ -314,6 +319,9 @@ class InicioActivity : AppCompatActivity() {
             if (menuItem.itemId != R.id.itInicio) {
 
                 transaccion.addToBackStack(null)
+                actualizarEstadoBarraInferior("MENU")
+            } else {
+                actualizarEstadoBarraInferior("INICIO")
             }
 
             transaccion.commit()
@@ -376,6 +384,7 @@ class InicioActivity : AppCompatActivity() {
                         nvMenu.setCheckedItem(
                             R.id.itNuevaCita
                         )
+                        actualizarEstadoBarraInferior("MENU")
 
                         return
                     }
@@ -390,6 +399,7 @@ class InicioActivity : AppCompatActivity() {
                         nvMenu.setCheckedItem(
                             R.id.itInicio
                         )
+                        actualizarEstadoBarraInferior("INICIO")
 
                         return
                     }
@@ -408,6 +418,44 @@ class InicioActivity : AppCompatActivity() {
         while (backStackEntryCount > 0) {
 
             popBackStackImmediate()
+        }
+    }
+
+    private fun actualizarEstadoBarraInferior(opcionSeleccionada: String) {
+        val colorActivo = Color.parseColor("#458890")
+        val colorInactivo = Color.parseColor("#A0A0A0")
+
+        val imgInicio = btnInicioBottom.getChildAt(0) as ImageView
+        val tvInicio = btnInicioBottom.getChildAt(1) as TextView
+
+        val imgMenu = btnMenuCentro.getChildAt(0) as ImageView
+        val tvMenu = btnMenuCentro.getChildAt(1) as TextView
+
+        val imgSalir = btnSalirBottom.getChildAt(0) as ImageView
+        val tvSalir = btnSalirBottom.getChildAt(1) as TextView
+
+        imgInicio.setColorFilter(colorInactivo)
+        tvInicio.setTextColor(colorInactivo)
+
+        imgMenu.setColorFilter(colorInactivo)
+        tvMenu.setTextColor(colorInactivo)
+
+        imgSalir.setColorFilter(colorInactivo)
+        tvSalir.setTextColor(colorInactivo)
+
+        when (opcionSeleccionada) {
+            "INICIO" -> {
+                imgInicio.setColorFilter(colorActivo)
+                tvInicio.setTextColor(colorActivo)
+            }
+            "MENU" -> {
+                imgMenu.setColorFilter(colorActivo)
+                tvMenu.setTextColor(colorActivo)
+            }
+            "SALIR" -> {
+                imgSalir.setColorFilter(Color.parseColor("#FF5252"))
+                tvSalir.setTextColor(Color.parseColor("#FF5252"))
+            }
         }
     }
 

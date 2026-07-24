@@ -83,32 +83,37 @@
             android:textColorHint="#555555" />
     </com.google.android.material.textfield.TextInputLayout>
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnLogin"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="24dp"
-        android:paddingHorizontal="40dp"
-        android:text="Acceder"
-        app:backgroundTint="#458890"
-        app:cornerRadius="8dp" />
-
     <TextView
         android:id="@+id/tvOlvidaste"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_gravity="end"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="8dp"
+        android:padding="4dp"
         android:text="¿Olvidaste la contraseña?"
-        android:textAlignment="center"
         android:textColor="#1976D2"
         android:textStyle="bold" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnLogin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="16dp"
+        android:paddingVertical="14dp"
+        android:text="INICIAR SESIÓN"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:backgroundTint="#458890"
+        app:cornerRadius="8dp" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:gravity="center"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="12dp"
+        android:gravity="start"
         android:orientation="horizontal">
 
         <TextView
