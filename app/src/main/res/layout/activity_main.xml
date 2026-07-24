@@ -8,13 +8,13 @@
     android:background="#F7FDFF"
     tools:context=".MainActivity">
 
-    <ImageView
+    <com.airbnb.lottie.LottieAnimationView
         android:id="@+id/imgLogo"
-        android:layout_width="340dp"
-        android:layout_height="340dp"
-        android:src="@drawable/logo"
-        android:scaleType="fitCenter"
-        android:contentDescription="@string/app_name"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        app:lottie_rawRes="@raw/animacion_logo"
+        app:lottie_autoPlay="true"
+        app:lottie_loop="false"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
