@@ -195,48 +195,72 @@ class CitaRepository(context: Context) {
     }
 
 
-    fun obtenerHorariosConEstado(idPaciente: Int, idMedico: Int, horarioOriginal: String): List<String> {
-        val horariosBase = listOf(
-            "Lunes 08 de Junio - 08:30 AM",
-            "Miércoles 10 de Junio - 10:15 AM",
-            "Viernes 12 de Junio - 04:00 PM"
-        )
+    fun obtenerHorariosConEstado(
+        idPaciente: Int,
+        idMedico: Int,
+        horarioOriginal: String
+    ): List<String> {
+
+        val horariosBase = mutableListOf<String>()
         val listaResultado = mutableListOf<String>()
         val db = dbHelper.readableDatabase
 
+        val cursorHorarios = db.rawQuery(
+            """
+        SELECT fecha_hora_texto
+        FROM csma_horarios_disponibles
+        WHERE id_medico = ?
+          AND estado = 'DISPONIBLE'
+        ORDER BY id ASC
+        """.trimIndent(),
+            arrayOf(idMedico.toString())
+        )
+
+        cursorHorarios.use { cursor ->
+            while (cursor.moveToNext()) {
+                val horario = cursor.getString(
+                    cursor.getColumnIndexOrThrow("fecha_hora_texto")
+                )
+
+                horariosBase.add(horario)
+            }
+        }
+
         for (horario in horariosBase) {
+
             if (horario == horarioOriginal) {
                 continue
             }
 
-            var pacienteOcupado = false
-            val queryPac = "SELECT COUNT(*) FROM csma_citas WHERE id_paciente = ? AND fecha_hora = ? AND estado IN ('PENDIENTE', 'CONFIRMADA', 'EN_ATENCION')"
-            val cursorPac = db.rawQuery(queryPac, arrayOf(idPaciente.toString(), horario))
-            if (cursorPac.moveToFirst()) {
-                pacienteOcupado = cursorPac.getInt(0) > 0
-            }
-            cursorPac.close()
+            val pacienteOcupado =
+                verificarPacienteOcupado(
+                    idPaciente = idPaciente,
+                    fechaHora = horario
+                )
 
             if (pacienteOcupado) {
-                listaResultado.add("$horario (Ocupado por ti)")
+                listaResultado.add(
+                    "$horario (Ocupado por ti)"
+                )
                 continue
             }
 
-            var medicoOcupado = false
-            val queryMed = "SELECT COUNT(*) FROM csma_citas WHERE id_medico = ? AND fecha_hora = ? AND estado IN ('PENDIENTE', 'CONFIRMADA')"
-            val cursorMed = db.rawQuery(queryMed, arrayOf(idMedico.toString(), horario))
-            if (cursorMed.moveToFirst()) {
-                medicoOcupado = cursorMed.getInt(0) > 0
-            }
-            cursorMed.close()
+            val medicoOcupado =
+                verificarMedicoOcupado(
+                    idMedico = idMedico,
+                    fechaHora = horario
+                )
 
             if (medicoOcupado) {
-                listaResultado.add("$horario (Médico ocupado en este horario)")
+                listaResultado.add(
+                    "$horario (Médico ocupado en este horario)"
+                )
                 continue
             }
 
             listaResultado.add(horario)
         }
+
         return listaResultado
     }
 
