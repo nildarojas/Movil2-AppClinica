@@ -1,4 +1,4 @@
-package pe.edu.idat.clinicasanmiguel
+package pe.edu.idat.clinicasanmiguel.ui
 
 import android.app.Activity
 import android.content.Context
@@ -8,6 +8,7 @@ import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import pe.edu.idat.clinicasanmiguel.R
 import pe.edu.idat.clinicasanmiguel.adapter.CitasAdapter
 import pe.edu.idat.clinicasanmiguel.adapter.CitaPacienteMock
 import pe.edu.idat.clinicasanmiguel.repository.CitaRepository

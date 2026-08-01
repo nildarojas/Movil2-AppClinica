@@ -1,4 +1,4 @@
-package pe.edu.idat.clinicasanmiguel
+package pe.edu.idat.clinicasanmiguel.ui
 
 import android.app.ProgressDialog
 import android.content.Context
@@ -12,6 +12,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import com.google.android.material.button.MaterialButton
+import pe.edu.idat.clinicasanmiguel.R
 import pe.edu.idat.clinicasanmiguel.repository.CitaRepository
 
 class SeleccionarMedicoHorarioFragment :

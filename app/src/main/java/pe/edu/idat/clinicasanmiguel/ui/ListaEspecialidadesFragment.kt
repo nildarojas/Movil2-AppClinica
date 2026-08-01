@@ -1,4 +1,4 @@
-package pe.edu.idat.clinicasanmiguel
+package pe.edu.idat.clinicasanmiguel.ui
 
 import android.content.Intent
 import android.os.Bundle
@@ -9,6 +9,8 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import pe.edu.idat.clinicasanmiguel.R
+import pe.edu.idat.clinicasanmiguel.RegistrarEspecialidadActivity
 import pe.edu.idat.clinicasanmiguel.adapter.EspecialidadAdminAdapter
 import pe.edu.idat.clinicasanmiguel.adapter.EspecialidadMock
 import pe.edu.idat.clinicasanmiguel.repository.AdminRepository

@@ -7,7 +7,7 @@
     android:gravity="center"
     android:orientation="vertical"
     android:padding="24dp"
-    tools:context=".AdminFragment">
+    tools:context=".ui.AdminFragment">
 
     <TextView
         android:layout_width="wrap_content"

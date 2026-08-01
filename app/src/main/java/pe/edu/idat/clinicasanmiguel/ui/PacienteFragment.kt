@@ -1,4 +1,4 @@
-package pe.edu.idat.clinicasanmiguel
+package pe.edu.idat.clinicasanmiguel.ui
 
 import android.content.Context
 import android.os.Bundle
@@ -9,6 +9,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.google.android.material.button.MaterialButton
+import pe.edu.idat.clinicasanmiguel.R
 import pe.edu.idat.clinicasanmiguel.repository.CitaRepository
 
 class PacienteFragment : Fragment(R.layout.activity_paciente) {

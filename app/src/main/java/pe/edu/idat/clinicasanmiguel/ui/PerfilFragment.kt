@@ -1,4 +1,4 @@
-package pe.edu.idat.clinicasanmiguel
+package pe.edu.idat.clinicasanmiguel.ui
 
 import android.content.Context
 import android.os.Bundle
@@ -6,6 +6,7 @@ import android.view.View
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.google.android.material.button.MaterialButton
+import pe.edu.idat.clinicasanmiguel.R
 import pe.edu.idat.clinicasanmiguel.repository.UsuarioRepository
 
 class PerfilFragment : Fragment(R.layout.activity_perfil) {

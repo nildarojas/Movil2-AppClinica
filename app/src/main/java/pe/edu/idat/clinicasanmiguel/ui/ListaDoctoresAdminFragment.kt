@@ -1,4 +1,4 @@
-package pe.edu.idat.clinicasanmiguel
+package pe.edu.idat.clinicasanmiguel.ui
 
 import android.content.Intent
 import android.os.Bundle
@@ -9,13 +9,15 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import pe.edu.idat.clinicasanmiguel.adapter.HorarioAdminAdapter
+import pe.edu.idat.clinicasanmiguel.R
+import pe.edu.idat.clinicasanmiguel.RegistrarDoctorActivity
+import pe.edu.idat.clinicasanmiguel.adapter.DoctorAdminAdapter
 import pe.edu.idat.clinicasanmiguel.repository.AdminRepository
 
-class ListaHorariosAdminFragment : Fragment() {
+class ListaDoctoresAdminFragment : Fragment() {
 
-    private lateinit var rvHorarios: RecyclerView
-    private lateinit var fabNuevoHorario: FloatingActionButton
+    private lateinit var rvDoctores: RecyclerView
+    private lateinit var fabAddDoctor: FloatingActionButton
     private lateinit var adminRepository: AdminRepository
 
     override fun onCreateView(
@@ -23,22 +25,22 @@ class ListaHorariosAdminFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.activity_lista_horarios_admin, container, false)
+        return inflater.inflate(R.layout.activity_lista_doctores_admin, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        rvHorarios = view.findViewById(R.id.rvHorarios)
-        fabNuevoHorario = view.findViewById(R.id.fabNuevoHorario)
+        rvDoctores = view.findViewById(R.id.rvDoctoresAdmin)
+        fabAddDoctor = view.findViewById(R.id.fabAddDoctor)
 
-        rvHorarios.layoutManager = LinearLayoutManager(requireContext())
+        rvDoctores.layoutManager = LinearLayoutManager(requireContext())
         adminRepository = AdminRepository(requireContext())
 
-        fabNuevoHorario.setOnClickListener {
+        fabAddDoctor.setOnClickListener {
             val intent = Intent(
                 requireContext(),
-                RegistrarHorarioActivity::class.java
+                RegistrarDoctorActivity::class.java
             )
             startActivity(intent)
         }
@@ -46,11 +48,11 @@ class ListaHorariosAdminFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        cargarHorariosDesdeSQLite()
+        cargarDoctoresDesdeSQLite()
     }
 
-    private fun cargarHorariosDesdeSQLite() {
-        val horariosReales = adminRepository.obtenerHorarios()
-        rvHorarios.adapter = HorarioAdminAdapter(horariosReales)
+    private fun cargarDoctoresDesdeSQLite() {
+        val medicosReales = adminRepository.obtenerMedicos()
+        rvDoctores.adapter = DoctorAdminAdapter(medicosReales)
     }
 }
