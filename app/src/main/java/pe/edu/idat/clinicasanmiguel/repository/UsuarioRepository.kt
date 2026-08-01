@@ -35,6 +35,44 @@ class UsuarioRepository(context: Context) {
         return idGenerado
     }
 
+    fun obtenerUsuarioPorCorreo(correo: String): Usuario? {
+        var usuario: Usuario? = null
+        val db = dbHelper.readableDatabase
+        val query = "SELECT * FROM csma_usuarios WHERE LOWER(correo) = ?"
+        val cursor: Cursor = db.rawQuery(query, arrayOf(correo.trim().lowercase()))
+
+        if (cursor.moveToFirst()) {
+            usuario = Usuario(
+                id = cursor.getInt(cursor.getColumnIndexOrThrow("id")),
+                dni = cursor.getString(cursor.getColumnIndexOrThrow("dni")),
+                nombre = cursor.getString(cursor.getColumnIndexOrThrow("nombre")),
+                apellido = cursor.getString(cursor.getColumnIndexOrThrow("apellido")),
+                correo = cursor.getString(cursor.getColumnIndexOrThrow("correo")),
+                password = cursor.getString(cursor.getColumnIndexOrThrow("password")),
+                telefono = cursor.getString(cursor.getColumnIndexOrThrow("telefono")),
+                fechaNacimiento = cursor.getString(cursor.getColumnIndexOrThrow("fecha_nacimiento")),
+                genero = cursor.getString(cursor.getColumnIndexOrThrow("genero")),
+                rol = cursor.getString(cursor.getColumnIndexOrThrow("rol"))
+            )
+        }
+        cursor.close()
+        return usuario
+    }
+
+    fun actualizarPasswordPorCorreo(correo: String, nuevaPassword: String): Boolean {
+        val db = dbHelper.writableDatabase
+        val valores = ContentValues().apply {
+            put("password", nuevaPassword)
+        }
+        val filasAfectadas = db.update(
+            "csma_usuarios",
+            valores,
+            "LOWER(correo) = ?",
+            arrayOf(correo.trim().lowercase())
+        )
+        return filasAfectadas > 0
+    }
+
     fun registrarUsuarioApi(
         usuario: Usuario,
         callback: (ResultadoRegistroApi) -> Unit

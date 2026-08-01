@@ -17,6 +17,7 @@ import androidx.fragment.app.Fragment
 import com.google.android.material.navigation.NavigationView
 import java.util.Locale
 
+
 class InicioActivity : AppCompatActivity() {
 
     private lateinit var drawerLayout: DrawerLayout

@@ -52,9 +52,8 @@ class LoginActivity : AppCompatActivity() {
         tvOlvidaste.setOnClickListener {
             val intent = Intent(
                 this,
-                SolicitarRecuperacionActivity::class.java
+                ResetearPasswordActivity::class.java
             )
-
             startActivity(intent)
         }
 
