@@ -141,11 +141,13 @@ class LoginActivity : AppCompatActivity() {
                 }
 
                 is ResultadoLoginApi.SinConexion -> {
+                    mostrarCargando(false)
 
-                    intentarLoginLocal(
-                        correo = correo,
-                        contrasena = contrasena
-                    )
+                    Toast.makeText(
+                        this,
+                        "Necesitas conexión a Internet para iniciar sesión.",
+                        Toast.LENGTH_LONG
+                    ).show()
                 }
 
                 is ResultadoLoginApi.Error -> {
@@ -159,44 +161,6 @@ class LoginActivity : AppCompatActivity() {
                     ).show()
                 }
             }
-        }
-    }
-
-    private fun intentarLoginLocal(
-        correo: String,
-        contrasena: String
-    ) {
-        val usuarioLogueado = usuarioRepository.login(
-            correo = correo,
-            password = contrasena
-        )
-
-        if (usuarioLogueado != null) {
-
-            guardarSesion(
-                usuario = usuarioLogueado,
-                idUsuarioApi = null,
-                token = null,
-                sesionRemota = false
-            )
-
-            Toast.makeText(
-                this,
-                "Sin conexión. Sesión iniciada con datos locales.",
-                Toast.LENGTH_LONG
-            ).show()
-
-            abrirPantallaPrincipal(usuarioLogueado)
-
-        } else {
-
-            mostrarCargando(false)
-
-            Toast.makeText(
-                this,
-                "No se pudo conectar con el servidor y las credenciales no existen localmente",
-                Toast.LENGTH_LONG
-            ).show()
         }
     }
 

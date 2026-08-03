@@ -17,7 +17,12 @@ import pe.edu.idat.clinicasanmiguel.network.RegistroApiResponse
 
 class UsuarioRepository(context: Context) {
 
+
     private val dbHelper = AppDatabaseHelper(context)
+    private val apiService =
+        RetrofitClient.obtenerApiService(
+            context.applicationContext
+        )
     fun registrarUsuario(usuario: Usuario): Long {
         val db = dbHelper.writableDatabase
         val valores = ContentValues().apply {
@@ -88,7 +93,7 @@ class UsuarioRepository(context: Context) {
             genero = usuario.genero.trim()
         )
 
-        RetrofitClient.apiService
+        apiService
             .registrar(request)
             .enqueue(
                 object : Callback<RegistroApiResponse> {
@@ -172,24 +177,11 @@ class UsuarioRepository(context: Context) {
                         call: Call<RegistroApiResponse>,
                         throwable: Throwable
                     ) {
-                        val idUsuarioLocal =
-                            registrarUsuario(usuario)
-
-                        if (idUsuarioLocal > 0) {
-                            callback(
-                                ResultadoRegistroApi.RegistroLocal(
-                                    idUsuarioLocal = idUsuarioLocal,
-                                    mensaje =
-                                        "Sin conexión. El paciente fue registrado solamente en el dispositivo."
-                                )
+                        callback(
+                            ResultadoRegistroApi.Error(
+                                "Esta acción requiere conexión a Internet. Verifica tu conexión e inténtalo nuevamente."
                             )
-                        } else {
-                            callback(
-                                ResultadoRegistroApi.Error(
-                                    "No se pudo conectar con Azure y el DNI o correo ya existe localmente"
-                                )
-                            )
-                        }
+                        )
                     }
                 }
             )
@@ -234,7 +226,7 @@ class UsuarioRepository(context: Context) {
                     "correo",
                     usuario.correo.trim().lowercase()
                 )
-                put("password", usuario.password)
+                put("password", "")
                 put("telefono", usuario.telefono.trim())
                 put(
                     "fecha_nacimiento",
@@ -312,7 +304,7 @@ class UsuarioRepository(context: Context) {
             password = password
         )
 
-        RetrofitClient.apiService
+        apiService
             .login(request)
             .enqueue(
                 object : Callback<LoginApiResponse> {
@@ -434,7 +426,7 @@ class UsuarioRepository(context: Context) {
                 put("nombre", usuarioApi.nombre)
                 put("apellido", usuarioApi.apellido)
                 put("correo", usuarioApi.correo)
-                put("password", passwordIngresado)
+                put("password", "")
                 put("telefono", usuarioApi.telefono)
                 put(
                     "fecha_nacimiento",
@@ -477,7 +469,7 @@ class UsuarioRepository(context: Context) {
                 nombre = usuarioApi.nombre,
                 apellido = usuarioApi.apellido,
                 correo = usuarioApi.correo,
-                password = passwordIngresado,
+                password = "",
                 telefono = usuarioApi.telefono,
                 fechaNacimiento = usuarioApi.fechaNacimiento,
                 genero = usuarioApi.genero,

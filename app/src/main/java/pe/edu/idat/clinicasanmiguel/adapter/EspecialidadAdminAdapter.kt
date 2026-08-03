@@ -7,7 +7,12 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import pe.edu.idat.clinicasanmiguel.R
 
-data class EspecialidadMock(val nombre: String, val area: String, val estado: String)
+data class EspecialidadMock(
+    val nombre: String,
+    val area: String,
+    val estado: String,
+    val id: Int = 0
+)
 
 class EspecialidadAdminAdapter(
     private val lista: List<EspecialidadMock>,

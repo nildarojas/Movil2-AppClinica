@@ -17,6 +17,8 @@ import androidx.fragment.app.Fragment
 import com.google.android.material.navigation.NavigationView
 import pe.edu.idat.clinicasanmiguel.ui.*
 import java.util.Locale
+import pe.edu.idat.clinicasanmiguel.network.JwtUtils
+import pe.edu.idat.clinicasanmiguel.network.SessionManager
 
 
 class InicioActivity : AppCompatActivity() {
@@ -31,7 +33,39 @@ class InicioActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_inicio)
+
+        val sessionManager =
+            SessionManager(this)
+
+        val token =
+            sessionManager.obtenerToken()
+
+        val sesionValida =
+            sessionManager.esSesionRemota() &&
+                    !token.isNullOrBlank() &&
+                    JwtUtils.esTokenVigente(token)
+
+        if (!sesionValida) {
+            sessionManager.limpiarSesion()
+
+            val intent =
+                Intent(
+                    this,
+                    LoginActivity::class.java
+                )
+
+            intent.flags =
+                Intent.FLAG_ACTIVITY_NEW_TASK or
+                        Intent.FLAG_ACTIVITY_CLEAR_TASK
+
+            startActivity(intent)
+
+            finish()
+
+            return
+        }
+        setContentView(
+            R.layout.activity_inicio)
 
         val preferencias =
             getSharedPreferences(
@@ -464,22 +498,19 @@ class InicioActivity : AppCompatActivity() {
     private fun desplegarCierreSesion() {
 
         AlertDialog.Builder(this)
-            .setTitle("Cerrar Sesión")
+            .setTitle(
+                "Cerrar Sesión"
+            )
             .setMessage(
                 "¿Está seguro de que desea salir del sistema?"
             )
-            .setPositiveButton("Sí") { _, _ ->
+            .setPositiveButton(
+                "Sí"
+            ) { _, _ ->
 
-                val preferencias =
-                    getSharedPreferences(
-                        "sesion_clinica",
-                        MODE_PRIVATE
-                    )
-
-                preferencias
-                    .edit()
-                    .clear()
-                    .apply()
+                SessionManager(
+                    this
+                ).limpiarSesion()
 
                 val intent =
                     Intent(
