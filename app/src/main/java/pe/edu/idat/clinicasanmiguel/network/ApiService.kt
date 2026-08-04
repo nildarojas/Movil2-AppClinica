@@ -4,6 +4,9 @@ import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.Query
+import retrofit2.http.PUT
+import retrofit2.http.Path
 
 interface ApiService {
 
@@ -25,4 +28,51 @@ interface ApiService {
     fun registrarEspecialidad(
         @Body request: CrearEspecialidadApiRequest
     ): Call<EspecialidadApiResponse>
+
+    @GET("api/medicos/filtrar")
+    fun listarMedicosPorEspecialidad(
+        @Query("id_especialidad")
+        idEspecialidad: Int
+    ): Call<List<MedicoApiResponse>>
+
+    @GET("api/horarios/con-estado")
+    fun listarHorariosConEstado(
+        @Query("id_medico")
+        idMedico: Int,
+
+        @Query("horario_original")
+        horarioOriginal: String? = null
+    ): Call<List<String>>
+
+    @POST("api/citas/reservar")
+    fun reservarCita(
+        @Body request: CrearCitaApiRequest
+    ): Call<CitaApiResponse>
+
+    @GET("api/citas/activas")
+    fun listarCitasActivas():
+            Call<List<CitaApiResponse>>
+
+    @GET("api/citas/ultima")
+    fun obtenerUltimaCita():
+            Call<CitaApiResponse>
+
+    @PUT("api/citas/{id}/cancelar")
+    fun cancelarCita(
+        @Path("id") idCita: Int
+    ): Call<CancelarCitaApiResponse>
+
+    @GET("api/citas/historial")
+    fun listarHistorialCitas():
+            Call<List<CitaApiResponse>>
+
+    @PUT("api/citas/{id}/reprogramar")
+    fun reprogramarCita(
+        @Path("id") idCita: Int,
+        @Body request: ReprogramarCitaApiRequest
+    ): Call<CitaApiResponse>
+
+    @GET("api/notificaciones/mias")
+    fun listarMisNotificaciones():
+            Call<List<NotificacionApiResponse>>
 }

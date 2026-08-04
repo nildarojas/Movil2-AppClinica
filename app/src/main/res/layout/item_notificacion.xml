@@ -7,7 +7,6 @@
     android:layout_marginHorizontal="16dp"
     android:layout_marginTop="12dp"
     app:cardBackgroundColor="#FFFFFF"
-    android:backgroundTint="#FFFFFF"
     app:cardCornerRadius="12dp"
     app:cardElevation="4dp"
     app:strokeColor="#E0E0E0"
@@ -23,17 +22,35 @@
             android:id="@+id/tvMensajeNoti"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="#333333"
+            android:textColor="#1E293B"
             android:textSize="16sp"
             android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvDetalleNoti"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:textColor="#458890"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvFechaCitaNoti"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:textColor="#475569"
+            android:textSize="13sp" />
 
         <TextView
             android:id="@+id/tvFechaNoti"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:textColor="#458890"
-            android:textSize="13sp" />
+            android:textColor="#64748B"
+            android:textSize="12sp" />
 
     </LinearLayout>
+
 </com.google.android.material.card.MaterialCardView>

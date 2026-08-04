@@ -7,25 +7,22 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import org.json.JSONObject
 import pe.edu.idat.clinicasanmiguel.LoginActivity
 import pe.edu.idat.clinicasanmiguel.R
 import pe.edu.idat.clinicasanmiguel.adapter.EspecialidadAdminAdapter
 import pe.edu.idat.clinicasanmiguel.adapter.EspecialidadMock
-import pe.edu.idat.clinicasanmiguel.entity.Especialidad
+import pe.edu.idat.clinicasanmiguel.network.EspecialidadApiResponse
+import pe.edu.idat.clinicasanmiguel.network.RetrofitClient
 import pe.edu.idat.clinicasanmiguel.network.SessionManager
-import pe.edu.idat.clinicasanmiguel.repository.EspecialidadRepository
-import pe.edu.idat.clinicasanmiguel.repository.ResultadoCargaEspecialidadesApi
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class SeleccionarEspecialidadFragment :
-    Fragment(
-        R.layout.activity_seleccionar_especialidad
-    ) {
+    Fragment(R.layout.activity_seleccionar_especialidad) {
 
-    private lateinit var especialidadRepository:
-            EspecialidadRepository
-
-    private lateinit var rvEspecialidades:
-            RecyclerView
+    private lateinit var rvEspecialidades: RecyclerView
 
     override fun onViewCreated(
         view: View,
@@ -35,11 +32,6 @@ class SeleccionarEspecialidadFragment :
             view,
             savedInstanceState
         )
-
-        especialidadRepository =
-            EspecialidadRepository(
-                requireContext()
-            )
 
         rvEspecialidades =
             view.findViewById(
@@ -51,95 +43,105 @@ class SeleccionarEspecialidadFragment :
                 requireContext()
             )
 
-        cargarEspecialidades()
+        cargarEspecialidadesDesdeApi()
     }
 
-    private fun cargarEspecialidades() {
-        val locales =
-            especialidadRepository
-                .obtenerEspecialidadesLocales()
+    private fun cargarEspecialidadesDesdeApi() {
+        val apiService =
+            RetrofitClient.obtenerApiService(
+                requireContext()
+            )
 
-        mostrarEspecialidades(
-            locales
-        )
+        apiService
+            .listarEspecialidades()
+            .enqueue(
+                object :
+                    Callback<List<EspecialidadApiResponse>> {
 
-        especialidadRepository
-            .sincronizarEspecialidadesApi {
-                    resultado ->
+                    override fun onResponse(
+                        call: Call<List<EspecialidadApiResponse>>,
+                        response: Response<List<EspecialidadApiResponse>>
+                    ) {
+                        if (!isAdded) {
+                            return
+                        }
 
-                if (!isAdded) {
-                    return@sincronizarEspecialidadesApi
+                        if (response.isSuccessful) {
+                            val especialidades =
+                                response.body()
+                                    ?: emptyList()
+
+                            mostrarEspecialidades(
+                                especialidades
+                            )
+
+                            if (especialidades.isEmpty()) {
+                                Toast.makeText(
+                                    requireContext(),
+                                    "No existen especialidades registradas en la nube",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
+
+                            return
+                        }
+
+                        when (response.code()) {
+                            401 -> {
+                                cerrarSesion(
+                                    obtenerMensajeError(response)
+                                        ?: "Tu sesión ha vencido"
+                                )
+                            }
+
+                            403 -> {
+                                Toast.makeText(
+                                    requireContext(),
+                                    obtenerMensajeError(response)
+                                        ?: "No tienes permiso para consultar las especialidades",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
+
+                            else -> {
+                                Toast.makeText(
+                                    requireContext(),
+                                    obtenerMensajeError(response)
+                                        ?: "No se pudieron cargar las especialidades. Código ${response.code()}",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
+                        }
+                    }
+
+                    override fun onFailure(
+                        call: Call<List<EspecialidadApiResponse>>,
+                        throwable: Throwable
+                    ) {
+                        if (!isAdded) {
+                            return
+                        }
+
+                        Toast.makeText(
+                            requireContext(),
+                            "No se pudo conectar con el servidor",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
                 }
-
-                when (resultado) {
-                    is ResultadoCargaEspecialidadesApi
-                    .Exito -> {
-
-                        mostrarEspecialidades(
-                            resultado.especialidades
-                        )
-                    }
-
-                    is ResultadoCargaEspecialidadesApi
-                    .SinConexion -> {
-
-                        mostrarEspecialidades(
-                            resultado.especialidades
-                        )
-
-                        Toast.makeText(
-                            requireContext(),
-                            resultado.mensaje,
-                            Toast.LENGTH_LONG
-                        ).show()
-                    }
-
-                    is ResultadoCargaEspecialidadesApi
-                    .Error -> {
-
-                        mostrarEspecialidades(
-                            resultado.especialidades
-                        )
-
-                        Toast.makeText(
-                            requireContext(),
-                            resultado.mensaje,
-                            Toast.LENGTH_LONG
-                        ).show()
-                    }
-
-                    is ResultadoCargaEspecialidadesApi
-                    .SesionExpirada -> {
-
-                        cerrarSesion(
-                            resultado.mensaje
-                        )
-                    }
-
-                    is ResultadoCargaEspecialidadesApi
-                    .SinPermiso -> {
-
-                        Toast.makeText(
-                            requireContext(),
-                            resultado.mensaje,
-                            Toast.LENGTH_LONG
-                        ).show()
-                    }
-                }
-            }
+            )
     }
 
     private fun mostrarEspecialidades(
-        especialidades:
-        List<Especialidad>
+        especialidades: List<EspecialidadApiResponse>
     ) {
         val lista =
             especialidades.map {
                 EspecialidadMock(
+                    id = it.id,
                     nombre = it.nombre,
                     area = "",
-                    estado = "",
-                    id = it.id
+                    estado = ""
                 )
             }
 
@@ -147,12 +149,9 @@ class SeleccionarEspecialidadFragment :
             EspecialidadAdminAdapter(
                 lista = lista,
                 esModoAdmin = false
-            ) {
-                    especialidadSeleccionada ->
+            ) { especialidadSeleccionada ->
 
-                if (
-                    especialidadSeleccionada.id <= 0
-                ) {
+                if (especialidadSeleccionada.id <= 0) {
                     Toast.makeText(
                         requireContext(),
                         "No se pudo identificar la especialidad",
@@ -190,6 +189,28 @@ class SeleccionarEspecialidadFragment :
             }
     }
 
+    private fun obtenerMensajeError(
+        response: Response<*>
+    ): String? {
+        return try {
+            val contenido =
+                response.errorBody()
+                    ?.string()
+
+            if (contenido.isNullOrBlank()) {
+                null
+            } else {
+                JSONObject(contenido)
+                    .optString("mensaje")
+                    .takeIf {
+                        it.isNotBlank()
+                    }
+            }
+        } catch (exception: Exception) {
+            null
+        }
+    }
+
     private fun cerrarSesion(
         mensaje: String
     ) {
@@ -207,14 +228,13 @@ class SeleccionarEspecialidadFragment :
             Intent(
                 requireContext(),
                 LoginActivity::class.java
-            )
-
-        intent.flags =
-            Intent.FLAG_ACTIVITY_NEW_TASK or
-                    Intent.FLAG_ACTIVITY_CLEAR_TASK
+            ).apply {
+                flags =
+                    Intent.FLAG_ACTIVITY_NEW_TASK or
+                            Intent.FLAG_ACTIVITY_CLEAR_TASK
+            }
 
         startActivity(intent)
-
         requireActivity().finish()
     }
 }
