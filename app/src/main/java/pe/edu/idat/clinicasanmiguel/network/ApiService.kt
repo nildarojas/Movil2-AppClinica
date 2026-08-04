@@ -75,4 +75,28 @@ interface ApiService {
     @GET("api/notificaciones/mias")
     fun listarMisNotificaciones():
             Call<List<NotificacionApiResponse>>
+
+    @PUT("api/auth/cambiar-password")
+    fun cambiarPassword(
+        @Body request: CambiarPasswordApiRequest
+    ): Call<CambiarPasswordApiResponse>
+
+    @POST("api/auth/solicitar-recuperacion")
+    fun solicitarRecuperacion(
+        @Body request: SolicitarRecuperacionApiRequest
+    ): Call<SolicitarRecuperacionApiResponse>
+
+    @POST("api/auth/verificar-codigo-recuperacion")
+    fun verificarCodigoRecuperacion(
+        @Body request: VerificarCodigoRecuperacionApiRequest
+    ): Call<RecuperacionPasswordApiResponse>
+
+    @POST("api/auth/resetear-password")
+    fun resetearPassword(
+        @Body request: ResetearPasswordApiRequest
+    ): Call<RecuperacionPasswordApiResponse>
+
+    @GET("api/auth/perfil")
+    fun obtenerPerfil():
+            Call<UsuarioLoginApi>
 }

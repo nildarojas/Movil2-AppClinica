@@ -9,10 +9,9 @@ import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.os.CountDownTimer
-import android.os.Handler
-import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Patterns
 import android.view.KeyEvent
 import android.view.View
 import android.view.Window
@@ -25,7 +24,17 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
-import pe.edu.idat.clinicasanmiguel.repository.UsuarioRepository
+import org.json.JSONObject
+import pe.edu.idat.clinicasanmiguel.network.RecuperacionPasswordApiResponse
+import pe.edu.idat.clinicasanmiguel.network.ResetearPasswordApiRequest
+import pe.edu.idat.clinicasanmiguel.network.RetrofitClient
+import pe.edu.idat.clinicasanmiguel.network.SessionManager
+import pe.edu.idat.clinicasanmiguel.network.SolicitarRecuperacionApiRequest
+import pe.edu.idat.clinicasanmiguel.network.SolicitarRecuperacionApiResponse
+import pe.edu.idat.clinicasanmiguel.network.VerificarCodigoRecuperacionApiRequest
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class ResetearPasswordActivity : AppCompatActivity() {
 
@@ -51,343 +60,1238 @@ class ResetearPasswordActivity : AppCompatActivity() {
     private lateinit var reqNumero: TextView
     private lateinit var reqCoinciden: TextView
     private lateinit var digitBoxes: Array<EditText>
-    private lateinit var usuarioRepository: UsuarioRepository
+
     private var esValidoMinimo = false
     private var esValidoMayuscula = false
     private var esValidoNumero = false
     private var esValidoCoincidencia = false
 
+    private var correoRecuperacion = ""
+    private var codigoRecuperacion = ""
+    private var codigoVerificado = false
+    private var operacionEnCurso = false
+    private var reenviarDisponible = false
+
     private var dialogCargando: Dialog? = null
     private var timerReenvio: CountDownTimer? = null
-    private val TIEMPO_ESPERA_REENVIO: Long = 30000
-    private var codigoVerificado = false
-    private var timer: CountDownTimer? = null
-    private var tiempoRestanteMillis: Long = 120000
+    private var timerExpiracion: CountDownTimer? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(
+        savedInstanceState: Bundle?
+    ) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_restablecer_password)
 
-        usuarioRepository = UsuarioRepository(this)
-
-        tvTituloReset = findViewById(R.id.tvTituloReset)
-        tvCorreoConfirmado = findViewById(R.id.tvCorreoConfirmado)
-        etCorreo = findViewById(R.id.etCorreoReset)
-        etCodigo = findViewById(R.id.etCodigoReset)
-        etNuevaPassword = findViewById(R.id.etNuevaPasswordReset)
-        etRepetirPassword = findViewById(R.id.etRepetirPasswordReset)
-        tilNuevaPassword = findViewById(R.id.tilNuevaPasswordReset)
-        tilRepetirPassword = findViewById(R.id.tilRepetirPasswordReset)
-
-        btnEnviarCodigo = findViewById(R.id.btnEnviarCodigo)
-        btnVerificarCodigo = findViewById(R.id.btnVerificarCodigo)
-        btnRestablecer = findViewById(R.id.btnRestablecerPassword)
-        tvTemporizador = findViewById(R.id.tvTemporizadorCodigo)
-        tvReenviarCodigo = findViewById(R.id.tvReenviarCodigo)
-
-        layoutPaso1Correo = findViewById(R.id.layoutPaso1Correo)
-        layoutPaso2Codigo = findViewById(R.id.layoutPaso2Codigo)
-        layoutPaso3Password = findViewById(R.id.layoutPaso3Password)
-
-        cardRequisitosPassword = findViewById(R.id.cardRequisitosPassword)
-        reqMinCaracteres = findViewById(R.id.reqMinCaracteres)
-        reqMayuscula = findViewById(R.id.reqMayuscula)
-        reqNumero = findViewById(R.id.reqNumero)
-        reqCoinciden = findViewById(R.id.reqCoinciden)
-
-        digitBoxes = arrayOf(
-            findViewById(R.id.etDigit1),
-            findViewById(R.id.etDigit2),
-            findViewById(R.id.etDigit3),
-            findViewById(R.id.etDigit4),
-            findViewById(R.id.etDigit5),
-            findViewById(R.id.etDigit6)
+        setContentView(
+            R.layout.activity_restablecer_password
         )
+
+        tvTituloReset =
+            findViewById(
+                R.id.tvTituloReset
+            )
+
+        tvCorreoConfirmado =
+            findViewById(
+                R.id.tvCorreoConfirmado
+            )
+
+        etCorreo =
+            findViewById(
+                R.id.etCorreoReset
+            )
+
+        etCodigo =
+            findViewById(
+                R.id.etCodigoReset
+            )
+
+        etNuevaPassword =
+            findViewById(
+                R.id.etNuevaPasswordReset
+            )
+
+        etRepetirPassword =
+            findViewById(
+                R.id.etRepetirPasswordReset
+            )
+
+        tilNuevaPassword =
+            findViewById(
+                R.id.tilNuevaPasswordReset
+            )
+
+        tilRepetirPassword =
+            findViewById(
+                R.id.tilRepetirPasswordReset
+            )
+
+        btnEnviarCodigo =
+            findViewById(
+                R.id.btnEnviarCodigo
+            )
+
+        btnVerificarCodigo =
+            findViewById(
+                R.id.btnVerificarCodigo
+            )
+
+        btnRestablecer =
+            findViewById(
+                R.id.btnRestablecerPassword
+            )
+
+        tvTemporizador =
+            findViewById(
+                R.id.tvTemporizadorCodigo
+            )
+
+        tvReenviarCodigo =
+            findViewById(
+                R.id.tvReenviarCodigo
+            )
+
+        layoutPaso1Correo =
+            findViewById(
+                R.id.layoutPaso1Correo
+            )
+
+        layoutPaso2Codigo =
+            findViewById(
+                R.id.layoutPaso2Codigo
+            )
+
+        layoutPaso3Password =
+            findViewById(
+                R.id.layoutPaso3Password
+            )
+
+        cardRequisitosPassword =
+            findViewById(
+                R.id.cardRequisitosPassword
+            )
+
+        reqMinCaracteres =
+            findViewById(
+                R.id.reqMinCaracteres
+            )
+
+        reqMayuscula =
+            findViewById(
+                R.id.reqMayuscula
+            )
+
+        reqNumero =
+            findViewById(
+                R.id.reqNumero
+            )
+
+        reqCoinciden =
+            findViewById(
+                R.id.reqCoinciden
+            )
+
+        digitBoxes =
+            arrayOf(
+                findViewById(R.id.etDigit1),
+                findViewById(R.id.etDigit2),
+                findViewById(R.id.etDigit3),
+                findViewById(R.id.etDigit4),
+                findViewById(R.id.etDigit5),
+                findViewById(R.id.etDigit6)
+            )
 
         configurarCasillerosCodigo()
         configurarAnimacionRequisitos()
         mostrarPaso1()
 
         btnEnviarCodigo.setOnClickListener {
-            validarCorreoYEnviarCodigo()
+            solicitarCodigoDesdeApi(
+                esReenvio = false
+            )
         }
 
         btnVerificarCodigo.setOnClickListener {
-            verificarCodigoLocal()
+            verificarCodigoDesdeApi()
         }
 
         btnRestablecer.setOnClickListener {
-            resetearPasswordLocal()
+            validarNuevaPassword()
         }
 
         tvReenviarCodigo.setOnClickListener {
-            reenviarCodigoLocal()
+            if (reenviarDisponible) {
+                solicitarCodigoDesdeApi(
+                    esReenvio = true
+                )
+            }
         }
     }
 
     private fun mostrarPaso1() {
-        tvTituloReset.text = "Recuperar contraseña"
-        layoutPaso1Correo.visibility = View.VISIBLE
-        layoutPaso2Codigo.visibility = View.GONE
-        layoutPaso3Password.visibility = View.GONE
+        timerExpiracion?.cancel()
+        timerReenvio?.cancel()
+
+        codigoVerificado = false
+        codigoRecuperacion = ""
+        reenviarDisponible = false
+
+        tvTituloReset.text =
+            "Recuperar contraseña"
+
+        layoutPaso1Correo.visibility =
+            View.VISIBLE
+
+        layoutPaso2Codigo.visibility =
+            View.GONE
+
+        layoutPaso3Password.visibility =
+            View.GONE
+
+        tvTemporizador.text =
+            ""
+
+        tvReenviarCodigo.text =
+            ""
+
+        limpiarCasillerosCodigo(
+            solicitarFoco = false
+        )
+
+        etNuevaPassword.text?.clear()
+        etRepetirPassword.text?.clear()
+
+        actualizarControles()
     }
 
-    private fun validarCorreoYEnviarCodigo() {
-        val correo = etCorreo.text.toString().trim()
+    private fun mostrarPaso2(
+        correo: String,
+        expiracionMinutos: Int
+    ) {
+        correoRecuperacion =
+            correo.trim().lowercase()
 
-        if (correo.isEmpty() || !android.util.Patterns.EMAIL_ADDRESS.matcher(correo).matches()) {
-            Toast.makeText(this, "Ingresa un correo electrónico válido", Toast.LENGTH_SHORT).show()
-            return
-        }
+        codigoVerificado =
+            false
 
-        mostrarModalCargando("Verificando usuario en base de datos...")
+        codigoRecuperacion =
+            ""
 
-        Handler(Looper.getMainLooper()).postDelayed({
-            ocultarModalCargando()
-            val usuarioEncontrado = usuarioRepository.obtenerUsuarioPorCorreo(correo)
+        tvTituloReset.text =
+            "Restablecer contraseña"
 
-            if (usuarioEncontrado != null) {
-                Toast.makeText(this, "Usuario encontrado. Código enviado", Toast.LENGTH_SHORT).show()
-                mostrarPaso2(correo)
-            } else {
-                Toast.makeText(this, "El correo no se encuentra registrado", Toast.LENGTH_LONG).show()
-            }
-        }, 1200)
-    }
+        tvCorreoConfirmado.text =
+            "Correo: $correoRecuperacion"
 
-    private fun mostrarPaso2(correo: String) {
-        tvTituloReset.text = "Restablecer contraseña"
-        tvCorreoConfirmado.text = "Correo: $correo"
+        layoutPaso1Correo.visibility =
+            View.GONE
 
-        layoutPaso1Correo.visibility = View.GONE
-        layoutPaso2Codigo.visibility = View.VISIBLE
-        layoutPaso3Password.visibility = View.GONE
+        layoutPaso2Codigo.visibility =
+            View.VISIBLE
 
-        iniciarTemporizador()
+        layoutPaso3Password.visibility =
+            View.GONE
+
+        limpiarCasillerosCodigo(
+            solicitarFoco = true
+        )
+
+        iniciarTemporizador(
+            expiracionMinutos
+        )
+
         iniciarContadorReenvio()
     }
 
-    private fun verificarCodigoLocal() {
-        val codigo = etCodigo.text.toString().trim()
-
-        if (codigo.length < 6) {
-            Toast.makeText(this, "Ingresa el código completo de 6 dígitos", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        mostrarModalCargando("Validando código...")
-
-        Handler(Looper.getMainLooper()).postDelayed({
-            ocultarModalCargando()
-
-            if (codigo == "123456") {
-                Toast.makeText(this, "Código verificado con éxito", Toast.LENGTH_SHORT).show()
-                codigoVerificado = true
-                mostrarPaso3()
-            } else {
-                Toast.makeText(this, "Código inválido (Prueba con 123456)", Toast.LENGTH_SHORT).show()
-            }
-        }, 1200)
-    }
-
     private fun mostrarPaso3() {
-        tvTituloReset.text = "Nueva contraseña"
-        layoutPaso1Correo.visibility = View.GONE
-        layoutPaso2Codigo.visibility = View.GONE
-        layoutPaso3Password.visibility = View.VISIBLE
+        tvTituloReset.text =
+            "Nueva contraseña"
+
+        layoutPaso1Correo.visibility =
+            View.GONE
+
+        layoutPaso2Codigo.visibility =
+            View.GONE
+
+        layoutPaso3Password.visibility =
+            View.VISIBLE
+
+        etNuevaPassword.requestFocus()
     }
 
-    private fun resetearPasswordLocal() {
-        if (!codigoVerificado) {
-            Toast.makeText(this, "Primero verifica el código", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        if (!esValidoMinimo || !esValidoMayuscula || !esValidoNumero || !esValidoCoincidencia) {
-            Toast.makeText(this, "Por favor cumple con todos los requisitos de seguridad", Toast.LENGTH_LONG).show()
-            return
-        }
-
-        val correo = etCorreo.text.toString().trim()
-        val nuevaPassword = etNuevaPassword.text.toString().trim()
-
-        mostrarModalCargando("Guardando nueva contraseña...")
-
-        Handler(Looper.getMainLooper()).postDelayed({
-            ocultarModalCargando()
-            val actualizado = usuarioRepository.actualizarPasswordPorCorreo(correo, nuevaPassword)
-
-            if (actualizado) {
-                Toast.makeText(this, "Contraseña actualizada exitosamente en SQLite", Toast.LENGTH_LONG).show()
-
-                val intent = Intent(this, LoginActivity::class.java)
-                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                startActivity(intent)
-                finish()
+    private fun solicitarCodigoDesdeApi(
+        esReenvio: Boolean
+    ) {
+        val correo =
+            if (esReenvio) {
+                correoRecuperacion
             } else {
-                Toast.makeText(this, "Error al actualizar la contraseña", Toast.LENGTH_LONG).show()
+                etCorreo.text
+                    ?.toString()
+                    ?.trim()
+                    ?.lowercase()
+                    .orEmpty()
             }
-        }, 1500)
+
+        if (
+            correo.isEmpty() ||
+            !Patterns.EMAIL_ADDRESS
+                .matcher(correo)
+                .matches()
+        ) {
+            Toast.makeText(
+                this,
+                "Ingresa un correo electrónico válido",
+                Toast.LENGTH_SHORT
+            ).show()
+
+            return
+        }
+
+        if (
+            !iniciarOperacion(
+                if (esReenvio) {
+                    "Reenviando código..."
+                } else {
+                    "Enviando código..."
+                }
+            )
+        ) {
+            return
+        }
+
+        val request =
+            SolicitarRecuperacionApiRequest(
+                correo = correo
+            )
+
+        RetrofitClient
+            .obtenerApiService(this)
+            .solicitarRecuperacion(request)
+            .enqueue(
+                object :
+                    Callback<SolicitarRecuperacionApiResponse> {
+
+                    override fun onResponse(
+                        call: Call<SolicitarRecuperacionApiResponse>,
+                        response: Response<SolicitarRecuperacionApiResponse>
+                    ) {
+                        finalizarOperacion()
+
+                        if (isFinishing || isDestroyed) {
+                            return
+                        }
+
+                        if (response.isSuccessful) {
+                            val respuesta =
+                                response.body()
+
+                            if (
+                                respuesta == null ||
+                                !respuesta.exito
+                            ) {
+                                Toast.makeText(
+                                    this@ResetearPasswordActivity,
+                                    respuesta?.mensaje
+                                        ?: "La API devolvió una respuesta incompleta",
+                                    Toast.LENGTH_LONG
+                                ).show()
+
+                                return
+                            }
+
+                            Toast.makeText(
+                                this@ResetearPasswordActivity,
+                                respuesta.mensaje,
+                                Toast.LENGTH_LONG
+                            ).show()
+
+                            mostrarPaso2(
+                                correo = correo,
+                                expiracionMinutos =
+                                    respuesta
+                                        .expiracionMinutos
+                                        ?: 5
+                            )
+
+                            return
+                        }
+
+                        procesarErrorRespuesta(
+                            response
+                        )
+                    }
+
+                    override fun onFailure(
+                        call: Call<SolicitarRecuperacionApiResponse>,
+                        throwable: Throwable
+                    ) {
+                        finalizarOperacion()
+
+                        if (isFinishing || isDestroyed) {
+                            return
+                        }
+
+                        Toast.makeText(
+                            this@ResetearPasswordActivity,
+                            "No se pudo conectar con el servidor",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                }
+            )
+    }
+
+    private fun verificarCodigoDesdeApi() {
+        val codigo =
+            digitBoxes.joinToString(
+                separator = ""
+            ) {
+                it.text.toString()
+            }
+
+        if (
+            correoRecuperacion.isBlank()
+        ) {
+            Toast.makeText(
+                this,
+                "Primero solicita un código",
+                Toast.LENGTH_SHORT
+            ).show()
+
+            mostrarPaso1()
+            return
+        }
+
+        if (
+            !codigo.matches(
+                Regex("^\\d{6}$")
+            )
+        ) {
+            Toast.makeText(
+                this,
+                "Ingresa el código completo de 6 dígitos",
+                Toast.LENGTH_SHORT
+            ).show()
+
+            return
+        }
+
+        if (
+            !iniciarOperacion(
+                "Validando código..."
+            )
+        ) {
+            return
+        }
+
+        val request =
+            VerificarCodigoRecuperacionApiRequest(
+                correo =
+                    correoRecuperacion,
+                codigo =
+                    codigo
+            )
+
+        RetrofitClient
+            .obtenerApiService(this)
+            .verificarCodigoRecuperacion(
+                request
+            )
+            .enqueue(
+                object :
+                    Callback<RecuperacionPasswordApiResponse> {
+
+                    override fun onResponse(
+                        call: Call<RecuperacionPasswordApiResponse>,
+                        response: Response<RecuperacionPasswordApiResponse>
+                    ) {
+                        finalizarOperacion()
+
+                        if (isFinishing || isDestroyed) {
+                            return
+                        }
+
+                        if (response.isSuccessful) {
+                            val respuesta =
+                                response.body()
+
+                            if (
+                                respuesta == null ||
+                                !respuesta.exito
+                            ) {
+                                Toast.makeText(
+                                    this@ResetearPasswordActivity,
+                                    respuesta?.mensaje
+                                        ?: "No se pudo verificar el código",
+                                    Toast.LENGTH_LONG
+                                ).show()
+
+                                return
+                            }
+
+                            codigoRecuperacion =
+                                codigo
+
+                            codigoVerificado =
+                                true
+
+                            Toast.makeText(
+                                this@ResetearPasswordActivity,
+                                respuesta.mensaje,
+                                Toast.LENGTH_SHORT
+                            ).show()
+
+                            mostrarPaso3()
+                            return
+                        }
+
+                        procesarErrorRespuesta(
+                            response = response,
+                            reiniciarSiCodigoInvalido =
+                                true
+                        )
+                    }
+
+                    override fun onFailure(
+                        call: Call<RecuperacionPasswordApiResponse>,
+                        throwable: Throwable
+                    ) {
+                        finalizarOperacion()
+
+                        if (isFinishing || isDestroyed) {
+                            return
+                        }
+
+                        Toast.makeText(
+                            this@ResetearPasswordActivity,
+                            "No se pudo verificar el código",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                }
+            )
+    }
+
+    private fun validarNuevaPassword() {
+        if (
+            !codigoVerificado ||
+            codigoRecuperacion.isBlank()
+        ) {
+            Toast.makeText(
+                this,
+                "Primero verifica el código",
+                Toast.LENGTH_SHORT
+            ).show()
+
+            return
+        }
+
+        val nuevaPassword =
+            etNuevaPassword.text
+                ?.toString()
+                .orEmpty()
+
+        val confirmarPassword =
+            etRepetirPassword.text
+                ?.toString()
+                .orEmpty()
+
+        if (
+            !esValidoMinimo ||
+            !esValidoMayuscula ||
+            !esValidoNumero ||
+            !esValidoCoincidencia
+        ) {
+            Toast.makeText(
+                this,
+                "Cumple con todos los requisitos de seguridad",
+                Toast.LENGTH_LONG
+            ).show()
+
+            return
+        }
+
+        resetearPasswordDesdeApi(
+            nuevaPassword =
+                nuevaPassword,
+            confirmarPassword =
+                confirmarPassword
+        )
+    }
+
+    private fun resetearPasswordDesdeApi(
+        nuevaPassword: String,
+        confirmarPassword: String
+    ) {
+        if (
+            !iniciarOperacion(
+                "Guardando nueva contraseña..."
+            )
+        ) {
+            return
+        }
+
+        val request =
+            ResetearPasswordApiRequest(
+                correo =
+                    correoRecuperacion,
+                codigo =
+                    codigoRecuperacion,
+                nuevaPassword =
+                    nuevaPassword,
+                confirmarPassword =
+                    confirmarPassword
+            )
+
+        RetrofitClient
+            .obtenerApiService(this)
+            .resetearPassword(request)
+            .enqueue(
+                object :
+                    Callback<RecuperacionPasswordApiResponse> {
+
+                    override fun onResponse(
+                        call: Call<RecuperacionPasswordApiResponse>,
+                        response: Response<RecuperacionPasswordApiResponse>
+                    ) {
+                        finalizarOperacion()
+
+                        if (isFinishing || isDestroyed) {
+                            return
+                        }
+
+                        if (response.isSuccessful) {
+                            val respuesta =
+                                response.body()
+
+                            if (
+                                respuesta == null ||
+                                !respuesta.exito
+                            ) {
+                                Toast.makeText(
+                                    this@ResetearPasswordActivity,
+                                    respuesta?.mensaje
+                                        ?: "No se pudo restablecer la contraseña",
+                                    Toast.LENGTH_LONG
+                                ).show()
+
+                                return
+                            }
+
+                            timerExpiracion?.cancel()
+                            timerReenvio?.cancel()
+
+                            Toast.makeText(
+                                this@ResetearPasswordActivity,
+                                respuesta.mensaje,
+                                Toast.LENGTH_LONG
+                            ).show()
+
+                            abrirLogin()
+                            return
+                        }
+
+                        procesarErrorRespuesta(
+                            response = response,
+                            reiniciarSiCodigoInvalido =
+                                true
+                        )
+                    }
+
+                    override fun onFailure(
+                        call: Call<RecuperacionPasswordApiResponse>,
+                        throwable: Throwable
+                    ) {
+                        finalizarOperacion()
+
+                        if (isFinishing || isDestroyed) {
+                            return
+                        }
+
+                        Toast.makeText(
+                            this@ResetearPasswordActivity,
+                            "No se pudo restablecer la contraseña",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                }
+            )
     }
 
     private fun configurarCasillerosCodigo() {
         for (i in digitBoxes.indices) {
-            actualizarBordeCasillero(digitBoxes[i], digitBoxes[i].text.isNotEmpty())
+            actualizarBordeCasillero(
+                digitBoxes[i],
+                digitBoxes[i].text.isNotEmpty()
+            )
 
-            digitBoxes[i].addTextChangedListener(object : TextWatcher {
-                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            digitBoxes[i]
+                .addTextChangedListener(
+                    object : TextWatcher {
 
-                override fun afterTextChanged(s: Editable?) {
-                    val tieneTexto = s?.isNotEmpty() == true
-                    actualizarBordeCasillero(digitBoxes[i], tieneTexto)
+                        override fun beforeTextChanged(
+                            s: CharSequence?,
+                            start: Int,
+                            count: Int,
+                            after: Int
+                        ) {
+                        }
 
-                    if (tieneTexto && i < digitBoxes.size - 1) {
-                        digitBoxes[i + 1].requestFocus()
+                        override fun onTextChanged(
+                            s: CharSequence?,
+                            start: Int,
+                            before: Int,
+                            count: Int
+                        ) {
+                        }
+
+                        override fun afterTextChanged(
+                            s: Editable?
+                        ) {
+                            val tieneTexto =
+                                s?.isNotEmpty() == true
+
+                            actualizarBordeCasillero(
+                                digitBoxes[i],
+                                tieneTexto
+                            )
+
+                            if (
+                                tieneTexto &&
+                                i < digitBoxes.size - 1
+                            ) {
+                                digitBoxes[i + 1]
+                                    .requestFocus()
+                            }
+
+                            val codigoCompleto =
+                                digitBoxes.joinToString(
+                                    separator = ""
+                                ) {
+                                    it.text.toString()
+                                }
+
+                            etCodigo.setText(
+                                codigoCompleto
+                            )
+                        }
                     }
+                )
 
-                    val codigoCompleto = digitBoxes.joinToString("") { it.text.toString() }
-                    etCodigo.setText(codigoCompleto)
-                }
-            })
+            digitBoxes[i]
+                .setOnKeyListener {
+                        _,
+                        keyCode,
+                        event ->
 
-            digitBoxes[i].setOnKeyListener { _, keyCode, event ->
-                if (keyCode == KeyEvent.KEYCODE_DEL && event.action == KeyEvent.ACTION_DOWN) {
-                    if (digitBoxes[i].text.isEmpty() && i > 0) {
-                        digitBoxes[i - 1].requestFocus()
-                        digitBoxes[i - 1].setText("")
-                        return@setOnKeyListener true
+                    if (
+                        keyCode ==
+                        KeyEvent.KEYCODE_DEL &&
+                        event.action ==
+                        KeyEvent.ACTION_DOWN &&
+                        digitBoxes[i].text.isEmpty() &&
+                        i > 0
+                    ) {
+                        digitBoxes[i - 1]
+                            .requestFocus()
+
+                        digitBoxes[i - 1]
+                            .setText("")
+
+                        true
+                    } else {
+                        false
                     }
                 }
-                false
-            }
         }
     }
 
-    private fun actualizarBordeCasillero(editText: EditText, lleno: Boolean) {
-        val drawable = editText.background.mutate() as? GradientDrawable ?: return
-        val colorBorde = if (lleno) Color.parseColor("#2E7D32") else Color.parseColor("#CFD8DC")
-        val grosor = if (lleno) 4 else 3
-        drawable.setStroke(grosor, colorBorde)
+    private fun actualizarBordeCasillero(
+        editText: EditText,
+        lleno: Boolean
+    ) {
+        val drawable =
+            editText.background
+                ?.mutate() as? GradientDrawable
+                ?: return
+
+        val colorBorde =
+            if (lleno) {
+                Color.parseColor("#2E7D32")
+            } else {
+                Color.parseColor("#CFD8DC")
+            }
+
+        val grosor =
+            if (lleno) {
+                4
+            } else {
+                3
+            }
+
+        drawable.setStroke(
+            grosor,
+            colorBorde
+        )
     }
 
     private fun configurarAnimacionRequisitos() {
-        val watcher = object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        val watcher =
+            object : TextWatcher {
 
-            override fun afterTextChanged(s: Editable?) {
-                val pass1 = etNuevaPassword.text.toString()
-                val pass2 = etRepetirPassword.text.toString()
+                override fun beforeTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    count: Int,
+                    after: Int
+                ) {
+                }
 
-                val estaVacio = pass1.isEmpty()
-                esValidoMinimo = pass1.length >= 6
-                esValidoMayuscula = pass1.any { it.isUpperCase() }
-                esValidoNumero = pass1.any { it.isDigit() }
-                esValidoCoincidencia = pass1.isNotEmpty() && pass1 == pass2
+                override fun onTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    before: Int,
+                    count: Int
+                ) {
+                }
 
-                animarColorRequisito(reqMinCaracteres, estaVacio, esValidoMinimo)
-                animarColorRequisito(reqMayuscula, estaVacio, esValidoMayuscula)
-                animarColorRequisito(reqNumero, estaVacio, esValidoNumero)
-                animarColorRequisito(reqCoinciden, pass2.isEmpty(), esValidoCoincidencia)
+                override fun afterTextChanged(
+                    s: Editable?
+                ) {
+                    val pass1 =
+                        etNuevaPassword.text
+                            ?.toString()
+                            .orEmpty()
+
+                    val pass2 =
+                        etRepetirPassword.text
+                            ?.toString()
+                            .orEmpty()
+
+                    val estaVacio =
+                        pass1.isEmpty()
+
+                    esValidoMinimo =
+                        pass1.length >= 6
+
+                    esValidoMayuscula =
+                        pass1.any {
+                            it.isUpperCase()
+                        }
+
+                    esValidoNumero =
+                        pass1.any {
+                            it.isDigit()
+                        }
+
+                    esValidoCoincidencia =
+                        pass1.isNotEmpty() &&
+                                pass1 == pass2
+
+                    animarColorRequisito(
+                        reqMinCaracteres,
+                        estaVacio,
+                        esValidoMinimo
+                    )
+
+                    animarColorRequisito(
+                        reqMayuscula,
+                        estaVacio,
+                        esValidoMayuscula
+                    )
+
+                    animarColorRequisito(
+                        reqNumero,
+                        estaVacio,
+                        esValidoNumero
+                    )
+
+                    animarColorRequisito(
+                        reqCoinciden,
+                        pass2.isEmpty(),
+                        esValidoCoincidencia
+                    )
+                }
+            }
+
+        etNuevaPassword
+            .addTextChangedListener(
+                watcher
+            )
+
+        etRepetirPassword
+            .addTextChangedListener(
+                watcher
+            )
+    }
+
+    private fun animarColorRequisito(
+        textView: TextView,
+        estaVacio: Boolean,
+        cumplido: Boolean
+    ) {
+        val colorTextoOriginal =
+            textView.currentTextColor
+
+        val colorTextoDestino =
+            when {
+                estaVacio ->
+                    Color.parseColor("#9E9E9E")
+
+                cumplido ->
+                    Color.parseColor("#2E7D32")
+
+                else ->
+                    Color.parseColor("#E53935")
+            }
+
+        if (
+            colorTextoOriginal !=
+            colorTextoDestino
+        ) {
+            ValueAnimator.ofObject(
+                ArgbEvaluator(),
+                colorTextoOriginal,
+                colorTextoDestino
+            ).apply {
+                duration = 300
+
+                addUpdateListener {
+                    textView.setTextColor(
+                        it.animatedValue as Int
+                    )
+                }
+
+                start()
             }
         }
-
-        etNuevaPassword.addTextChangedListener(watcher)
-        etRepetirPassword.addTextChangedListener(watcher)
     }
 
-    private fun animarColorRequisito(textView: TextView, estaVacio: Boolean, cumplido: Boolean) {
-        val colorTextoOriginal = textView.currentTextColor
+    private fun iniciarTemporizador(
+        expiracionMinutos: Int
+    ) {
+        timerExpiracion?.cancel()
 
-        val colorTextoDestino = when {
-            estaVacio -> Color.parseColor("#9E9E9E")
-            cumplido -> Color.parseColor("#2E7D32")
-            else -> Color.parseColor("#E53935")
-        }
+        val duracion =
+            expiracionMinutos
+                .coerceAtLeast(1)
+                .toLong() *
+                    60_000L
 
-        if (colorTextoOriginal != colorTextoDestino) {
-            val animadorColor = ValueAnimator.ofObject(ArgbEvaluator(), colorTextoOriginal, colorTextoDestino)
-            animadorColor.duration = 300
-            animadorColor.addUpdateListener { animator ->
-                textView.setTextColor(animator.animatedValue as Int)
-            }
-            animadorColor.start()
-        }
-    }
+        timerExpiracion =
+            object :
+                CountDownTimer(
+                    duracion,
+                    1_000L
+                ) {
 
-    private fun mostrarModalCargando(mensaje: String) {
-        dialogCargando = Dialog(this).apply {
-            requestWindowFeature(Window.FEATURE_NO_TITLE)
-            setContentView(R.layout.dialog_cargando)
-            setCancelable(false)
-            window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-            findViewById<TextView>(R.id.tvMensajeCarga)?.text = mensaje
-            show()
-        }
-    }
+                override fun onTick(
+                    millisUntilFinished: Long
+                ) {
+                    val minutos =
+                        millisUntilFinished /
+                                1_000L /
+                                60L
 
-    private fun ocultarModalCargando() {
-        dialogCargando?.dismiss()
+                    val segundos =
+                        millisUntilFinished /
+                                1_000L %
+                                60L
+
+                    tvTemporizador.text =
+                        String.format(
+                            "El código expira en %02d:%02d",
+                            minutos,
+                            segundos
+                        )
+                }
+
+                override fun onFinish() {
+                    codigoVerificado =
+                        false
+
+                    codigoRecuperacion =
+                        ""
+
+                    Toast.makeText(
+                        this@ResetearPasswordActivity,
+                        "El código ha expirado. Solicita uno nuevo.",
+                        Toast.LENGTH_LONG
+                    ).show()
+
+                    mostrarPaso1()
+                }
+            }.start()
     }
 
     private fun iniciarContadorReenvio() {
         timerReenvio?.cancel()
-        tvReenviarCodigo.isEnabled = false
-        tvReenviarCodigo.alpha = 0.5f
 
-        timerReenvio = object : CountDownTimer(TIEMPO_ESPERA_REENVIO, 1000) {
-            override fun onTick(millisUntilFinished: Long) {
-                val segundos = millisUntilFinished / 1000
-                tvReenviarCodigo.text = "¿No te llegó el código? Espera ${segundos}s"
-            }
+        reenviarDisponible =
+            false
 
-            override fun onFinish() {
-                tvReenviarCodigo.isEnabled = true
-                tvReenviarCodigo.alpha = 1.0f
-                tvReenviarCodigo.text = "¿No te llegó el código? Reenviar"
-            }
-        }.start()
+        actualizarControles()
+
+        timerReenvio =
+            object :
+                CountDownTimer(
+                    30_000L,
+                    1_000L
+                ) {
+
+                override fun onTick(
+                    millisUntilFinished: Long
+                ) {
+                    val segundos =
+                        millisUntilFinished /
+                                1_000L
+
+                    tvReenviarCodigo.text =
+                        "¿No te llegó el código? Espera ${segundos}s"
+                }
+
+                override fun onFinish() {
+                    reenviarDisponible =
+                        true
+
+                    tvReenviarCodigo.text =
+                        "¿No te llegó el código? Reenviar"
+
+                    actualizarControles()
+                }
+            }.start()
     }
 
-    private fun limpiarCasillerosCodigo() {
-        for (box in digitBoxes) {
-            box.setText("")
+    private fun limpiarCasillerosCodigo(
+        solicitarFoco: Boolean
+    ) {
+        digitBoxes.forEach {
+            it.setText("")
         }
-        digitBoxes[0].requestFocus()
+
+        etCodigo.text?.clear()
+
+        if (solicitarFoco) {
+            digitBoxes.firstOrNull()
+                ?.requestFocus()
+        }
     }
 
-    private fun iniciarTemporizador() {
-        timer?.cancel()
-        tiempoRestanteMillis = 120000
+    private fun iniciarOperacion(
+        mensaje: String
+    ): Boolean {
+        if (operacionEnCurso) {
+            return false
+        }
 
-        timer = object : CountDownTimer(tiempoRestanteMillis, 1000) {
-            override fun onTick(millisUntilFinished: Long) {
-                tiempoRestanteMillis = millisUntilFinished
-                val minutos = (millisUntilFinished / 1000) / 60
-                val segundos = (millisUntilFinished / 1000) % 60
-                tvTemporizador.text = String.format("El código expira en %02d:%02d", minutos, segundos)
+        operacionEnCurso =
+            true
+
+        actualizarControles()
+        mostrarModalCargando(mensaje)
+
+        return true
+    }
+
+    private fun finalizarOperacion() {
+        operacionEnCurso =
+            false
+
+        ocultarModalCargando()
+        actualizarControles()
+    }
+
+    private fun actualizarControles() {
+        btnEnviarCodigo.isEnabled =
+            !operacionEnCurso
+
+        btnVerificarCodigo.isEnabled =
+            !operacionEnCurso
+
+        btnRestablecer.isEnabled =
+            !operacionEnCurso
+
+        tvReenviarCodigo.isEnabled =
+            !operacionEnCurso &&
+                    reenviarDisponible
+
+        tvReenviarCodigo.alpha =
+            if (
+                !operacionEnCurso &&
+                reenviarDisponible
+            ) {
+                1f
+            } else {
+                0.5f
             }
+    }
 
-            override fun onFinish() {
-                tvTemporizador.text = "Código expirado"
-                Toast.makeText(this@ResetearPasswordActivity, "Código expirado, vuelva a intentarlo", Toast.LENGTH_LONG).show()
+    private fun mostrarModalCargando(
+        mensaje: String
+    ) {
+        dialogCargando?.dismiss()
+
+        dialogCargando =
+            Dialog(this).apply {
+                requestWindowFeature(
+                    Window.FEATURE_NO_TITLE
+                )
+
+                setContentView(
+                    R.layout.dialog_cargando
+                )
+
+                setCancelable(false)
+
+                window?.setBackgroundDrawable(
+                    ColorDrawable(
+                        Color.TRANSPARENT
+                    )
+                )
+
+                findViewById<TextView>(
+                    R.id.tvMensajeCarga
+                )?.text =
+                    mensaje
+
+                show()
+            }
+    }
+
+    private fun ocultarModalCargando() {
+        dialogCargando?.dismiss()
+        dialogCargando = null
+    }
+
+    private fun procesarErrorRespuesta(
+        response: Response<*>,
+        reiniciarSiCodigoInvalido: Boolean =
+            false
+    ) {
+        val mensaje =
+            obtenerMensajeError(response)
+                ?: when (response.code()) {
+                    400 ->
+                        "Los datos enviados no son válidos"
+
+                    404 ->
+                        "El correo no se encuentra registrado"
+
+                    500 ->
+                        "No se pudo enviar el código de recuperación"
+
+                    else ->
+                        "El servidor respondió con el código ${response.code()}"
+                }
+
+        Toast.makeText(
+            this,
+            mensaje,
+            Toast.LENGTH_LONG
+        ).show()
+
+        if (
+            reiniciarSiCodigoInvalido
+        ) {
+            val texto =
+                mensaje.lowercase()
+
+            if (
+                texto.contains("expirado") ||
+                texto.contains("máximo") ||
+                texto.contains(
+                    "no existe un código"
+                )
+            ) {
                 mostrarPaso1()
             }
-        }.start()
+        }
     }
 
-    private fun reenviarCodigoLocal() {
-        Toast.makeText(this, "Se envió un nuevo código local", Toast.LENGTH_SHORT).show()
-        limpiarCasillerosCodigo()
-        iniciarTemporizador()
-        iniciarContadorReenvio()
+    private fun obtenerMensajeError(
+        response: Response<*>
+    ): String? {
+        return try {
+            val contenido =
+                response.errorBody()
+                    ?.string()
+
+            if (contenido.isNullOrBlank()) {
+                null
+            } else {
+                val json =
+                    JSONObject(contenido)
+
+                val mensaje =
+                    json.optString(
+                        "mensaje"
+                    )
+
+                if (mensaje.isNotBlank()) {
+                    mensaje
+                } else {
+                    val errores =
+                        json.optJSONObject(
+                            "errors"
+                        )
+
+                    if (errores != null) {
+                        val claves =
+                            errores.keys()
+
+                        if (claves.hasNext()) {
+                            errores
+                                .optJSONArray(
+                                    claves.next()
+                                )
+                                ?.optString(0)
+                                ?.takeIf {
+                                    it.isNotBlank()
+                                }
+                        } else {
+                            json.optString(
+                                "title"
+                            ).takeIf {
+                                it.isNotBlank()
+                            }
+                        }
+                    } else {
+                        json.optString(
+                            "title"
+                        ).takeIf {
+                            it.isNotBlank()
+                        }
+                    }
+                }
+            }
+        } catch (exception: Exception) {
+            null
+        }
+    }
+
+    private fun abrirLogin() {
+        SessionManager(this)
+            .limpiarSesion()
+
+        val intent =
+            Intent(
+                this,
+                LoginActivity::class.java
+            ).apply {
+                flags =
+                    Intent.FLAG_ACTIVITY_NEW_TASK or
+                            Intent.FLAG_ACTIVITY_CLEAR_TASK
+            }
+
+        startActivity(intent)
+        finish()
     }
 
     override fun onDestroy() {
-        timer?.cancel()
+        timerExpiracion?.cancel()
         timerReenvio?.cancel()
         ocultarModalCargando()
+
         super.onDestroy()
     }
 }
