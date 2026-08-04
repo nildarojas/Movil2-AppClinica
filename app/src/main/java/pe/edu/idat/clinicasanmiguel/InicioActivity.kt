@@ -15,27 +15,53 @@ import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import com.google.android.material.navigation.NavigationView
-import pe.edu.idat.clinicasanmiguel.ui.*
-import java.util.Locale
+import com.google.android.material.snackbar.Snackbar
 import pe.edu.idat.clinicasanmiguel.network.JwtUtils
 import pe.edu.idat.clinicasanmiguel.network.SessionManager
-
+import pe.edu.idat.clinicasanmiguel.ui.*
+import pe.edu.idat.clinicasanmiguel.utils.NetworkMonitor
+import java.util.Locale
 
 class InicioActivity : AppCompatActivity() {
 
-    private lateinit var drawerLayout: DrawerLayout
-    private lateinit var nvMenu: NavigationView
-    private lateinit var btnMenuCentro: LinearLayout
-    private lateinit var btnInicioBottom: LinearLayout
-    private lateinit var btnSalirBottom: LinearLayout
+    private lateinit var drawerLayout:
+            DrawerLayout
 
-    private var rolUsuario: String = "PACIENTE"
+    private lateinit var nvMenu:
+            NavigationView
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    private lateinit var btnMenuCentro:
+            LinearLayout
+
+    private lateinit var btnInicioBottom:
+            LinearLayout
+
+    private lateinit var btnSalirBottom:
+            LinearLayout
+
+    private var rolUsuario:
+            String = "PACIENTE"
+
+    private var snackbarConexion:
+            Snackbar? = null
+
+    private var estadoConexionInicialRecibido =
+        false
+
+    private var ultimoEstadoConexion:
+            Boolean? = null
+
+    override fun onCreate(
+        savedInstanceState: Bundle?
+    ) {
+        super.onCreate(
+            savedInstanceState
+        )
 
         val sessionManager =
-            SessionManager(this)
+            SessionManager(
+                this
+            )
 
         val token =
             sessionManager.obtenerToken()
@@ -43,7 +69,9 @@ class InicioActivity : AppCompatActivity() {
         val sesionValida =
             sessionManager.esSesionRemota() &&
                     !token.isNullOrBlank() &&
-                    JwtUtils.esTokenVigente(token)
+                    JwtUtils.esTokenVigente(
+                        token
+                    )
 
         if (!sesionValida) {
             sessionManager.limpiarSesion()
@@ -52,20 +80,23 @@ class InicioActivity : AppCompatActivity() {
                 Intent(
                     this,
                     LoginActivity::class.java
-                )
+                ).apply {
+                    flags =
+                        Intent.FLAG_ACTIVITY_NEW_TASK or
+                                Intent.FLAG_ACTIVITY_CLEAR_TASK
+                }
 
-            intent.flags =
-                Intent.FLAG_ACTIVITY_NEW_TASK or
-                        Intent.FLAG_ACTIVITY_CLEAR_TASK
-
-            startActivity(intent)
+            startActivity(
+                intent
+            )
 
             finish()
-
             return
         }
+
         setContentView(
-            R.layout.activity_inicio)
+            R.layout.activity_inicio
+        )
 
         val preferencias =
             getSharedPreferences(
@@ -75,61 +106,190 @@ class InicioActivity : AppCompatActivity() {
 
         rolUsuario =
             (
-                    intent.getStringExtra("ROL_USUARIO")
+                    intent.getStringExtra(
+                        "ROL_USUARIO"
+                    )
                         ?: preferencias.getString(
                             "ROL_USUARIO",
                             "PACIENTE"
                         )
                         ?: "PACIENTE"
-                    ).uppercase(Locale.ROOT)
+                    ).uppercase(
+                    Locale.ROOT
+                )
 
         drawerLayout =
-            findViewById(R.id.MenuGeneral)
+            findViewById(
+                R.id.MenuGeneral
+            )
 
         nvMenu =
-            findViewById(R.id.nvMenu)
+            findViewById(
+                R.id.nvMenu
+            )
 
-        btnMenuCentro = findViewById(R.id.btnMenuCentro)
-        btnInicioBottom = findViewById(R.id.btnInicioBottom)
-        btnSalirBottom = findViewById(R.id.btnSalirBottom)
+        btnMenuCentro =
+            findViewById(
+                R.id.btnMenuCentro
+            )
 
-        btnMenuCentro.setOnClickListener {
-            abrirMenuLateral()
-            actualizarEstadoBarraInferior("MENU")
-        }
+        btnInicioBottom =
+            findViewById(
+                R.id.btnInicioBottom
+            )
 
-        btnInicioBottom.setOnClickListener {
-            cargarPantallaInicial()
-            nvMenu.setCheckedItem(R.id.itInicio)
-            actualizarEstadoBarraInferior("INICIO")
-        }
+        btnSalirBottom =
+            findViewById(
+                R.id.btnSalirBottom
+            )
 
-        btnSalirBottom.setOnClickListener {
-            actualizarEstadoBarraInferior("SALIR")
-            desplegarCierreSesion()
-        }
+        btnMenuCentro
+            .setOnClickListener {
+
+                abrirMenuLateral()
+
+                actualizarEstadoBarraInferior(
+                    "MENU"
+                )
+            }
+
+        btnInicioBottom
+            .setOnClickListener {
+
+                cargarPantallaInicial()
+
+                nvMenu.setCheckedItem(
+                    R.id.itInicio
+                )
+
+                actualizarEstadoBarraInferior(
+                    "INICIO"
+                )
+            }
+
+        btnSalirBottom
+            .setOnClickListener {
+
+                actualizarEstadoBarraInferior(
+                    "SALIR"
+                )
+
+                desplegarCierreSesion()
+            }
 
         configurarMenuPorRol()
         configurarCabeceraPorRol()
+        observarEstadoConexion()
 
         if (savedInstanceState == null) {
-
             cargarPantallaInicial()
 
-            nvMenu.setCheckedItem(R.id.itInicio)
-            actualizarEstadoBarraInferior("INICIO")
+            nvMenu.setCheckedItem(
+                R.id.itInicio
+            )
+
+            actualizarEstadoBarraInferior(
+                "INICIO"
+            )
         }
 
-        nvMenu.setNavigationItemSelectedListener { menuItem ->
+        nvMenu
+            .setNavigationItemSelectedListener {
+                    menuItem ->
 
-            ejecutarRuteoMenu(menuItem)
-        }
+                ejecutarRuteoMenu(
+                    menuItem
+                )
+            }
 
         configurarBotonAtras()
     }
 
-    private fun configurarMenuPorRol() {
+    override fun onStart() {
+        super.onStart()
 
+        NetworkMonitor.iniciar(
+            this
+        )
+    }
+
+    override fun onStop() {
+        NetworkMonitor.detener()
+
+        super.onStop()
+    }
+
+    private fun observarEstadoConexion() {
+        NetworkMonitor
+            .estadoConexion
+            .observe(
+                this
+            ) { conectado ->
+
+                val estadoAnterior =
+                    ultimoEstadoConexion
+
+                ultimoEstadoConexion =
+                    conectado
+
+                if (!estadoConexionInicialRecibido) {
+                    estadoConexionInicialRecibido =
+                        true
+
+                    if (!conectado) {
+                        mostrarAvisoSinConexion()
+                    }
+
+                    return@observe
+                }
+
+                if (estadoAnterior == conectado) {
+                    return@observe
+                }
+
+                if (conectado) {
+                    ocultarAvisoSinConexion()
+
+                    Snackbar.make(
+                        findViewById(
+                            android.R.id.content
+                        ),
+                        "Conexión restablecida",
+                        Snackbar.LENGTH_SHORT
+                    ).show()
+
+                } else {
+                    mostrarAvisoSinConexion()
+                }
+            }
+    }
+
+    private fun mostrarAvisoSinConexion() {
+        if (
+            snackbarConexion?.isShown ==
+            true
+        ) {
+            return
+        }
+
+        snackbarConexion =
+            Snackbar.make(
+                findViewById(
+                    android.R.id.content
+                ),
+                "Sin conexión. Algunas funciones no están disponibles.",
+                Snackbar.LENGTH_INDEFINITE
+            )
+
+        snackbarConexion?.show()
+    }
+
+    private fun ocultarAvisoSinConexion() {
+        snackbarConexion?.dismiss()
+        snackbarConexion = null
+    }
+
+    private fun configurarMenuPorRol() {
         val menu =
             nvMenu.menu
 
@@ -138,15 +298,18 @@ class InicioActivity : AppCompatActivity() {
 
         menu.findItem(
             R.id.itModuloPaciente
-        ).isVisible = !esAdministrador
+        ).isVisible =
+            !esAdministrador
 
         menu.findItem(
             R.id.itModuloAdministrador
-        ).isVisible = esAdministrador
+        ).isVisible =
+            esAdministrador
 
         menu.findItem(
             R.id.itModuloCuenta
-        ).isVisible = true
+        ).isVisible =
+            true
 
         menu.findItem(
             R.id.itInicio
@@ -168,7 +331,6 @@ class InicioActivity : AppCompatActivity() {
     }
 
     private fun configurarCabeceraPorRol() {
-
         val preferencias =
             getSharedPreferences(
                 "sesion_clinica",
@@ -183,36 +345,50 @@ class InicioActivity : AppCompatActivity() {
 
         val esAdministrador =
             rolUsuario == "ADMIN"
+
         val colorRol =
             if (esAdministrador) {
-                Color.parseColor("#8B1E1E")
+                Color.parseColor(
+                    "#8B1E1E"
+                )
             } else {
-                Color.parseColor("#458890")
+                Color.parseColor(
+                    "#458890"
+                )
             }
+
         val headerView =
-            nvMenu.getHeaderView(0)
+            nvMenu.getHeaderView(
+                0
+            )
 
         val headerMenu =
-            headerView.findViewById<LinearLayout>(
-                R.id.headerMenu
-            )
+            headerView
+                .findViewById<LinearLayout>(
+                    R.id.headerMenu
+                )
 
         val tvHeaderTitulo =
-            headerView.findViewById<TextView>(
-                R.id.tvHeaderTitulo
-            )
+            headerView
+                .findViewById<TextView>(
+                    R.id.tvHeaderTitulo
+                )
 
         val tvHeaderBienvenida =
-            headerView.findViewById<TextView>(
-                R.id.tvHeaderBienvenida
-            )
+            headerView
+                .findViewById<TextView>(
+                    R.id.tvHeaderBienvenida
+                )
 
         val tvHeaderRol =
-            headerView.findViewById<TextView>(
-                R.id.tvHeaderRol
-            )
+            headerView
+                .findViewById<TextView>(
+                    R.id.tvHeaderRol
+                )
 
-        headerMenu.setBackgroundColor(colorRol)
+        headerMenu.setBackgroundColor(
+            colorRol
+        )
 
         tvHeaderTitulo.text =
             "Clínica San Miguel"
@@ -226,13 +402,16 @@ class InicioActivity : AppCompatActivity() {
             } else {
                 "PACIENTE"
             }
+
         nvMenu.itemIconTintList =
-            ColorStateList.valueOf(colorRol)
+            ColorStateList.valueOf(
+                colorRol
+            )
     }
 
     private fun cargarPantallaInicial() {
-
-        val fragmentInicial: Fragment =
+        val fragmentInicial:
+                Fragment =
             if (rolUsuario == "ADMIN") {
                 AdminFragment()
             } else {
@@ -252,12 +431,12 @@ class InicioActivity : AppCompatActivity() {
         menuItem: MenuItem
     ): Boolean {
 
-        var fragmentSeleccionado: Fragment? = null
+        var fragmentSeleccionado:
+                Fragment? = null
 
         when (menuItem.itemId) {
 
             R.id.itInicio -> {
-
                 fragmentSeleccionado =
                     if (rolUsuario == "ADMIN") {
                         AdminFragment()
@@ -265,78 +444,77 @@ class InicioActivity : AppCompatActivity() {
                         PacienteFragment()
                     }
             }
-            R.id.itPerfil -> {
 
+            R.id.itPerfil -> {
                 fragmentSeleccionado =
                     PerfilFragment()
             }
 
             R.id.itSeguridad -> {
-
                 fragmentSeleccionado =
-                    CambiarPasswordInternoFragment().apply {
-
-                        arguments =
-                            Bundle().apply {
-
-                                putString(
-                                    "ROL_USUARIO",
-                                    rolUsuario
-                                )
-                            }
-                    }
+                    CambiarPasswordInternoFragment()
+                        .apply {
+                            arguments =
+                                Bundle().apply {
+                                    putString(
+                                        "ROL_USUARIO",
+                                        rolUsuario
+                                    )
+                                }
+                        }
             }
 
             R.id.itCerrarSesion -> {
-
                 desplegarCierreSesion()
             }
-            R.id.itNuevaCita -> {
 
+            R.id.itNuevaCita -> {
                 fragmentSeleccionado =
                     SeleccionarEspecialidadFragment()
             }
 
             R.id.itMisCitas -> {
-
                 fragmentSeleccionado =
                     MisCitasFragment()
             }
 
             R.id.itHistorial -> {
-
                 fragmentSeleccionado =
                     HistorialCompletoFragment()
             }
 
             R.id.itNotificaciones -> {
-
                 fragmentSeleccionado =
                     NotificacionesFragment()
             }
 
             R.id.itEspecialidades -> {
-                fragmentSeleccionado = ListaEspecialidadesFragment()
+                fragmentSeleccionado =
+                    ListaEspecialidadesFragment()
             }
 
             R.id.itDoctores -> {
-                fragmentSeleccionado = ListaDoctoresAdminFragment()
+                fragmentSeleccionado =
+                    ListaDoctoresAdminFragment()
             }
 
             R.id.itHorarios -> {
-                fragmentSeleccionado = ListaHorariosAdminFragment()
+                fragmentSeleccionado =
+                    ListaHorariosAdminFragment()
             }
 
             R.id.itUsuarios -> {
-                fragmentSeleccionado = ListaUsuariosFragment()
+                fragmentSeleccionado =
+                    ListaUsuariosFragment()
             }
 
             R.id.itCitasGlobales -> {
-                fragmentSeleccionado = CitasGlobalesFragment()
+                fragmentSeleccionado =
+                    CitasGlobalesFragment()
             }
         }
-        if (fragmentSeleccionado != null) {
 
+        if (fragmentSeleccionado != null) {
             supportFragmentManager
                 .popBackStackComplete()
 
@@ -352,17 +530,28 @@ class InicioActivity : AppCompatActivity() {
                         fragmentSeleccionado
                     )
 
-            if (menuItem.itemId != R.id.itInicio) {
+            if (
+                menuItem.itemId !=
+                R.id.itInicio
+            ) {
+                transaccion.addToBackStack(
+                    null
+                )
 
-                transaccion.addToBackStack(null)
-                actualizarEstadoBarraInferior("MENU")
+                actualizarEstadoBarraInferior(
+                    "MENU"
+                )
+
             } else {
-                actualizarEstadoBarraInferior("INICIO")
+                actualizarEstadoBarraInferior(
+                    "INICIO"
+                )
             }
 
             transaccion.commit()
 
-            menuItem.isChecked = true
+            menuItem.isChecked =
+                true
 
             nvMenu.setCheckedItem(
                 menuItem.itemId
@@ -377,127 +566,215 @@ class InicioActivity : AppCompatActivity() {
     }
 
     private fun abrirMenuLateral() {
-
         drawerLayout.openDrawer(
             GravityCompat.START
         )
     }
 
     private fun configurarBotonAtras() {
-
-        onBackPressedDispatcher.addCallback(
-            this,
-            object : OnBackPressedCallback(true) {
-
-                override fun handleOnBackPressed() {
-
-                    if (
-                        drawerLayout.isDrawerOpen(
-                            GravityCompat.START
-                        )
+        onBackPressedDispatcher
+            .addCallback(
+                this,
+                object :
+                    OnBackPressedCallback(
+                        true
                     ) {
 
-                        drawerLayout.closeDrawer(
-                            GravityCompat.START
-                        )
+                    override fun handleOnBackPressed() {
+                        if (
+                            drawerLayout
+                                .isDrawerOpen(
+                                    GravityCompat.START
+                                )
+                        ) {
+                            drawerLayout
+                                .closeDrawer(
+                                    GravityCompat.START
+                                )
 
-                        return
-                    }
+                            return
+                        }
 
-                    val fragmentActual =
-                        supportFragmentManager
-                            .findFragmentById(
-                                R.id.flContenedor
+                        val fragmentActual =
+                            supportFragmentManager
+                                .findFragmentById(
+                                    R.id.flContenedor
+                                )
+
+                        if (
+                            fragmentActual
+                                    is SeleccionarMedicoHorarioFragment
+                        ) {
+                            supportFragmentManager
+                                .popBackStack()
+
+                            nvMenu.setCheckedItem(
+                                R.id.itNuevaCita
                             )
-                    if (
-                        fragmentActual
-                                is SeleccionarMedicoHorarioFragment
-                    ) {
 
-                        supportFragmentManager
-                            .popBackStack()
+                            actualizarEstadoBarraInferior(
+                                "MENU"
+                            )
 
-                        nvMenu.setCheckedItem(
-                            R.id.itNuevaCita
-                        )
-                        actualizarEstadoBarraInferior("MENU")
+                            return
+                        }
 
-                        return
+                        if (
+                            supportFragmentManager
+                                .backStackEntryCount >
+                            0
+                        ) {
+                            supportFragmentManager
+                                .popBackStackComplete()
+
+                            nvMenu.setCheckedItem(
+                                R.id.itInicio
+                            )
+
+                            actualizarEstadoBarraInferior(
+                                "INICIO"
+                            )
+
+                            return
+                        }
+
+                        isEnabled =
+                            false
+
+                        onBackPressedDispatcher
+                            .onBackPressed()
                     }
-                    if (
-                        supportFragmentManager
-                            .backStackEntryCount > 0
-                    ) {
-
-                        supportFragmentManager
-                            .popBackStackComplete()
-
-                        nvMenu.setCheckedItem(
-                            R.id.itInicio
-                        )
-                        actualizarEstadoBarraInferior("INICIO")
-
-                        return
-                    }
-                    isEnabled = false
-
-                    onBackPressedDispatcher
-                        .onBackPressed()
                 }
-            }
-        )
+            )
     }
 
     private fun androidx.fragment.app.FragmentManager
             .popBackStackComplete() {
 
-        while (backStackEntryCount > 0) {
-
+        while (
+            backStackEntryCount >
+            0
+        ) {
             popBackStackImmediate()
         }
     }
 
-    private fun actualizarEstadoBarraInferior(opcionSeleccionada: String) {
-        val colorActivo = Color.parseColor("#458890")
-        val colorInactivo = Color.parseColor("#A0A0A0")
+    private fun actualizarEstadoBarraInferior(
+        opcionSeleccionada: String
+    ) {
+        val colorActivo =
+            Color.parseColor(
+                "#458890"
+            )
 
-        val imgInicio = btnInicioBottom.getChildAt(0) as ImageView
-        val tvInicio = btnInicioBottom.getChildAt(1) as TextView
+        val colorInactivo =
+            Color.parseColor(
+                "#A0A0A0"
+            )
 
-        val imgMenu = btnMenuCentro.getChildAt(0) as ImageView
-        val tvMenu = btnMenuCentro.getChildAt(1) as TextView
+        val imgInicio =
+            btnInicioBottom
+                .getChildAt(
+                    0
+                ) as ImageView
 
-        val imgSalir = btnSalirBottom.getChildAt(0) as ImageView
-        val tvSalir = btnSalirBottom.getChildAt(1) as TextView
+        val tvInicio =
+            btnInicioBottom
+                .getChildAt(
+                    1
+                ) as TextView
 
-        imgInicio.setColorFilter(colorInactivo)
-        tvInicio.setTextColor(colorInactivo)
+        val imgMenu =
+            btnMenuCentro
+                .getChildAt(
+                    0
+                ) as ImageView
 
-        imgMenu.setColorFilter(colorInactivo)
-        tvMenu.setTextColor(colorInactivo)
+        val tvMenu =
+            btnMenuCentro
+                .getChildAt(
+                    1
+                ) as TextView
 
-        imgSalir.setColorFilter(colorInactivo)
-        tvSalir.setTextColor(colorInactivo)
+        val imgSalir =
+            btnSalirBottom
+                .getChildAt(
+                    0
+                ) as ImageView
+
+        val tvSalir =
+            btnSalirBottom
+                .getChildAt(
+                    1
+                ) as TextView
+
+        imgInicio.setColorFilter(
+            colorInactivo
+        )
+
+        tvInicio.setTextColor(
+            colorInactivo
+        )
+
+        imgMenu.setColorFilter(
+            colorInactivo
+        )
+
+        tvMenu.setTextColor(
+            colorInactivo
+        )
+
+        imgSalir.setColorFilter(
+            colorInactivo
+        )
+
+        tvSalir.setTextColor(
+            colorInactivo
+        )
 
         when (opcionSeleccionada) {
+
             "INICIO" -> {
-                imgInicio.setColorFilter(colorActivo)
-                tvInicio.setTextColor(colorActivo)
+                imgInicio.setColorFilter(
+                    colorActivo
+                )
+
+                tvInicio.setTextColor(
+                    colorActivo
+                )
             }
+
             "MENU" -> {
-                imgMenu.setColorFilter(colorActivo)
-                tvMenu.setTextColor(colorActivo)
+                imgMenu.setColorFilter(
+                    colorActivo
+                )
+
+                tvMenu.setTextColor(
+                    colorActivo
+                )
             }
+
             "SALIR" -> {
-                imgSalir.setColorFilter(Color.parseColor("#FF5252"))
-                tvSalir.setTextColor(Color.parseColor("#FF5252"))
+                val colorSalir =
+                    Color.parseColor(
+                        "#FF5252"
+                    )
+
+                imgSalir.setColorFilter(
+                    colorSalir
+                )
+
+                tvSalir.setTextColor(
+                    colorSalir
+                )
             }
         }
     }
 
     private fun desplegarCierreSesion() {
-
-        AlertDialog.Builder(this)
+        AlertDialog.Builder(
+            this
+        )
             .setTitle(
                 "Cerrar Sesión"
             )
@@ -516,13 +793,15 @@ class InicioActivity : AppCompatActivity() {
                     Intent(
                         this,
                         LoginActivity::class.java
-                    )
+                    ).apply {
+                        flags =
+                            Intent.FLAG_ACTIVITY_NEW_TASK or
+                                    Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    }
 
-                intent.flags =
-                    Intent.FLAG_ACTIVITY_NEW_TASK or
-                            Intent.FLAG_ACTIVITY_CLEAR_TASK
-
-                startActivity(intent)
+                startActivity(
+                    intent
+                )
 
                 finish()
             }
@@ -531,5 +810,11 @@ class InicioActivity : AppCompatActivity() {
                 null
             )
             .show()
+    }
+
+    override fun onDestroy() {
+        ocultarAvisoSinConexion()
+
+        super.onDestroy()
     }
 }
