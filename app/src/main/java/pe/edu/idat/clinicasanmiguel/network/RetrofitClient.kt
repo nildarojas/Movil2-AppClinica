@@ -33,6 +33,7 @@ object RetrofitClient {
     private fun crearApiService(
         context: Context
     ): ApiService {
+
         val logging =
             HttpLoggingInterceptor().apply {
                 level =
@@ -48,7 +49,7 @@ object RetrofitClient {
                 )
                 .addInterceptor(logging)
                 .connectTimeout(
-                    30,
+                    15,
                     TimeUnit.SECONDS
                 )
                 .readTimeout(
@@ -56,7 +57,11 @@ object RetrofitClient {
                     TimeUnit.SECONDS
                 )
                 .writeTimeout(
-                    30,
+                    15,
+                    TimeUnit.SECONDS
+                )
+                .callTimeout(
+                    35,
                     TimeUnit.SECONDS
                 )
                 .build()

@@ -10,11 +10,13 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import pe.edu.idat.clinicasanmiguel.entity.Usuario
 import pe.edu.idat.clinicasanmiguel.repository.ResultadoLoginApi
 import pe.edu.idat.clinicasanmiguel.repository.UsuarioRepository
+import pe.edu.idat.clinicasanmiguel.utils.LoadingController
 
 class LoginActivity : AppCompatActivity() {
 
@@ -23,7 +25,22 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var btnLogin: MaterialButton
     private lateinit var etCorreo: TextInputEditText
     private lateinit var etContrasena: TextInputEditText
+
     private lateinit var usuarioRepository: UsuarioRepository
+    private lateinit var loadingController: LoadingController
+
+    /*
+     * Evita que se ejecuten varias consultas de login
+     * por toques rápidos o repetidos.
+     */
+    private var loginEnProceso = false
+
+    /*
+     * Identifica la operación de carga actual.
+     * LoadingController utiliza este token para evitar
+     * que una carga anterior cierre un modal más reciente.
+     */
+    private var loginLoadingToken: Long? = null
 
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,6 +51,11 @@ class LoginActivity : AppCompatActivity() {
 
         usuarioRepository = UsuarioRepository(this)
 
+        loadingController = LoadingController(
+            fragmentManager = supportFragmentManager,
+            coroutineScope = lifecycleScope
+        )
+
         tvRegistro = findViewById(R.id.tvRegistro)
         tvOlvidaste = findViewById(R.id.tvOlvidaste)
         btnLogin = findViewById(R.id.btnLogin)
@@ -41,6 +63,10 @@ class LoginActivity : AppCompatActivity() {
         etContrasena = findViewById(R.id.etContrasena)
 
         tvRegistro.setOnClickListener {
+            if (loginEnProceso) {
+                return@setOnClickListener
+            }
+
             val intent = Intent(
                 this,
                 RegistroActivity::class.java
@@ -50,10 +76,15 @@ class LoginActivity : AppCompatActivity() {
         }
 
         tvOlvidaste.setOnClickListener {
+            if (loginEnProceso) {
+                return@setOnClickListener
+            }
+
             val intent = Intent(
                 this,
                 ResetearPasswordActivity::class.java
             )
+
             startActivity(intent)
         }
 
@@ -82,6 +113,15 @@ class LoginActivity : AppCompatActivity() {
 
     private fun iniciarSesion() {
 
+        /*
+         * Segunda protección contra varios toques.
+         * Aunque el botón ya esté deshabilitado, esta variable
+         * evita cualquier ejecución duplicada pendiente.
+         */
+        if (loginEnProceso) {
+            return
+        }
+
         val correo = etCorreo.text
             ?.toString()
             ?.trim()
@@ -102,21 +142,83 @@ class LoginActivity : AppCompatActivity() {
             return
         }
 
-        mostrarCargando(true)
+        /*
+         * Primero bloqueamos la pantalla y mostramos el modal.
+         */
+        iniciarCargaLogin()
 
+        /*
+         * La consulta comienza inmediatamente.
+         * No existe ningún delay antes de llamar a Azure.
+         */
         usuarioRepository.loginApi(
             correo = correo,
             password = contrasena
         ) { resultado ->
 
-            if (isFinishing || isDestroyed) {
-                return@loginApi
+            /*
+             * Se utiliza runOnUiThread por seguridad,
+             * por si el repositorio devuelve el resultado
+             * desde un hilo secundario.
+             */
+            runOnUiThread {
+
+                if (isFinishing || isDestroyed) {
+                    return@runOnUiThread
+                }
+
+                /*
+                 * El resultado ya llegó, pero LoadingController
+                 * esperará el tiempo restante hasta completar
+                 * los 1.5 segundos mínimos.
+                 */
+                finalizarCargaLogin(resultado)
             }
+        }
+    }
+
+    private fun iniciarCargaLogin() {
+
+        loginEnProceso = true
+
+        btnLogin.isEnabled = false
+        etCorreo.isEnabled = false
+        etContrasena.isEnabled = false
+        tvRegistro.isEnabled = false
+        tvOlvidaste.isEnabled = false
+
+        btnLogin.text = "CONECTANDO..."
+
+        loginLoadingToken = loadingController.show(
+            message = "Iniciando sesión..."
+        )
+    }
+
+    private fun finalizarCargaLogin(
+        resultado: ResultadoLoginApi
+    ) {
+
+        val token = loginLoadingToken
+            ?: return
+
+        loadingController.hide(
+            requestToken = token
+        ) callback@{
+
+            if (isFinishing || isDestroyed) {
+                return@callback
+            }
+
+            loginLoadingToken = null
 
             when (resultado) {
 
                 is ResultadoLoginApi.Exito -> {
 
+                    /*
+                     * En caso exitoso no habilitamos nuevamente
+                     * el formulario porque la Activity será cerrada.
+                     */
                     guardarSesion(
                         usuario = resultado.usuarioLocal,
                         idUsuarioApi = resultado.idUsuarioApi,
@@ -131,7 +233,7 @@ class LoginActivity : AppCompatActivity() {
 
                 is ResultadoLoginApi.CredencialesInvalidas -> {
 
-                    mostrarCargando(false)
+                    restaurarFormularioLogin()
 
                     Toast.makeText(
                         this,
@@ -141,7 +243,8 @@ class LoginActivity : AppCompatActivity() {
                 }
 
                 is ResultadoLoginApi.SinConexion -> {
-                    mostrarCargando(false)
+
+                    restaurarFormularioLogin()
 
                     Toast.makeText(
                         this,
@@ -152,7 +255,7 @@ class LoginActivity : AppCompatActivity() {
 
                 is ResultadoLoginApi.Error -> {
 
-                    mostrarCargando(false)
+                    restaurarFormularioLogin()
 
                     Toast.makeText(
                         this,
@@ -162,6 +265,19 @@ class LoginActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun restaurarFormularioLogin() {
+
+        loginEnProceso = false
+
+        btnLogin.isEnabled = true
+        etCorreo.isEnabled = true
+        etContrasena.isEnabled = true
+        tvRegistro.isEnabled = true
+        tvOlvidaste.isEnabled = true
+
+        btnLogin.text = "INICIAR SESIÓN"
     }
 
     private fun guardarSesion(
@@ -255,16 +371,12 @@ class LoginActivity : AppCompatActivity() {
         finish()
     }
 
-    private fun mostrarCargando(
-        cargando: Boolean
-    ) {
-        btnLogin.isEnabled = !cargando
+    override fun onDestroy() {
 
-        btnLogin.text =
-            if (cargando) {
-                "CONECTANDO..."
-            } else {
-                "INICIAR SESIÓN"
-            }
+        if (::loadingController.isInitialized) {
+            loadingController.forceHide()
+        }
+
+        super.onDestroy()
     }
 }
