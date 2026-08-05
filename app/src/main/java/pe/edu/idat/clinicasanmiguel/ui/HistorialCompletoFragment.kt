@@ -5,19 +5,27 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.json.JSONObject
 import pe.edu.idat.clinicasanmiguel.LoginActivity
 import pe.edu.idat.clinicasanmiguel.R
-import pe.edu.idat.clinicasanmiguel.adapter.CitaPacienteMock
 import pe.edu.idat.clinicasanmiguel.adapter.CitasAdapter
 import pe.edu.idat.clinicasanmiguel.network.CitaApiResponse
 import pe.edu.idat.clinicasanmiguel.network.RetrofitClient
 import pe.edu.idat.clinicasanmiguel.network.SessionManager
+import pe.edu.idat.clinicasanmiguel.utils.CacheManager
+import pe.edu.idat.clinicasanmiguel.utils.ConnectionDialogFragment
+import pe.edu.idat.clinicasanmiguel.utils.LoadingController
+import pe.edu.idat.clinicasanmiguel.utils.NetworkMonitor
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.io.IOException
 
 class HistorialCompletoFragment :
     Fragment(R.layout.activity_historial_completo) {
@@ -28,11 +36,29 @@ class HistorialCompletoFragment :
     private lateinit var adapter:
             CitasAdapter
 
+    private lateinit var cacheManager:
+            CacheManager
+
+    private lateinit var loadingController:
+            LoadingController
+
     private val listaHistorial =
-        mutableListOf<CitaPacienteMock>()
+        mutableListOf<CitaApiResponse>()
 
     private var cargandoHistorial =
         false
+
+    private var mostrandoCache =
+        true
+
+    private var llamadaHistorial:
+            Call<List<CitaApiResponse>>? = null
+
+    private var timeoutHistorialJob:
+            Job? = null
+
+    private var idSolicitudHistorial =
+        0L
 
     override fun onViewCreated(
         view: View,
@@ -42,6 +68,19 @@ class HistorialCompletoFragment :
             view,
             savedInstanceState
         )
+
+        cacheManager =
+            CacheManager(
+                requireContext()
+            )
+
+        loadingController =
+            LoadingController(
+                fragmentManager =
+                    parentFragmentManager,
+                coroutineScope =
+                    viewLifecycleOwner.lifecycleScope
+            )
 
         rvHistorial =
             view.findViewById(
@@ -56,12 +95,60 @@ class HistorialCompletoFragment :
         adapter =
             CitasAdapter(
                 lista = listaHistorial,
-                esHistorial = true,
-                onCancelarCita = {}
+                esHistorial = true
             )
 
         rvHistorial.adapter =
             adapter
+
+        parentFragmentManager
+            .setFragmentResultListener(
+                REQUEST_REINTENTAR_HISTORIAL,
+                viewLifecycleOwner
+            ) { _, bundle ->
+
+                val reintentar =
+                    bundle.getBoolean(
+                        ConnectionDialogFragment
+                            .RESULTADO_REINTENTAR,
+                        false
+                    )
+
+                if (reintentar) {
+                    cargarHistorialDesdeApi()
+                }
+            }
+
+        NetworkMonitor
+            .estadoConexion
+            .observe(
+                viewLifecycleOwner
+            ) { conectado ->
+
+                if (!conectado) {
+                    cancelarCargaHistorialEnCurso()
+
+                    mostrarHistorialGuardado(
+                        titulo =
+                            "Sin conexión a Internet",
+                        detalle =
+                            "No fue posible actualizar tu historial desde la API."
+                    )
+
+                    return@observe
+                }
+
+                ConnectionDialogFragment.ocultar(
+                    parentFragmentManager
+                )
+
+                if (
+                    mostrandoCache &&
+                    !cargandoHistorial
+                ) {
+                    cargarHistorialDesdeApi()
+                }
+            }
     }
 
     override fun onResume() {
@@ -70,32 +157,79 @@ class HistorialCompletoFragment :
         cargarHistorialDesdeApi()
     }
 
+    override fun onDestroyView() {
+        cancelarCargaHistorialEnCurso()
+
+        super.onDestroyView()
+    }
+
     private fun cargarHistorialDesdeApi() {
-        if (cargandoHistorial) {
+        if (
+            cargandoHistorial ||
+            !vistaDisponible()
+        ) {
             return
         }
 
-        cargandoHistorial = true
+        if (!NetworkMonitor.hayInternet()) {
+            mostrarHistorialGuardado(
+                titulo =
+                    "Sin conexión a Internet",
+                detalle =
+                    "No fue posible actualizar tu historial desde la API."
+            )
+
+            return
+        }
+
+        cargandoHistorial =
+            true
+
+        val tokenCarga =
+            loadingController.show(
+                message =
+                    "Consultando tu historial..."
+            )
+
+        val solicitudId =
+            ++idSolicitudHistorial
 
         val apiService =
             RetrofitClient.obtenerApiService(
                 requireContext()
             )
 
-        apiService
-            .listarHistorialCitas()
-            .enqueue(
-                object :
-                    Callback<List<CitaApiResponse>> {
+        val llamada =
+            apiService.listarHistorialCitas()
 
-                    override fun onResponse(
-                        call: Call<List<CitaApiResponse>>,
-                        response: Response<List<CitaApiResponse>>
-                    ) {
-                        cargandoHistorial = false
+        llamadaHistorial =
+            llamada
 
-                        if (!isAdded) {
-                            return
+        programarTiempoMaximo(
+            solicitudId = solicitudId,
+            tokenCarga = tokenCarga,
+            llamada = llamada
+        )
+
+        llamada.enqueue(
+            object :
+                Callback<List<CitaApiResponse>> {
+
+                override fun onResponse(
+                    call: Call<List<CitaApiResponse>>,
+                    response: Response<List<CitaApiResponse>>
+                ) {
+                    if (!solicitudVigente(solicitudId)) {
+                        return
+                    }
+
+                    finalizarSolicitudHistorial(
+                        solicitudId = solicitudId,
+                        tokenCarga = tokenCarga
+                    ) callback@{
+
+                        if (!vistaDisponible()) {
+                            return@callback
                         }
 
                         if (response.isSuccessful) {
@@ -103,25 +237,21 @@ class HistorialCompletoFragment :
                                 response.body()
                                     ?: emptyList()
 
-                            listaHistorial.clear()
-
-                            listaHistorial.addAll(
-                                historialApi.map { cita ->
-                                    CitaPacienteMock(
-                                        id = cita.id,
-                                        especialidad =
-                                            cita.especialidad,
-                                        medico =
-                                            cita.medico,
-                                        fechaHora =
-                                            cita.fechaHora,
-                                        estado =
-                                            cita.estado
-                                    )
-                                }
+                            cacheManager.guardarLista(
+                                CacheManager.HISTORIAL_CITAS,
+                                historialApi
                             )
 
-                            adapter.notifyDataSetChanged()
+                            mostrandoCache =
+                                false
+
+                            mostrarHistorial(
+                                historialApi
+                            )
+
+                            ConnectionDialogFragment.ocultar(
+                                parentFragmentManager
+                            )
 
                             if (listaHistorial.isEmpty()) {
                                 Toast.makeText(
@@ -131,70 +261,252 @@ class HistorialCompletoFragment :
                                 ).show()
                             }
 
-                            return
+                            return@callback
                         }
 
-                        procesarErrorRespuesta(
-                            response
+                        if (response.code() == 401) {
+                            cerrarSesion(
+                                obtenerMensajeError(
+                                    response
+                                ) ?: "Tu sesión ha vencido"
+                            )
+
+                            return@callback
+                        }
+
+                        val mensajeServidor =
+                            obtenerMensajeError(
+                                response
+                            )
+
+                        mostrarHistorialGuardado(
+                            titulo =
+                                "Servicio no disponible",
+                            detalle =
+                                mensajeServidor
+                                    ?: "La API respondió con el código ${response.code()} y no se pudo actualizar el historial."
                         )
                     }
+                }
 
-                    override fun onFailure(
-                        call: Call<List<CitaApiResponse>>,
-                        throwable: Throwable
-                    ) {
-                        cargandoHistorial = false
+                override fun onFailure(
+                    call: Call<List<CitaApiResponse>>,
+                    throwable: Throwable
+                ) {
+                    if (!solicitudVigente(solicitudId)) {
+                        return
+                    }
 
-                        if (!isAdded) {
-                            return
+                    finalizarSolicitudHistorial(
+                        solicitudId = solicitudId,
+                        tokenCarga = tokenCarga
+                    ) callback@{
+
+                        if (!vistaDisponible()) {
+                            return@callback
                         }
 
-                        Toast.makeText(
-                            requireContext(),
-                            "No se pudo conectar con el servidor",
-                            Toast.LENGTH_LONG
-                        ).show()
+                        val sinConexion =
+                            throwable is IOException ||
+                                    !NetworkMonitor.hayInternet()
+
+                        if (sinConexion) {
+                            mostrarHistorialGuardado(
+                                titulo =
+                                    "Sin conexión a Internet",
+                                detalle =
+                                    "No fue posible comunicarse con la API. " +
+                                            "La red puede estar desconectada, sin megas o sin acceso real a Internet."
+                            )
+                        } else {
+                            mostrarHistorialGuardado(
+                                titulo =
+                                    "No se pudo actualizar el historial",
+                                detalle =
+                                    "Ocurrió un error al consultar la API."
+                            )
+                        }
                     }
                 }
-            )
+            }
+        )
     }
 
-    private fun procesarErrorRespuesta(
-        response: Response<*>
+    private fun programarTiempoMaximo(
+        solicitudId: Long,
+        tokenCarga: Long,
+        llamada: Call<List<CitaApiResponse>>
     ) {
-        if (!isAdded) {
+        timeoutHistorialJob?.cancel()
+
+        timeoutHistorialJob =
+            viewLifecycleOwner.lifecycleScope.launch {
+                delay(
+                    TIEMPO_MAXIMO_API_MS
+                )
+
+                if (
+                    !solicitudVigente(
+                        solicitudId
+                    ) ||
+                    !vistaDisponible()
+                ) {
+                    return@launch
+                }
+
+                idSolicitudHistorial++
+
+                timeoutHistorialJob =
+                    null
+
+                llamadaHistorial =
+                    null
+
+                cargandoHistorial =
+                    false
+
+                llamada.cancel()
+
+                loadingController.hide(
+                    requestToken = tokenCarga
+                ) callback@{
+
+                    if (!vistaDisponible()) {
+                        return@callback
+                    }
+
+                    mostrarHistorialGuardado(
+                        titulo =
+                            "Tiempo de espera agotado",
+                        detalle =
+                            "La API no respondió dentro de 30 segundos."
+                    )
+                }
+            }
+    }
+
+    private fun finalizarSolicitudHistorial(
+        solicitudId: Long,
+        tokenCarga: Long,
+        despuesDeCerrar: () -> Unit
+    ) {
+        if (!solicitudVigente(solicitudId)) {
             return
         }
 
-        val mensaje =
-            obtenerMensajeError(response)
+        idSolicitudHistorial++
 
-        when (response.code()) {
-            401 -> {
-                cerrarSesion(
-                    mensaje
-                        ?: "Tu sesión ha vencido"
-                )
+        timeoutHistorialJob?.cancel()
+        timeoutHistorialJob =
+            null
+
+        llamadaHistorial =
+            null
+
+        cargandoHistorial =
+            false
+
+        loadingController.hide(
+            requestToken = tokenCarga
+        ) callback@{
+
+            if (!vistaDisponible()) {
+                return@callback
             }
 
-            403 -> {
-                Toast.makeText(
-                    requireContext(),
-                    mensaje
-                        ?: "No tienes permiso para consultar el historial",
-                    Toast.LENGTH_LONG
-                ).show()
-            }
-
-            else -> {
-                Toast.makeText(
-                    requireContext(),
-                    mensaje
-                        ?: "No se pudo cargar el historial. Código ${response.code()}",
-                    Toast.LENGTH_LONG
-                ).show()
-            }
+            despuesDeCerrar()
         }
+    }
+
+    private fun cancelarCargaHistorialEnCurso() {
+        idSolicitudHistorial++
+
+        timeoutHistorialJob?.cancel()
+        timeoutHistorialJob =
+            null
+
+        llamadaHistorial?.cancel()
+        llamadaHistorial =
+            null
+
+        cargandoHistorial =
+            false
+
+        if (::loadingController.isInitialized) {
+            loadingController.forceHide()
+        }
+    }
+
+    private fun solicitudVigente(
+        solicitudId: Long
+    ): Boolean {
+        return solicitudId ==
+                idSolicitudHistorial
+    }
+
+    private fun mostrarHistorialGuardado(
+        titulo: String,
+        detalle: String
+    ) {
+        if (!vistaDisponible()) {
+            return
+        }
+
+        mostrandoCache =
+            true
+
+        val historialGuardado =
+            cacheManager.obtenerLista(
+                CacheManager.HISTORIAL_CITAS,
+                CitaApiResponse::class.java
+            )
+
+        mostrarHistorial(
+            historialGuardado
+                ?: emptyList()
+        )
+
+        val informacionCache =
+            when {
+                historialGuardado == null -> {
+                    "No existe un historial guardado en este dispositivo."
+                }
+
+                historialGuardado.isEmpty() -> {
+                    "El último historial guardado no contiene citas. " +
+                            "Esta información podría estar desactualizada."
+                }
+
+                else -> {
+                    "Se está mostrando el último historial guardado. " +
+                            "Esta información podría estar desactualizada."
+                }
+            }
+
+        ConnectionDialogFragment.mostrar(
+            fragmentManager =
+                parentFragmentManager,
+            titulo =
+                titulo,
+            mensaje =
+                "$detalle\n\n$informacionCache",
+            requestKey =
+                REQUEST_REINTENTAR_HISTORIAL,
+            permitirReintento =
+                true
+        )
+    }
+
+    private fun mostrarHistorial(
+        historial: List<CitaApiResponse>
+    ) {
+        listaHistorial.clear()
+
+        listaHistorial.addAll(
+            historial
+        )
+
+        adapter.notifyDataSetChanged()
     }
 
     private fun obtenerMensajeError(
@@ -209,7 +521,9 @@ class HistorialCompletoFragment :
                 null
             } else {
                 JSONObject(contenido)
-                    .optString("mensaje")
+                    .optString(
+                        "mensaje"
+                    )
                     .takeIf {
                         it.isNotBlank()
                     }
@@ -245,5 +559,18 @@ class HistorialCompletoFragment :
         startActivity(intent)
 
         requireActivity().finish()
+    }
+
+    private fun vistaDisponible(): Boolean {
+        return isAdded &&
+                view != null
+    }
+
+    companion object {
+        private const val REQUEST_REINTENTAR_HISTORIAL =
+            "REQUEST_REINTENTAR_HISTORIAL"
+
+        private const val TIEMPO_MAXIMO_API_MS =
+            30_000L
     }
 }

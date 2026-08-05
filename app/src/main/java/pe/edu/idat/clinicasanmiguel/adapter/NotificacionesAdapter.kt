@@ -6,21 +6,13 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import pe.edu.idat.clinicasanmiguel.R
+import pe.edu.idat.clinicasanmiguel.network.NotificacionApiResponse
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-data class NotificacionUi(
-    val id: Int,
-    val idCita: Int,
-    val mensaje: String,
-    val fechaHoraCita: String,
-    val medico: String,
-    val especialidad: String,
-    val fechaGeneracion: String
-)
-
 class NotificacionesAdapter(
-    private val lista: List<NotificacionUi>
+    private val lista:
+    List<NotificacionApiResponse>
 ) : RecyclerView.Adapter<NotificacionesAdapter.ViewHolder>() {
 
     class ViewHolder(
@@ -142,15 +134,21 @@ class NotificacionesAdapter(
                 )
 
             if (fecha == null) {
-                formatearFechaSimple(valor)
+                formatearFechaSimple(
+                    valor
+                )
             } else {
                 SimpleDateFormat(
                     "dd/MM/yyyy HH:mm",
                     Locale.getDefault()
-                ).format(fecha)
+                ).format(
+                    fecha
+                )
             }
         } catch (exception: Exception) {
-            formatearFechaSimple(valor)
+            formatearFechaSimple(
+                valor
+            )
         }
     }
 
@@ -158,8 +156,15 @@ class NotificacionesAdapter(
         valor: String
     ): String {
         return valor
-            .replace("T", " ")
-            .substringBefore(".")
-            .removeSuffix("Z")
+            .replace(
+                "T",
+                " "
+            )
+            .substringBefore(
+                "."
+            )
+            .removeSuffix(
+                "Z"
+            )
     }
 }

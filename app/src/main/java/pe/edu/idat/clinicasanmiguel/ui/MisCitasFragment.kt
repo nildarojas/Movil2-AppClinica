@@ -5,21 +5,29 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.json.JSONObject
 import pe.edu.idat.clinicasanmiguel.LoginActivity
 import pe.edu.idat.clinicasanmiguel.R
-import pe.edu.idat.clinicasanmiguel.adapter.CitaPacienteMock
+import pe.edu.idat.clinicasanmiguel.ReprogramarCitaActivity
 import pe.edu.idat.clinicasanmiguel.adapter.CitasAdapter
 import pe.edu.idat.clinicasanmiguel.network.CancelarCitaApiResponse
 import pe.edu.idat.clinicasanmiguel.network.CitaApiResponse
 import pe.edu.idat.clinicasanmiguel.network.RetrofitClient
 import pe.edu.idat.clinicasanmiguel.network.SessionManager
+import pe.edu.idat.clinicasanmiguel.utils.CacheManager
+import pe.edu.idat.clinicasanmiguel.utils.ConnectionDialogFragment
+import pe.edu.idat.clinicasanmiguel.utils.LoadingController
+import pe.edu.idat.clinicasanmiguel.utils.NetworkMonitor
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import pe.edu.idat.clinicasanmiguel.ReprogramarCitaActivity
+import java.io.IOException
 
 class MisCitasFragment :
     Fragment(R.layout.activity_mis_citas) {
@@ -30,11 +38,35 @@ class MisCitasFragment :
     private lateinit var adapter:
             CitasAdapter
 
+    private lateinit var cacheManager:
+            CacheManager
+
+    private lateinit var loadingController:
+            LoadingController
+
     private val listaCitas =
-        mutableListOf<CitaPacienteMock>()
+        mutableListOf<CitaApiResponse>()
 
     private var cancelandoCita =
         false
+
+    private var cargandoCitas =
+        false
+
+    private var mostrandoCache =
+        true
+
+    private var llamadaCitas:
+            Call<List<CitaApiResponse>>? = null
+
+    private var timeoutCitasJob:
+            Job? = null
+
+    private var loadingTokenCitas:
+            Long? = null
+
+    private var idSolicitudCitas =
+        0L
 
     override fun onViewCreated(
         view: View,
@@ -44,6 +76,19 @@ class MisCitasFragment :
             view,
             savedInstanceState
         )
+
+        cacheManager =
+            CacheManager(
+                requireContext()
+            )
+
+        loadingController =
+            LoadingController(
+                fragmentManager =
+                    parentFragmentManager,
+                coroutineScope =
+                    viewLifecycleOwner.lifecycleScope
+            )
 
         rvMisCitas =
             view.findViewById(
@@ -69,17 +114,66 @@ class MisCitasFragment :
                         cita
                     )
                 }
-
-
             )
-
-
 
         rvMisCitas.adapter =
             adapter
+
+        adapter.actualizarAccionesHabilitadas(
+            false
+        )
+
+        parentFragmentManager
+            .setFragmentResultListener(
+                REQUEST_REINTENTAR_CITAS,
+                viewLifecycleOwner
+            ) { _, bundle ->
+
+                val reintentar =
+                    bundle.getBoolean(
+                        ConnectionDialogFragment
+                            .RESULTADO_REINTENTAR,
+                        false
+                    )
+
+                if (reintentar) {
+                    cargarCitasDesdeApi()
+                }
+            }
+
+        NetworkMonitor
+            .estadoConexion
+            .observe(
+                viewLifecycleOwner
+            ) { conectado ->
+
+                if (!conectado) {
+                    cancelarCargaCitasEnCurso()
+
+                    mostrarCitasGuardadas(
+                        titulo =
+                            "Sin conexión a Internet",
+                        detalle =
+                            "No fue posible actualizar tus citas desde la API."
+                    )
+
+                    return@observe
+                }
+
+                ConnectionDialogFragment.ocultar(
+                    parentFragmentManager
+                )
+
+                if (
+                    mostrandoCache &&
+                    !cargandoCitas
+                ) {
+                    cargarCitasDesdeApi()
+                } else {
+                    actualizarEstadoAcciones()
+                }
+            }
     }
-
-
 
     override fun onResume() {
         super.onResume()
@@ -87,26 +181,84 @@ class MisCitasFragment :
         cargarCitasDesdeApi()
     }
 
+    override fun onDestroyView() {
+        cancelarCargaCitasEnCurso()
+
+        super.onDestroyView()
+    }
+
     private fun cargarCitasDesdeApi() {
+        if (
+            cargandoCitas ||
+            !vistaDisponible()
+        ) {
+            return
+        }
+
+        if (!NetworkMonitor.hayInternet()) {
+            mostrarCitasGuardadas(
+                titulo =
+                    "Sin conexión a Internet",
+                detalle =
+                    "No fue posible actualizar tus citas desde la API."
+            )
+
+            return
+        }
+
+        cargandoCitas =
+            true
+
+        actualizarEstadoAcciones()
+
+        val tokenCarga =
+            loadingController.show(
+                message =
+                    "Consultando tus citas..."
+            )
+
+        loadingTokenCitas =
+            tokenCarga
+
+        val solicitudId =
+            ++idSolicitudCitas
+
         val apiService =
             RetrofitClient.obtenerApiService(
                 requireContext()
             )
 
-        apiService
-            .listarCitasActivas()
-            .enqueue(
-                object :
-                    Callback<List<CitaApiResponse>> {
+        val llamada =
+            apiService.listarCitasActivas()
 
-                    override fun onResponse(
-                        call:
-                        Call<List<CitaApiResponse>>,
-                        response:
-                        Response<List<CitaApiResponse>>
-                    ) {
-                        if (!isAdded) {
-                            return
+        llamadaCitas =
+            llamada
+
+        programarTiempoMaximo(
+            solicitudId = solicitudId,
+            tokenCarga = tokenCarga,
+            llamada = llamada
+        )
+
+        llamada.enqueue(
+            object :
+                Callback<List<CitaApiResponse>> {
+
+                override fun onResponse(
+                    call: Call<List<CitaApiResponse>>,
+                    response: Response<List<CitaApiResponse>>
+                ) {
+                    if (!solicitudVigente(solicitudId)) {
+                        return
+                    }
+
+                    finalizarSolicitudCitas(
+                        solicitudId = solicitudId,
+                        tokenCarga = tokenCarga
+                    ) callback@{
+
+                        if (!vistaDisponible()) {
+                            return@callback
                         }
 
                         if (response.isSuccessful) {
@@ -114,22 +266,23 @@ class MisCitasFragment :
                                 response.body()
                                     ?: emptyList()
 
-                            listaCitas.clear()
-
-                            listaCitas.addAll(
-                                citasApi.map { cita ->
-                                    CitaPacienteMock(
-                                        id = cita.id,
-                                        especialidad = cita.especialidad,
-                                        medico = cita.medico,
-                                        fechaHora = cita.fechaHora,
-                                        estado = cita.estado,
-                                        idMedico = cita.idMedico
-                                    )
-                                }
+                            cacheManager.guardarLista(
+                                CacheManager.CITAS_ACTIVAS,
+                                citasApi
                             )
 
-                            adapter.notifyDataSetChanged()
+                            mostrandoCache =
+                                false
+
+                            mostrarCitas(
+                                citasApi
+                            )
+
+                            ConnectionDialogFragment.ocultar(
+                                parentFragmentManager
+                            )
+
+                            actualizarEstadoAcciones()
 
                             if (listaCitas.isEmpty()) {
                                 Toast.makeText(
@@ -139,37 +292,301 @@ class MisCitasFragment :
                                 ).show()
                             }
 
-                            return
+                            return@callback
                         }
 
-                        procesarErrorRespuesta(
-                            response
+                        if (response.code() == 401) {
+                            cerrarSesion(
+                                obtenerMensajeError(
+                                    response
+                                ) ?: "Tu sesión ha vencido"
+                            )
+
+                            return@callback
+                        }
+
+                        val mensajeServidor =
+                            obtenerMensajeError(
+                                response
+                            )
+
+                        mostrarCitasGuardadas(
+                            titulo =
+                                "Servicio no disponible",
+                            detalle =
+                                mensajeServidor
+                                    ?: "La API respondió con el código ${response.code()} y no se pudo actualizar el listado."
                         )
                     }
+                }
 
-                    override fun onFailure(
-                        call:
-                        Call<List<CitaApiResponse>>,
-                        throwable: Throwable
-                    ) {
-                        if (!isAdded) {
-                            return
+                override fun onFailure(
+                    call: Call<List<CitaApiResponse>>,
+                    throwable: Throwable
+                ) {
+                    if (!solicitudVigente(solicitudId)) {
+                        return
+                    }
+
+                    finalizarSolicitudCitas(
+                        solicitudId = solicitudId,
+                        tokenCarga = tokenCarga
+                    ) callback@{
+
+                        if (!vistaDisponible()) {
+                            return@callback
                         }
 
-                        Toast.makeText(
-                            requireContext(),
-                            "No se pudo conectar con el servidor",
-                            Toast.LENGTH_LONG
-                        ).show()
+                        val sinConexion =
+                            throwable is IOException ||
+                                    !NetworkMonitor.hayInternet()
+
+                        if (sinConexion) {
+                            mostrarCitasGuardadas(
+                                titulo =
+                                    "Sin conexión a Internet",
+                                detalle =
+                                    "No fue posible comunicarse con la API. " +
+                                            "La red puede estar desconectada, sin megas o sin acceso real a Internet."
+                            )
+                        } else {
+                            mostrarCitasGuardadas(
+                                titulo =
+                                    "No se pudieron actualizar las citas",
+                                detalle =
+                                    "Ocurrió un error al consultar la API."
+                            )
+                        }
                     }
                 }
+            }
+        )
+    }
+
+    private fun programarTiempoMaximo(
+        solicitudId: Long,
+        tokenCarga: Long,
+        llamada: Call<List<CitaApiResponse>>
+    ) {
+        timeoutCitasJob?.cancel()
+
+        timeoutCitasJob =
+            viewLifecycleOwner.lifecycleScope.launch {
+                delay(
+                    TIEMPO_MAXIMO_API_MS
+                )
+
+                if (
+                    !solicitudVigente(
+                        solicitudId
+                    ) ||
+                    !vistaDisponible()
+                ) {
+                    return@launch
+                }
+
+                idSolicitudCitas++
+
+                timeoutCitasJob =
+                    null
+
+                llamadaCitas =
+                    null
+
+                cargandoCitas =
+                    false
+
+                loadingTokenCitas =
+                    null
+
+                llamada.cancel()
+
+                loadingController.hide(
+                    requestToken = tokenCarga
+                ) callback@{
+
+                    if (!vistaDisponible()) {
+                        return@callback
+                    }
+
+                    mostrarCitasGuardadas(
+                        titulo =
+                            "Tiempo de espera agotado",
+                        detalle =
+                            "La API no respondió dentro de 30 segundos."
+                    )
+                }
+            }
+    }
+
+    private fun finalizarSolicitudCitas(
+        solicitudId: Long,
+        tokenCarga: Long,
+        despuesDeCerrar: () -> Unit
+    ) {
+        if (!solicitudVigente(solicitudId)) {
+            return
+        }
+
+        idSolicitudCitas++
+
+        timeoutCitasJob?.cancel()
+        timeoutCitasJob =
+            null
+
+        llamadaCitas =
+            null
+
+        cargandoCitas =
+            false
+
+        loadingTokenCitas =
+            null
+
+        loadingController.hide(
+            requestToken = tokenCarga
+        ) callback@{
+
+            if (!vistaDisponible()) {
+                return@callback
+            }
+
+            despuesDeCerrar()
+        }
+    }
+
+    private fun cancelarCargaCitasEnCurso() {
+        idSolicitudCitas++
+
+        timeoutCitasJob?.cancel()
+        timeoutCitasJob =
+            null
+
+        llamadaCitas?.cancel()
+        llamadaCitas =
+            null
+
+        cargandoCitas =
+            false
+
+        loadingTokenCitas =
+            null
+
+        if (::loadingController.isInitialized) {
+            loadingController.forceHide()
+        }
+
+        if (::adapter.isInitialized) {
+            actualizarEstadoAcciones()
+        }
+    }
+
+    private fun solicitudVigente(
+        solicitudId: Long
+    ): Boolean {
+        return solicitudId == idSolicitudCitas
+    }
+
+    private fun mostrarCitasGuardadas(
+        titulo: String,
+        detalle: String
+    ) {
+        if (!vistaDisponible()) {
+            return
+        }
+
+        mostrandoCache =
+            true
+
+        val citasGuardadas =
+            cacheManager.obtenerLista(
+                CacheManager.CITAS_ACTIVAS,
+                CitaApiResponse::class.java
             )
+
+        mostrarCitas(
+            citasGuardadas
+                ?: emptyList()
+        )
+
+        actualizarEstadoAcciones()
+
+        val informacionCache =
+            when {
+                citasGuardadas == null -> {
+                    "No existe un listado guardado de tus citas en este dispositivo."
+                }
+
+                citasGuardadas.isEmpty() -> {
+                    "El último listado guardado indica que no tienes citas activas. " +
+                            "Esta información podría estar desactualizada."
+                }
+
+                else -> {
+                    "Se está mostrando el último listado guardado de tus citas. " +
+                            "Esta información podría estar desactualizada. " +
+                            "Cancelar y reprogramar permanecerán bloqueados."
+                }
+            }
+
+        ConnectionDialogFragment.mostrar(
+            fragmentManager =
+                parentFragmentManager,
+            titulo =
+                titulo,
+            mensaje =
+                "$detalle\n\n$informacionCache",
+            requestKey =
+                REQUEST_REINTENTAR_CITAS,
+            permitirReintento =
+                true
+        )
+    }
+
+    private fun mostrarCitas(
+        citas: List<CitaApiResponse>
+    ) {
+        listaCitas.clear()
+
+        listaCitas.addAll(
+            citas
+        )
+
+        adapter.notifyDataSetChanged()
+    }
+
+    private fun actualizarEstadoAcciones() {
+        if (!::adapter.isInitialized) {
+            return
+        }
+
+        val accionesDisponibles =
+            NetworkMonitor.hayInternet() &&
+                    !mostrandoCache &&
+                    !cargandoCitas &&
+                    !cancelandoCita
+
+        adapter.actualizarAccionesHabilitadas(
+            accionesDisponibles
+        )
     }
 
     private fun abrirReprogramacion(
-        cita: CitaPacienteMock
+        cita: CitaApiResponse
     ) {
-        if (cita.id <= 0 || cita.idMedico <= 0) {
+        if (
+            !NetworkMonitor.hayInternet() ||
+            mostrandoCache ||
+            cargandoCitas
+        ) {
+            mostrarOperacionRequiereInternet()
+            return
+        }
+
+        if (
+            cita.id <= 0 ||
+            cita.idMedico <= 0
+        ) {
             Toast.makeText(
                 requireContext(),
                 "No se pudo identificar la cita o el médico",
@@ -217,13 +634,25 @@ class MisCitasFragment :
         idCita: Int
     ) {
         if (
+            !NetworkMonitor.hayInternet() ||
+            mostrandoCache ||
+            cargandoCitas
+        ) {
+            mostrarOperacionRequiereInternet()
+            return
+        }
+
+        if (
             cancelandoCita ||
             idCita <= 0
         ) {
             return
         }
 
-        cancelandoCita = true
+        cancelandoCita =
+            true
+
+        actualizarEstadoAcciones()
 
         val apiService =
             RetrofitClient.obtenerApiService(
@@ -237,14 +666,13 @@ class MisCitasFragment :
                     Callback<CancelarCitaApiResponse> {
 
                     override fun onResponse(
-                        call:
-                        Call<CancelarCitaApiResponse>,
-                        response:
-                        Response<CancelarCitaApiResponse>
+                        call: Call<CancelarCitaApiResponse>,
+                        response: Response<CancelarCitaApiResponse>
                     ) {
-                        cancelandoCita = false
+                        cancelandoCita =
+                            false
 
-                        if (!isAdded) {
+                        if (!vistaDisponible()) {
                             return
                         }
 
@@ -256,6 +684,8 @@ class MisCitasFragment :
                                 respuesta != null &&
                                 !respuesta.exito
                             ) {
+                                actualizarEstadoAcciones()
+
                                 Toast.makeText(
                                     requireContext(),
                                     respuesta.mensaje,
@@ -276,19 +706,36 @@ class MisCitasFragment :
                             return
                         }
 
+                        actualizarEstadoAcciones()
+
                         procesarErrorRespuesta(
                             response
                         )
                     }
 
                     override fun onFailure(
-                        call:
-                        Call<CancelarCitaApiResponse>,
+                        call: Call<CancelarCitaApiResponse>,
                         throwable: Throwable
                     ) {
-                        cancelandoCita = false
+                        cancelandoCita =
+                            false
 
-                        if (!isAdded) {
+                        if (!vistaDisponible()) {
+                            return
+                        }
+
+                        actualizarEstadoAcciones()
+
+                        if (
+                            throwable is IOException ||
+                            !NetworkMonitor.hayInternet()
+                        ) {
+                            mostrandoCache =
+                                true
+
+                            actualizarEstadoAcciones()
+
+                            mostrarOperacionRequiereInternet()
                             return
                         }
 
@@ -302,15 +749,31 @@ class MisCitasFragment :
             )
     }
 
+    private fun mostrarOperacionRequiereInternet() {
+        ConnectionDialogFragment.mostrar(
+            fragmentManager =
+                parentFragmentManager,
+            titulo =
+                "Conexión requerida",
+            mensaje =
+                "Esta operación necesita conexión a Internet. " +
+                        "No se guardará ninguna acción pendiente para después.",
+            permitirReintento =
+                false
+        )
+    }
+
     private fun procesarErrorRespuesta(
         response: Response<*>
     ) {
-        if (!isAdded) {
+        if (!vistaDisponible()) {
             return
         }
 
         val mensaje =
-            obtenerMensajeError(response)
+            obtenerMensajeError(
+                response
+            )
 
         when (response.code()) {
             400 -> {
@@ -379,7 +842,9 @@ class MisCitasFragment :
                 null
             } else {
                 JSONObject(contenido)
-                    .optString("mensaje")
+                    .optString(
+                        "mensaje"
+                    )
                     .takeIf {
                         it.isNotBlank()
                     }
@@ -415,5 +880,16 @@ class MisCitasFragment :
         startActivity(intent)
 
         requireActivity().finish()
+    }
+    private fun vistaDisponible(): Boolean {
+        return isAdded &&
+                view != null
+    }
+    companion object {
+        private const val REQUEST_REINTENTAR_CITAS =
+            "REQUEST_REINTENTAR_CITAS"
+
+        private const val TIEMPO_MAXIMO_API_MS =
+            30_000L
     }
 }

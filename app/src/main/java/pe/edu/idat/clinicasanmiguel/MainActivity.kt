@@ -2,21 +2,28 @@ package pe.edu.idat.clinicasanmiguel
 
 import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
+import android.util.Log
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import pe.edu.idat.clinicasanmiguel.network.JwtUtils
 import pe.edu.idat.clinicasanmiguel.network.SessionManager
 
 class MainActivity : AppCompatActivity() {
 
+    private var navegacionRealizada =
+        false
+
     override fun onCreate(
         savedInstanceState: Bundle?
     ) {
-        super.onCreate(savedInstanceState)
+        super.onCreate(
+            savedInstanceState
+        )
 
         enableEdgeToEdge()
 
@@ -26,7 +33,9 @@ class MainActivity : AppCompatActivity() {
 
         ViewCompat
             .setOnApplyWindowInsetsListener(
-                findViewById(R.id.main)
+                findViewById(
+                    R.id.main
+                )
             ) { view, insets ->
 
                 val systemBars =
@@ -46,65 +55,110 @@ class MainActivity : AppCompatActivity() {
                 insets
             }
 
-        Handler(
-            Looper.getMainLooper()
-        ).postDelayed(
-            {
-                resolverDestinoInicial()
-            },
-            3000
-        )
+        lifecycleScope.launch {
+            delay(
+                TIEMPO_SPLASH_MS
+            )
+
+            resolverDestinoInicial()
+        }
     }
 
     private fun resolverDestinoInicial() {
-        val sessionManager =
-            SessionManager(this)
+        if (
+            navegacionRealizada ||
+            isFinishing ||
+            isDestroyed
+        ) {
+            return
+        }
 
-        val token =
-            sessionManager.obtenerToken()
+        val sessionManager =
+            SessionManager(
+                this
+            )
 
         val sesionValida =
-            sessionManager.esSesionRemota() &&
-                    !token.isNullOrBlank() &&
-                    JwtUtils.esTokenVigente(token)
+            runCatching {
+                val token =
+                    sessionManager.obtenerToken()
+
+                sessionManager.esSesionRemota() &&
+                        !token.isNullOrBlank() &&
+                        JwtUtils.esTokenVigente(
+                            token
+                        )
+            }
+                .onFailure { exception ->
+                    Log.e(
+                        TAG,
+                        "No se pudo validar la sesión",
+                        exception
+                    )
+                }
+                .getOrDefault(
+                    false
+                )
+
+        if (!sesionValida) {
+            runCatching {
+                sessionManager.limpiarSesion()
+            }.onFailure { exception ->
+                Log.e(
+                    TAG,
+                    "No se pudo limpiar la sesión",
+                    exception
+                )
+            }
+        }
+
+        navegacionRealizada =
+            true
 
         if (sesionValida) {
             abrirInicio()
         } else {
-            sessionManager.limpiarSesion()
             abrirLogin()
         }
     }
 
     private fun abrirInicio() {
+        abrirDestino(
+            InicioActivity::class.java
+        )
+    }
+
+    private fun abrirLogin() {
+        abrirDestino(
+            LoginActivity::class.java
+        )
+    }
+
+    private fun abrirDestino(
+        destino: Class<*>
+    ) {
         val intent =
             Intent(
                 this,
-                InicioActivity::class.java
-            )
+                destino
+            ).apply {
+                flags =
+                    Intent.FLAG_ACTIVITY_NEW_TASK or
+                            Intent.FLAG_ACTIVITY_CLEAR_TASK
+            }
 
-        intent.flags =
-            Intent.FLAG_ACTIVITY_NEW_TASK or
-                    Intent.FLAG_ACTIVITY_CLEAR_TASK
-
-        startActivity(intent)
+        startActivity(
+            intent
+        )
 
         finish()
     }
 
-    private fun abrirLogin() {
-        val intent =
-            Intent(
-                this,
-                LoginActivity::class.java
-            )
+    companion object {
+        private const val TAG =
+            "MainActivity"
 
-        intent.flags =
-            Intent.FLAG_ACTIVITY_NEW_TASK or
-                    Intent.FLAG_ACTIVITY_CLEAR_TASK
-
-        startActivity(intent)
-
-        finish()
+        private const val TIEMPO_SPLASH_MS =
+            1_500L
     }
 }

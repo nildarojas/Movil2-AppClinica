@@ -20,36 +20,29 @@ import pe.edu.idat.clinicasanmiguel.network.JwtUtils
 import pe.edu.idat.clinicasanmiguel.network.SessionManager
 import pe.edu.idat.clinicasanmiguel.ui.*
 import pe.edu.idat.clinicasanmiguel.utils.NetworkMonitor
+import android.view.View
 import java.util.Locale
 
 class InicioActivity : AppCompatActivity() {
 
     private lateinit var drawerLayout:
             DrawerLayout
-
     private lateinit var nvMenu:
             NavigationView
-
     private lateinit var btnMenuCentro:
             LinearLayout
-
     private lateinit var btnInicioBottom:
             LinearLayout
-
     private lateinit var btnSalirBottom:
             LinearLayout
-
     private var rolUsuario:
             String = "PACIENTE"
-
-    private var snackbarConexion:
-            Snackbar? = null
-
     private var estadoConexionInicialRecibido =
         false
-
     private var ultimoEstadoConexion:
             Boolean? = null
+
+    private lateinit var tvEstadoConexion: TextView
 
     override fun onCreate(
         savedInstanceState: Bundle?
@@ -232,6 +225,10 @@ class InicioActivity : AppCompatActivity() {
                 ultimoEstadoConexion =
                     conectado
 
+                actualizarEstadoOpciones(
+                    conectado
+                )
+
                 if (!estadoConexionInicialRecibido) {
                     estadoConexionInicialRecibido =
                         true
@@ -265,29 +262,28 @@ class InicioActivity : AppCompatActivity() {
     }
 
     private fun mostrarAvisoSinConexion() {
-        if (
-            snackbarConexion?.isShown ==
-            true
-        ) {
-            return
-        }
+        tvEstadoConexion.visibility =
+            View.VISIBLE
 
-        snackbarConexion =
-            Snackbar.make(
+        Snackbar.make(
+            findViewById(
+                android.R.id.content
+            ),
+            "Sin conexión. Algunas funciones no están disponibles.",
+            Snackbar.LENGTH_SHORT
+        )
+            .setAnchorView(
                 findViewById(
-                    android.R.id.content
-                ),
-                "Sin conexión. Algunas funciones no están disponibles.",
-                Snackbar.LENGTH_INDEFINITE
+                    R.id.bottomBar
+                )
             )
-
-        snackbarConexion?.show()
+            .show()
     }
-
     private fun ocultarAvisoSinConexion() {
-        snackbarConexion?.dismiss()
-        snackbarConexion = null
+        tvEstadoConexion.visibility =
+            View.GONE
     }
+
 
     private fun configurarMenuPorRol() {
         val menu =
@@ -385,6 +381,10 @@ class InicioActivity : AppCompatActivity() {
                 .findViewById<TextView>(
                     R.id.tvHeaderRol
                 )
+        tvEstadoConexion =
+            headerView.findViewById(
+                R.id.tvEstadoConexion
+            )
 
         headerMenu.setBackgroundColor(
             colorRol
@@ -404,8 +404,19 @@ class InicioActivity : AppCompatActivity() {
             }
 
         nvMenu.itemIconTintList =
-            ColorStateList.valueOf(
-                colorRol
+            ColorStateList(
+                arrayOf(
+                    intArrayOf(
+                        -android.R.attr.state_enabled
+                    ),
+                    intArrayOf()
+                ),
+                intArrayOf(
+                    Color.parseColor(
+                        "#9E9E9E"
+                    ),
+                    colorRol
+                )
             )
     }
 
@@ -427,10 +438,65 @@ class InicioActivity : AppCompatActivity() {
             .commit()
     }
 
+    private val opcionesQueRequierenInternet =
+        setOf(
+            R.id.itNuevaCita,
+            R.id.itSeguridad,
+            R.id.itEspecialidades,
+            R.id.itDoctores,
+            R.id.itHorarios,
+            R.id.itUsuarios,
+            R.id.itCitasGlobales
+        )
+
+    private fun requiereInternet(
+        itemId: Int
+    ): Boolean {
+        return itemId in opcionesQueRequierenInternet
+    }
+
+    private fun actualizarEstadoOpciones(
+        conectado: Boolean
+    ) {
+        opcionesQueRequierenInternet.forEach { itemId ->
+            nvMenu.menu
+                .findItem(itemId)
+                ?.isEnabled = conectado
+        }
+    }
     private fun ejecutarRuteoMenu(
         menuItem: MenuItem
     ): Boolean {
 
+        val conectado =
+            ultimoEstadoConexion == true
+
+        if (
+            !conectado &&
+            requiereInternet(
+                menuItem.itemId
+            )
+        ) {
+            drawerLayout.closeDrawer(
+                GravityCompat.START
+            )
+
+            Snackbar.make(
+                findViewById(
+                    android.R.id.content
+                ),
+                "Esta función requiere conexión a Internet.",
+                Snackbar.LENGTH_SHORT
+            )
+                .setAnchorView(
+                    findViewById(
+                        R.id.bottomBar
+                    )
+                )
+                .show()
+
+            return true
+        }
         var fragmentSeleccionado:
                 Fragment? = null
 
@@ -813,7 +879,9 @@ class InicioActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        ocultarAvisoSinConexion()
+        if (::tvEstadoConexion.isInitialized) {
+            ocultarAvisoSinConexion()
+        }
 
         super.onDestroy()
     }

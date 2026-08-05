@@ -9,23 +9,18 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
 import pe.edu.idat.clinicasanmiguel.R
+import pe.edu.idat.clinicasanmiguel.network.CitaApiResponse
 import java.util.Locale
 
-data class CitaPacienteMock(
-    val id: Int,
-    val especialidad: String,
-    val medico: String,
-    val fechaHora: String,
-    var estado: String,
-    val idMedico: Int = 0
-)
-
 class CitasAdapter(
-    private val lista: List<CitaPacienteMock>,
+    private val lista: List<CitaApiResponse>,
     private val esHistorial: Boolean = false,
-    private val onCancelarCita: (CitaPacienteMock) -> Unit = {},
-    private val onReprogramarCita: (CitaPacienteMock) -> Unit = {}
+    private val onCancelarCita: (CitaApiResponse) -> Unit = {},
+    private val onReprogramarCita: (CitaApiResponse) -> Unit = {}
 ) : RecyclerView.Adapter<CitasAdapter.CitaViewHolder>() {
+
+    private var accionesHabilitadas =
+        false
 
     class CitaViewHolder(
         view: View
@@ -192,11 +187,35 @@ class CitasAdapter(
             }
         }
 
-        if (
+        val puedeModificarCita =
             !esHistorial &&
-            estado != "CANCELADA" &&
-            estado != "REPROGRAMADA"
-        ) {
+                    estado != "CANCELADA" &&
+                    estado != "REPROGRAMADA"
+
+        val botonesHabilitados =
+            puedeModificarCita &&
+                    accionesHabilitadas
+
+        holder.btnReprogramar.isEnabled =
+            botonesHabilitados
+
+        holder.btnCancelar.isEnabled =
+            botonesHabilitados
+
+        val alphaAcciones =
+            if (botonesHabilitados) {
+                1.0f
+            } else {
+                0.45f
+            }
+
+        holder.btnReprogramar.alpha =
+            alphaAcciones
+
+        holder.btnCancelar.alpha =
+            alphaAcciones
+
+        if (botonesHabilitados) {
             holder.btnReprogramar
                 .setOnClickListener {
                     onReprogramarCita(item)
@@ -226,6 +245,19 @@ class CitasAdapter(
                         .show()
                 }
         }
+    }
+
+    fun actualizarAccionesHabilitadas(
+        habilitadas: Boolean
+    ) {
+        if (accionesHabilitadas == habilitadas) {
+            return
+        }
+
+        accionesHabilitadas =
+            habilitadas
+
+        notifyDataSetChanged()
     }
 
     override fun getItemCount(): Int =
