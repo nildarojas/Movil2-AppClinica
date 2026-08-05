@@ -96,5 +96,18 @@
             android:textStyle="bold"
             android:backgroundTint="#458890"
             app:cornerRadius="8dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnEditarPerfil"
+            android:layout_width="match_parent"
+            android:layout_height="55dp"
+            android:layout_marginBottom="12dp"
+            android:backgroundTint="#458890"
+            android:enabled="false"
+            android:text="EDITAR PERFIL"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:cornerRadius="8dp" />
     </LinearLayout>
 </ScrollView>

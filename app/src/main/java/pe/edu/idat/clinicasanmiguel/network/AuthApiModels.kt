@@ -17,6 +17,16 @@ data class UsuarioLoginApi(
     val rol: String
 )
 
+data class ActualizarPerfilApiRequest(
+    val dni: String,
+    val nombre: String,
+    val apellido: String,
+    val correo: String,
+    val telefono: String,
+    val fechaNacimiento: String,
+    val genero: String
+)
+
 data class LoginApiResponse(
     val exito: Boolean,
     val mensaje: String,

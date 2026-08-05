@@ -99,4 +99,9 @@ interface ApiService {
     @GET("api/auth/perfil")
     fun obtenerPerfil():
             Call<UsuarioLoginApi>
+
+    @PUT("api/auth/perfil")
+    fun actualizarPerfil(
+        @Body request: ActualizarPerfilApiRequest
+    ): Call<UsuarioLoginApi>
 }
