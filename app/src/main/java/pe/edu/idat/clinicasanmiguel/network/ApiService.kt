@@ -104,4 +104,12 @@ interface ApiService {
     fun actualizarPerfil(
         @Body request: ActualizarPerfilApiRequest
     ): Call<UsuarioLoginApi>
+    @GET("api/medicos/listar")
+    fun listarMedicosAdmin():
+            Call<List<MedicoApiResponse>>
+
+    @POST("api/medicos/registrar")
+    fun registrarMedicoAdmin(
+        @Body request: CrearMedicoApiRequest
+    ): Call<MedicoApiResponse>
 }

@@ -50,4 +50,30 @@ class SessionManager(
             .clear()
             .apply()
     }
+
+    fun obtenerIdUsuarioLocal(): Int? {
+        val id =
+            preferencias.getInt(
+                "ID_USUARIO",
+                -1
+            )
+
+        return if (id > 0) {
+            id
+        } else {
+            null
+        }
+    }
+
+    fun actualizarNombreUsuario(
+        nombre: String,
+        apellido: String
+    ) {
+        preferencias.edit()
+            .putString(
+                "NOMBRE_USUARIO",
+                "$nombre $apellido".trim()
+            )
+            .apply()
+    }
 }

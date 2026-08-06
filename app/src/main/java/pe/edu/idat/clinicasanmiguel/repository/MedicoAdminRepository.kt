@@ -2,17 +2,17 @@ package pe.edu.idat.clinicasanmiguel.repository
 
 import android.content.Context
 import org.json.JSONObject
-import pe.edu.idat.clinicasanmiguel.entity.Especialidad
+import pe.edu.idat.clinicasanmiguel.entity.MedicoAdmin
 import pe.edu.idat.clinicasanmiguel.network.ApiService
-import pe.edu.idat.clinicasanmiguel.network.CrearEspecialidadApiRequest
-import pe.edu.idat.clinicasanmiguel.network.EspecialidadApiResponse
+import pe.edu.idat.clinicasanmiguel.network.CrearMedicoApiRequest
+import pe.edu.idat.clinicasanmiguel.network.MedicoApiResponse
 import pe.edu.idat.clinicasanmiguel.network.RetrofitClient
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.io.IOException
 
-class EspecialidadRepository(
+class MedicoAdminRepository(
     context: Context
 ) {
 
@@ -21,18 +21,18 @@ class EspecialidadRepository(
             context.applicationContext
         )
 
-    fun listarEspecialidadesApi(
-        callback: (ResultadoCargaEspecialidadesApi) -> Unit
+    fun listarMedicosApi(
+        callback: (ResultadoCargaMedicosAdminApi) -> Unit
     ) {
         apiService
-            .listarEspecialidades()
+            .listarMedicosAdmin()
             .enqueue(
                 object :
-                    Callback<List<EspecialidadApiResponse>> {
+                    Callback<List<MedicoApiResponse>> {
 
                     override fun onResponse(
-                        call: Call<List<EspecialidadApiResponse>>,
-                        response: Response<List<EspecialidadApiResponse>>
+                        call: Call<List<MedicoApiResponse>>,
+                        response: Response<List<MedicoApiResponse>>
                     ) {
                         if (response.isSuccessful) {
                             val respuesta =
@@ -40,7 +40,7 @@ class EspecialidadRepository(
 
                             if (respuesta == null) {
                                 callback(
-                                    ResultadoCargaEspecialidadesApi.Error(
+                                    ResultadoCargaMedicosAdminApi.Error(
                                         "La API devolvió una respuesta vacía"
                                     )
                                 )
@@ -48,13 +48,16 @@ class EspecialidadRepository(
                                 return
                             }
 
-                            val especialidades =
+                            val medicos =
                                 respuesta
-                                    .map { especialidadApi ->
-                                        Especialidad(
-                                            id = especialidadApi.id,
-                                            nombre =
-                                                especialidadApi.nombre
+                                    .map { medicoApi ->
+                                        MedicoAdmin(
+                                            id = medicoApi.id,
+                                            nombre = medicoApi.nombre,
+                                            idEspecialidad =
+                                                medicoApi.idEspecialidad,
+                                            especialidad =
+                                                medicoApi.especialidad
                                         )
                                     }
                                     .sortedBy {
@@ -62,8 +65,8 @@ class EspecialidadRepository(
                                     }
 
                             callback(
-                                ResultadoCargaEspecialidadesApi.Exito(
-                                    especialidades
+                                ResultadoCargaMedicosAdminApi.Exito(
+                                    medicos
                                 )
                             )
 
@@ -78,7 +81,7 @@ class EspecialidadRepository(
                         when (response.code()) {
                             401 -> {
                                 callback(
-                                    ResultadoCargaEspecialidadesApi
+                                    ResultadoCargaMedicosAdminApi
                                         .SesionExpirada(
                                             mensaje
                                                 ?: "La sesión ha vencido"
@@ -88,17 +91,17 @@ class EspecialidadRepository(
 
                             403 -> {
                                 callback(
-                                    ResultadoCargaEspecialidadesApi
+                                    ResultadoCargaMedicosAdminApi
                                         .SinPermiso(
                                             mensaje
-                                                ?: "No tienes permiso para consultar las especialidades"
+                                                ?: "No tienes permiso para consultar médicos"
                                         )
                                 )
                             }
 
                             else -> {
                                 callback(
-                                    ResultadoCargaEspecialidadesApi.Error(
+                                    ResultadoCargaMedicosAdminApi.Error(
                                         mensaje
                                             ?: "El servidor respondió con el código ${response.code()}"
                                     )
@@ -108,7 +111,7 @@ class EspecialidadRepository(
                     }
 
                     override fun onFailure(
-                        call: Call<List<EspecialidadApiResponse>>,
+                        call: Call<List<MedicoApiResponse>>,
                         throwable: Throwable
                     ) {
                         if (call.isCanceled) {
@@ -117,15 +120,16 @@ class EspecialidadRepository(
 
                         if (throwable is IOException) {
                             callback(
-                                ResultadoCargaEspecialidadesApi.SinConexion(
-                                    "Necesitas conexión a Internet para consultar las especialidades."
-                                )
+                                ResultadoCargaMedicosAdminApi
+                                    .SinConexion(
+                                        "Necesitas conexión a Internet para consultar médicos."
+                                    )
                             )
                         } else {
                             callback(
-                                ResultadoCargaEspecialidadesApi.Error(
+                                ResultadoCargaMedicosAdminApi.Error(
                                     throwable.message
-                                        ?: "Ocurrió un error al consultar las especialidades."
+                                        ?: "Ocurrió un error al consultar médicos."
                                 )
                             )
                         }
@@ -133,9 +137,13 @@ class EspecialidadRepository(
                 }
             )
     }
-    fun registrarEspecialidadApi(
+
+    fun registrarMedicoApi(
         nombre: String,
-        callback: (ResultadoRegistroEspecialidadApi) -> Unit
+        idEspecialidad: Int,
+        correo: String,
+        password: String,
+        callback: (ResultadoRegistroMedicoAdminApi) -> Unit
     ) {
         val nombreLimpio =
             nombre
@@ -145,10 +153,20 @@ class EspecialidadRepository(
                     " "
                 )
 
-        if (nombreLimpio.isBlank()) {
+        val correoLimpio =
+            correo
+                .trim()
+                .lowercase()
+
+        if (
+            nombreLimpio.isBlank() ||
+            idEspecialidad <= 0 ||
+            correoLimpio.isBlank() ||
+            password.isBlank()
+        ) {
             callback(
-                ResultadoRegistroEspecialidadApi.Error(
-                    "Ingrese el nombre de la especialidad"
+                ResultadoRegistroMedicoAdminApi.Error(
+                    "Complete correctamente todos los datos del médico"
                 )
             )
 
@@ -156,21 +174,24 @@ class EspecialidadRepository(
         }
 
         val request =
-            CrearEspecialidadApiRequest(
-                nombre = nombreLimpio
+            CrearMedicoApiRequest(
+                nombre = nombreLimpio,
+                idEspecialidad = idEspecialidad,
+                correo = correoLimpio,
+                password = password
             )
 
         apiService
-            .registrarEspecialidad(
+            .registrarMedicoAdmin(
                 request
             )
             .enqueue(
                 object :
-                    Callback<EspecialidadApiResponse> {
+                    Callback<MedicoApiResponse> {
 
                     override fun onResponse(
-                        call: Call<EspecialidadApiResponse>,
-                        response: Response<EspecialidadApiResponse>
+                        call: Call<MedicoApiResponse>,
+                        response: Response<MedicoApiResponse>
                     ) {
                         if (response.isSuccessful) {
                             val respuesta =
@@ -178,7 +199,7 @@ class EspecialidadRepository(
 
                             if (respuesta == null) {
                                 callback(
-                                    ResultadoRegistroEspecialidadApi.Error(
+                                    ResultadoRegistroMedicoAdminApi.Error(
                                         "La API devolvió una respuesta incompleta"
                                     )
                                 )
@@ -186,18 +207,21 @@ class EspecialidadRepository(
                                 return
                             }
 
-                            val especialidad =
-                                Especialidad(
+                            val medico =
+                                MedicoAdmin(
                                     id = respuesta.id,
-                                    nombre = respuesta.nombre
+                                    nombre = respuesta.nombre,
+                                    idEspecialidad =
+                                        respuesta.idEspecialidad,
+                                    especialidad =
+                                        respuesta.especialidad
                                 )
 
                             callback(
-                                ResultadoRegistroEspecialidadApi.Exito(
-                                    especialidad =
-                                        especialidad,
+                                ResultadoRegistroMedicoAdminApi.Exito(
+                                    medico = medico,
                                     mensaje =
-                                        "Especialidad registrada correctamente"
+                                        "Médico registrado correctamente"
                                 )
                             )
 
@@ -212,16 +236,16 @@ class EspecialidadRepository(
                         when (response.code()) {
                             400 -> {
                                 callback(
-                                    ResultadoRegistroEspecialidadApi.Error(
+                                    ResultadoRegistroMedicoAdminApi.Error(
                                         mensaje
-                                            ?: "Revise el nombre ingresado"
+                                            ?: "Revise los datos ingresados"
                                     )
                                 )
                             }
 
                             401 -> {
                                 callback(
-                                    ResultadoRegistroEspecialidadApi
+                                    ResultadoRegistroMedicoAdminApi
                                         .SesionExpirada(
                                             mensaje
                                                 ?: "La sesión ha vencido"
@@ -231,27 +255,36 @@ class EspecialidadRepository(
 
                             403 -> {
                                 callback(
-                                    ResultadoRegistroEspecialidadApi
+                                    ResultadoRegistroMedicoAdminApi
                                         .SinPermiso(
                                             mensaje
-                                                ?: "Solo un administrador puede registrar especialidades"
+                                                ?: "Solo un administrador puede registrar médicos"
                                         )
+                                )
+                            }
+
+                            404 -> {
+                                callback(
+                                    ResultadoRegistroMedicoAdminApi.Error(
+                                        mensaje
+                                            ?: "La especialidad seleccionada no existe"
+                                    )
                                 )
                             }
 
                             409 -> {
                                 callback(
-                                    ResultadoRegistroEspecialidadApi
+                                    ResultadoRegistroMedicoAdminApi
                                         .Duplicado(
                                             mensaje
-                                                ?: "La especialidad ya se encuentra registrada"
+                                                ?: "El médico o correo ya se encuentra registrado"
                                         )
                                 )
                             }
 
                             else -> {
                                 callback(
-                                    ResultadoRegistroEspecialidadApi.Error(
+                                    ResultadoRegistroMedicoAdminApi.Error(
                                         mensaje
                                             ?: "El servidor respondió con el código ${response.code()}"
                                     )
@@ -261,7 +294,7 @@ class EspecialidadRepository(
                     }
 
                     override fun onFailure(
-                        call: Call<EspecialidadApiResponse>,
+                        call: Call<MedicoApiResponse>,
                         throwable: Throwable
                     ) {
                         if (call.isCanceled) {
@@ -270,16 +303,16 @@ class EspecialidadRepository(
 
                         if (throwable is IOException) {
                             callback(
-                                ResultadoRegistroEspecialidadApi
+                                ResultadoRegistroMedicoAdminApi
                                     .SinConexion(
-                                        "Necesitas conexión a Internet para registrar una especialidad."
+                                        "Necesitas conexión a Internet para registrar médicos."
                                     )
                             )
                         } else {
                             callback(
-                                ResultadoRegistroEspecialidadApi.Error(
+                                ResultadoRegistroMedicoAdminApi.Error(
                                     throwable.message
-                                        ?: "Ocurrió un error al registrar la especialidad."
+                                        ?: "Ocurrió un error al registrar el médico."
                                 )
                             )
                         }
@@ -316,53 +349,53 @@ class EspecialidadRepository(
     }
 }
 
-sealed class ResultadoCargaEspecialidadesApi {
+sealed class ResultadoCargaMedicosAdminApi {
 
     data class Exito(
-        val especialidades: List<Especialidad>
-    ) : ResultadoCargaEspecialidadesApi()
+        val medicos: List<MedicoAdmin>
+    ) : ResultadoCargaMedicosAdminApi()
 
     data class SinConexion(
         val mensaje: String
-    ) : ResultadoCargaEspecialidadesApi()
-
-    data class Error(
-        val mensaje: String
-    ) : ResultadoCargaEspecialidadesApi()
+    ) : ResultadoCargaMedicosAdminApi()
 
     data class SesionExpirada(
         val mensaje: String
-    ) : ResultadoCargaEspecialidadesApi()
+    ) : ResultadoCargaMedicosAdminApi()
 
     data class SinPermiso(
         val mensaje: String
-    ) : ResultadoCargaEspecialidadesApi()
+    ) : ResultadoCargaMedicosAdminApi()
+
+    data class Error(
+        val mensaje: String
+    ) : ResultadoCargaMedicosAdminApi()
 }
 
-sealed class ResultadoRegistroEspecialidadApi {
+sealed class ResultadoRegistroMedicoAdminApi {
 
     data class Exito(
-        val especialidad: Especialidad,
+        val medico: MedicoAdmin,
         val mensaje: String
-    ) : ResultadoRegistroEspecialidadApi()
+    ) : ResultadoRegistroMedicoAdminApi()
 
     data class Duplicado(
         val mensaje: String
-    ) : ResultadoRegistroEspecialidadApi()
+    ) : ResultadoRegistroMedicoAdminApi()
 
     data class SinConexion(
         val mensaje: String
-    ) : ResultadoRegistroEspecialidadApi()
+    ) : ResultadoRegistroMedicoAdminApi()
 
     data class SesionExpirada(
         val mensaje: String
-    ) : ResultadoRegistroEspecialidadApi()
+    ) : ResultadoRegistroMedicoAdminApi()
 
     data class SinPermiso(
         val mensaje: String
-    ) : ResultadoRegistroEspecialidadApi()
+    ) : ResultadoRegistroMedicoAdminApi()
 
     data class Error(
         val mensaje: String
-    ) : ResultadoRegistroEspecialidadApi()
+    ) : ResultadoRegistroMedicoAdminApi()
 }

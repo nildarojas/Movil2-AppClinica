@@ -422,6 +422,11 @@ class EditarPerfilFragment :
                     usuarioActualizadoApi
                 )
 
+                sessionManager.actualizarNombreUsuario(
+                    nombre = usuarioLocal.nombre,
+                    apellido = usuarioLocal.apellido
+                )
+
                 Toast.makeText(
                     requireContext(),
                     resultado.mensaje,

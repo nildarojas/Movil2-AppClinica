@@ -32,13 +32,6 @@
             android:name=".RegistroActivity"
             android:exported="false" />
         <activity
-            android:name=".RegistrarEspecialidadActivity"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
-        <activity
-            android:name=".RegistrarDoctorActivity"
-            android:exported="false" />
-        <activity
             android:name=".ReprogramarCitaActivity"
             android:exported="false" />
         <activity

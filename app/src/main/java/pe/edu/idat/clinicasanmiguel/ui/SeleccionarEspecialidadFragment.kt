@@ -17,7 +17,6 @@ import org.json.JSONObject
 import pe.edu.idat.clinicasanmiguel.LoginActivity
 import pe.edu.idat.clinicasanmiguel.R
 import pe.edu.idat.clinicasanmiguel.adapter.EspecialidadAdminAdapter
-import pe.edu.idat.clinicasanmiguel.adapter.EspecialidadMock
 import pe.edu.idat.clinicasanmiguel.network.EspecialidadApiResponse
 import pe.edu.idat.clinicasanmiguel.network.RetrofitClient
 import pe.edu.idat.clinicasanmiguel.network.SessionManager
@@ -26,6 +25,7 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.io.IOException
+import pe.edu.idat.clinicasanmiguel.entity.Especialidad
 
 class SeleccionarEspecialidadFragment :
     Fragment(R.layout.activity_seleccionar_especialidad) {
@@ -33,6 +33,8 @@ class SeleccionarEspecialidadFragment :
     private lateinit var rvEspecialidades:
             RecyclerView
 
+    private lateinit var especialidadAdapter:
+            EspecialidadAdminAdapter
     private lateinit var loadingController:
             LoadingController
 
@@ -75,9 +77,59 @@ class SeleccionarEspecialidadFragment :
                 requireContext()
             )
 
-        mostrarEspecialidades(
-            emptyList()
-        )
+        especialidadAdapter =
+            EspecialidadAdminAdapter(
+                listaEspecialidades =
+                    emptyList(),
+                onItemClick = click@{
+                        especialidadSeleccionada ->
+
+                    if (cargandoEspecialidades) {
+                        return@click
+                    }
+
+                    if (especialidadSeleccionada.id <= 0) {
+                        Toast.makeText(
+                            requireContext(),
+                            "No se pudo identificar la especialidad",
+                            Toast.LENGTH_SHORT
+                        ).show()
+
+                        return@click
+                    }
+
+                    val siguientePaso =
+                        SeleccionarMedicoHorarioFragment()
+                            .apply {
+                                arguments =
+                                    Bundle().apply {
+                                        putInt(
+                                            "ID_ESPECIALIDAD",
+                                            especialidadSeleccionada.id
+                                        )
+
+                                        putString(
+                                            "NOMBRE_ESPECIALIDAD",
+                                            especialidadSeleccionada.nombre
+                                        )
+                                    }
+                            }
+
+                    parentFragmentManager
+                        .beginTransaction()
+                        .replace(
+                            R.id.flContenedor,
+                            siguientePaso
+                        )
+                        .addToBackStack(
+                            null
+                        )
+                        .commit()
+                }
+            )
+
+        rvEspecialidades.adapter =
+            especialidadAdapter
 
         cargarEspecialidadesDesdeApi()
     }
@@ -408,64 +460,24 @@ class SeleccionarEspecialidadFragment :
     private fun mostrarEspecialidades(
         especialidades: List<EspecialidadApiResponse>
     ) {
+        if (!::especialidadAdapter.isInitialized) {
+            return
+        }
+
         val lista =
             especialidades.map {
-                EspecialidadMock(
-                    id = it.id,
-                    nombre = it.nombre,
-                    area = "",
-                    estado = ""
+                    especialidadApi ->
+
+                Especialidad(
+                    id = especialidadApi.id,
+                    nombre = especialidadApi.nombre
                 )
             }
 
-        rvEspecialidades.adapter =
-            EspecialidadAdminAdapter(
-                lista = lista,
-                esModoAdmin = false
-            ) { especialidadSeleccionada ->
-
-                if (cargandoEspecialidades) {
-                    return@EspecialidadAdminAdapter
-                }
-
-                if (especialidadSeleccionada.id <= 0) {
-                    Toast.makeText(
-                        requireContext(),
-                        "No se pudo identificar la especialidad",
-                        Toast.LENGTH_SHORT
-                    ).show()
-
-                    return@EspecialidadAdminAdapter
-                }
-
-                val siguientePaso =
-                    SeleccionarMedicoHorarioFragment()
-                        .apply {
-                            arguments =
-                                Bundle().apply {
-                                    putInt(
-                                        "ID_ESPECIALIDAD",
-                                        especialidadSeleccionada.id
-                                    )
-
-                                    putString(
-                                        "NOMBRE_ESPECIALIDAD",
-                                        especialidadSeleccionada.nombre
-                                    )
-                                }
-                        }
-
-                parentFragmentManager
-                    .beginTransaction()
-                    .replace(
-                        R.id.flContenedor,
-                        siguientePaso
-                    )
-                    .addToBackStack(
-                        null
-                    )
-                    .commit()
-            }
+        especialidadAdapter
+            .actualizarLista(
+                lista
+            )
     }
 
     private fun hayConexionAInternet():

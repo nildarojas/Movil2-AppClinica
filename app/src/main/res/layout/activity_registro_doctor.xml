@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -15,25 +17,26 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
             android:layout_marginTop="10dp"
-            android:layout_marginBottom="30dp">
+            android:layout_marginBottom="30dp"
+            android:orientation="vertical">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Gestión administrativa"
-                android:textSize="14sp"
-                android:textColor="#757575" />
+                android:textColor="#757575"
+                android:textSize="14sp" />
 
             <TextView
                 android:id="@+id/tvTituloDoc"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Registrar Médico"
+                android:textColor="#1A1A1A"
                 android:textSize="28sp"
-                android:textStyle="bold"
-                android:textColor="#1A1A1A" />
+                android:textStyle="bold" />
+
         </LinearLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -52,6 +55,7 @@
                 android:inputType="textCapWords"
                 android:textColor="#000000"
                 android:textColorHint="#777777" />
+
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -71,6 +75,75 @@
                 android:inputType="textCapWords"
                 android:textColor="#000000"
                 android:textColorHint="#777777" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilCorreoDoc"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:hint="Correo"
+            app:boxStrokeColor="#458890"
+            app:hintTextColor="#212121">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etCorreoDoc"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionNext"
+                android:inputType="textEmailAddress"
+                android:maxLines="1"
+                android:textColor="#000000"
+                android:textColorHint="#777777" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilPasswordDoc"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:hint="Contraseña"
+            app:boxStrokeColor="#458890"
+            app:endIconMode="password_toggle"
+            app:hintTextColor="#212121">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etPasswordDoc"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionNext"
+                android:inputType="textPassword"
+                android:maxLines="1"
+                android:textColor="#000000"
+                android:textColorHint="#777777" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilConfirmarPasswordDoc"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:hint="Confirmar contraseña"
+            app:boxStrokeColor="#458890"
+            app:endIconMode="password_toggle"
+            app:hintTextColor="#212121">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etConfirmarPasswordDoc"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionDone"
+                android:inputType="textPassword"
+                android:maxLines="1"
+                android:textColor="#000000"
+                android:textColorHint="#777777" />
+
         </com.google.android.material.textfield.TextInputLayout>
 
         <TextView
@@ -80,9 +153,9 @@
             android:layout_marginTop="22dp"
             android:layout_marginBottom="10dp"
             android:text="Seleccione Especialidad"
+            android:textColor="#333333"
             android:textSize="16sp"
-            android:textStyle="bold"
-            android:textColor="#333333" />
+            android:textStyle="bold" />
 
         <FrameLayout
             android:layout_width="match_parent"
@@ -95,6 +168,7 @@
                 android:layout_height="50dp"
                 android:paddingStart="12dp"
                 android:paddingEnd="12dp" />
+
         </FrameLayout>
 
         <com.google.android.material.button.MaterialButton
@@ -102,14 +176,14 @@
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:layout_marginTop="28dp"
+            android:backgroundTint="#458890"
+            android:elevation="4dp"
             android:text="REGISTRAR DOCTOR"
             android:textAllCaps="false"
             android:textColor="@android:color/white"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:backgroundTint="#458890"
-            app:cornerRadius="12dp"
-            android:elevation="4dp" />
+            app:cornerRadius="12dp" />
 
         <ProgressBar
             android:id="@+id/pbCargandoDoc"

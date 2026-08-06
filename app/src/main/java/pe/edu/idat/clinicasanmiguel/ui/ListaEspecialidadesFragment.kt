@@ -2,23 +2,27 @@ package pe.edu.idat.clinicasanmiguel.ui
 
 import android.content.Intent
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ProgressBar
+import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.textfield.TextInputEditText
 import pe.edu.idat.clinicasanmiguel.LoginActivity
 import pe.edu.idat.clinicasanmiguel.R
-import pe.edu.idat.clinicasanmiguel.RegistrarEspecialidadActivity
 import pe.edu.idat.clinicasanmiguel.adapter.EspecialidadAdminAdapter
-import pe.edu.idat.clinicasanmiguel.adapter.EspecialidadMock
 import pe.edu.idat.clinicasanmiguel.entity.Especialidad
 import pe.edu.idat.clinicasanmiguel.network.SessionManager
 import pe.edu.idat.clinicasanmiguel.repository.EspecialidadRepository
 import pe.edu.idat.clinicasanmiguel.repository.ResultadoCargaEspecialidadesApi
+import pe.edu.idat.clinicasanmiguel.utils.NetworkMonitor
 
 class ListaEspecialidadesFragment :
     Fragment() {
@@ -26,8 +30,34 @@ class ListaEspecialidadesFragment :
     private lateinit var rvEspecialidades:
             RecyclerView
 
+    private lateinit var etBuscarEspecialidad:
+            TextInputEditText
+
+    private lateinit var tvEstadoEspecialidades:
+            TextView
+
+    private lateinit var pbEspecialidades:
+            ProgressBar
+
+    private lateinit var fabNuevaEspecialidad:
+            FloatingActionButton
+
     private lateinit var especialidadRepository:
             EspecialidadRepository
+
+    private lateinit var especialidadAdapter:
+            EspecialidadAdminAdapter
+    private var especialidadesCompletas:
+            List<Especialidad> =
+        emptyList()
+
+    private var cargando =
+        false
+
+    private var cargaCompletada =
+        false
+    private var idSolicitud =
+        0L
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -50,73 +80,235 @@ class ListaEspecialidadesFragment :
             savedInstanceState
         )
 
-        rvEspecialidades =
-            view.findViewById(
-                R.id.rvEspecialidades
-            )
-
-        rvEspecialidades.layoutManager =
-            LinearLayoutManager(
-                requireContext()
-            )
-
         especialidadRepository =
             EspecialidadRepository(
                 requireContext()
             )
 
-        view.findViewById<
-                FloatingActionButton
-                >(
-            R.id.fabNuevaEspecialidad
-        ).setOnClickListener {
-            val intent =
-                Intent(
-                    requireContext(),
-                    RegistrarEspecialidadActivity::class.java
-                )
+        rvEspecialidades =
+            view.findViewById(
+                R.id.rvEspecialidades
+            )
 
-            startActivity(intent)
-        }
+        etBuscarEspecialidad =
+            view.findViewById(
+                R.id.etBuscarEspecialidad
+            )
+
+        tvEstadoEspecialidades =
+            view.findViewById(
+                R.id.tvEstadoEspecialidades
+            )
+
+        pbEspecialidades =
+            view.findViewById(
+                R.id.pbEspecialidades
+            )
+
+        fabNuevaEspecialidad =
+            view.findViewById(
+                R.id.fabNuevaEspecialidad
+            )
+
+        configurarRecyclerView()
+
+        configurarBusqueda()
+
+        fabNuevaEspecialidad
+            .setOnClickListener {
+                abrirRegistroEspecialidad()
+            }
+
+        observarConexion()
     }
 
     override fun onResume() {
         super.onResume()
+        if (NetworkMonitor.hayInternet()) {
+            cargarEspecialidades()
+        } else {
+            mostrarSinConexion()
+        }
+    }
 
-        cargarEspecialidades()
+    override fun onDestroyView() {
+        idSolicitud++
+
+        cargando =
+            false
+
+        super.onDestroyView()
+    }
+
+    private fun configurarRecyclerView() {
+        especialidadAdapter =
+            EspecialidadAdminAdapter(
+                listaEspecialidades =
+                    emptyList()
+            )
+
+        rvEspecialidades.apply {
+            layoutManager =
+                LinearLayoutManager(
+                    requireContext()
+                )
+
+            adapter =
+                especialidadAdapter
+
+            setHasFixedSize(
+                true
+            )
+        }
+    }
+
+    private fun configurarBusqueda() {
+        etBuscarEspecialidad
+            .addTextChangedListener(
+                object : TextWatcher {
+
+                    override fun beforeTextChanged(
+                        texto: CharSequence?,
+                        inicio: Int,
+                        cantidad: Int,
+                        despues: Int
+                    ) {
+                    }
+
+                    override fun onTextChanged(
+                        texto: CharSequence?,
+                        inicio: Int,
+                        antes: Int,
+                        cantidad: Int
+                    ) {
+                        filtrarEspecialidades(
+                            texto
+                                ?.toString()
+                                .orEmpty()
+                        )
+                    }
+
+                    override fun afterTextChanged(
+                        texto: Editable?
+                    ) {
+                    }
+                }
+            )
+    }
+
+    private fun observarConexion() {
+        NetworkMonitor
+            .estadoConexion
+            .observe(
+                viewLifecycleOwner
+            ) { conectado ->
+
+                if (!conectado) {
+                    mostrarSinConexion()
+
+                    return@observe
+                }
+
+                fabNuevaEspecialidad.isEnabled =
+                    !cargando
+
+                if (
+                    !cargando &&
+                    !cargaCompletada
+                ) {
+                    cargarEspecialidades()
+                }
+            }
     }
 
     private fun cargarEspecialidades() {
-        val locales =
-            especialidadRepository
-                .obtenerEspecialidadesLocales()
+        if (
+            cargando ||
+            !vistaDisponible()
+        ) {
+            return
+        }
 
-        mostrarEspecialidades(
-            locales
-        )
+        if (!NetworkMonitor.hayInternet()) {
+            mostrarSinConexion()
+
+            return
+        }
+
+        cargando =
+            true
+
+        cargaCompletada =
+            false
+
+        val solicitudActual =
+            ++idSolicitud
+
+        mostrarCargando()
 
         especialidadRepository
-            .sincronizarEspecialidadesApi {
+            .listarEspecialidadesApi {
                     resultado ->
 
-                if (!isAdded) {
-                    return@sincronizarEspecialidadesApi
+                if (
+                    !solicitudVigente(
+                        solicitudActual
+                    )
+                ) {
+                    return@listarEspecialidadesApi
+                }
+
+                cargando =
+                    false
+
+                pbEspecialidades.visibility =
+                    View.GONE
+
+                fabNuevaEspecialidad.isEnabled =
+                    NetworkMonitor.hayInternet()
+
+                if (!NetworkMonitor.hayInternet()) {
+                    mostrarSinConexion()
+
+                    return@listarEspecialidadesApi
                 }
 
                 when (resultado) {
-                    is ResultadoCargaEspecialidadesApi
-                    .Exito -> {
+                    is ResultadoCargaEspecialidadesApi.Exito -> {
+                        cargaCompletada =
+                            true
 
-                        mostrarEspecialidades(
-                            resultado.especialidades
+                        especialidadesCompletas =
+                            resultado
+                                .especialidades
+                                .sortedBy {
+                                        especialidad ->
+
+                                    especialidad
+                                        .nombre
+                                        .lowercase()
+                                }
+
+                        etBuscarEspecialidad.isEnabled =
+                            true
+
+                        filtrarEspecialidades(
+                            etBuscarEspecialidad
+                                .text
+                                ?.toString()
+                                .orEmpty()
                         )
                     }
 
-                    is ResultadoCargaEspecialidadesApi
-                    .SinConexion -> {
+                    is ResultadoCargaEspecialidadesApi.SinConexion -> {
+                        mostrarErrorLista(
+                            resultado.mensaje
+                        )
+                    }
 
-                        mostrarEspecialidades(
-                            resultado.especialidades
+                    is ResultadoCargaEspecialidadesApi.Error -> {
+                        mostrarErrorLista(
+                            resultado.mensaje
                         )
 
                         Toast.makeText(
@@ -126,30 +318,16 @@ class ListaEspecialidadesFragment :
                         ).show()
                     }
 
-                    is ResultadoCargaEspecialidadesApi
-                    .Error -> {
-
-                        mostrarEspecialidades(
-                            resultado.especialidades
-                        )
-
-                        Toast.makeText(
-                            requireContext(),
-                            resultado.mensaje,
-                            Toast.LENGTH_LONG
-                        ).show()
-                    }
-
-                    is ResultadoCargaEspecialidadesApi
-                    .SesionExpirada -> {
-
+                    is ResultadoCargaEspecialidadesApi.SesionExpirada -> {
                         cerrarSesion(
                             resultado.mensaje
                         )
                     }
 
-                    is ResultadoCargaEspecialidadesApi
-                    .SinPermiso -> {
+                    is ResultadoCargaEspecialidadesApi.SinPermiso -> {
+                        mostrarErrorLista(
+                            resultado.mensaje
+                        )
 
                         Toast.makeText(
                             requireContext(),
@@ -161,26 +339,195 @@ class ListaEspecialidadesFragment :
             }
     }
 
-    private fun mostrarEspecialidades(
-        especialidades:
-        List<Especialidad>
+    private fun filtrarEspecialidades(
+        texto: String
     ) {
-        val lista =
-            especialidades.map {
-                EspecialidadMock(
-                    nombre = it.nombre,
-                    area =
-                        "Área no asignada",
-                    estado = "ACTIVO",
-                    id = it.id
+        if (
+            !::especialidadAdapter.isInitialized ||
+            !vistaDisponible()
+        ) {
+            return
+        }
+
+        val consulta =
+            texto.trim()
+
+        val especialidadesFiltradas =
+            if (consulta.isBlank()) {
+                especialidadesCompletas
+            } else {
+                especialidadesCompletas.filter {
+                        especialidad ->
+
+                    especialidad.nombre.contains(
+                        consulta,
+                        ignoreCase = true
+                    )
+                }
+            }
+
+        especialidadAdapter
+            .actualizarLista(
+                especialidadesFiltradas
+            )
+
+        when {
+            !NetworkMonitor.hayInternet() -> {
+                mostrarMensajeEstado(
+                    "Necesitas conexión a Internet para consultar las especialidades."
                 )
             }
 
-        rvEspecialidades.adapter =
-            EspecialidadAdminAdapter(
-                lista = lista,
-                esModoAdmin = true
+            !cargaCompletada -> {
+            }
+
+            especialidadesCompletas.isEmpty() -> {
+                mostrarMensajeEstado(
+                    "No hay especialidades registradas."
+                )
+            }
+
+            especialidadesFiltradas.isEmpty() -> {
+                mostrarMensajeEstado(
+                    "No se encontraron especialidades con ese nombre."
+                )
+            }
+
+            else -> {
+                tvEstadoEspecialidades.visibility =
+                    View.GONE
+
+                rvEspecialidades.visibility =
+                    View.VISIBLE
+            }
+        }
+    }
+
+    private fun mostrarCargando() {
+        pbEspecialidades.visibility =
+            View.VISIBLE
+
+        tvEstadoEspecialidades.visibility =
+            View.GONE
+
+        fabNuevaEspecialidad.isEnabled =
+            false
+
+        etBuscarEspecialidad.isEnabled =
+            false
+
+        if (especialidadesCompletas.isEmpty()) {
+            rvEspecialidades.visibility =
+                View.GONE
+        }
+    }
+
+    private fun mostrarSinConexion() {
+        idSolicitud++
+
+        cargando =
+            false
+
+        cargaCompletada =
+            false
+
+        especialidadesCompletas =
+            emptyList()
+
+        if (::especialidadAdapter.isInitialized) {
+            especialidadAdapter
+                .actualizarLista(
+                    emptyList()
+                )
+        }
+
+        if (!vistaDisponible()) {
+            return
+        }
+
+        pbEspecialidades.visibility =
+            View.GONE
+
+        rvEspecialidades.visibility =
+            View.GONE
+
+        etBuscarEspecialidad.isEnabled =
+            false
+
+        fabNuevaEspecialidad.isEnabled =
+            false
+
+        mostrarMensajeEstado(
+            "Necesitas conexión a Internet para consultar y administrar especialidades."
+        )
+    }
+
+    private fun mostrarErrorLista(
+        mensaje: String
+    ) {
+        cargaCompletada =
+            false
+
+        especialidadesCompletas =
+            emptyList()
+
+        especialidadAdapter
+            .actualizarLista(
+                emptyList()
             )
+
+        pbEspecialidades.visibility =
+            View.GONE
+
+        rvEspecialidades.visibility =
+            View.GONE
+
+        etBuscarEspecialidad.isEnabled =
+            false
+
+        mostrarMensajeEstado(
+            mensaje
+        )
+    }
+
+    private fun mostrarMensajeEstado(
+        mensaje: String
+    ) {
+        tvEstadoEspecialidades.text =
+            mensaje
+
+        tvEstadoEspecialidades.visibility =
+            View.VISIBLE
+
+        rvEspecialidades.visibility =
+            View.GONE
+    }
+
+    private fun abrirRegistroEspecialidad() {
+        if (cargando) {
+            return
+        }
+
+        if (!NetworkMonitor.hayInternet()) {
+            Toast.makeText(
+                requireContext(),
+                "Necesitas conexión a Internet para registrar una especialidad.",
+                Toast.LENGTH_LONG
+            ).show()
+
+            return
+        }
+
+        parentFragmentManager
+            .beginTransaction()
+            .replace(
+                R.id.flContenedor,
+                RegistrarEspecialidadFragment()
+            )
+            .addToBackStack(
+                "LISTA_ESPECIALIDADES"
+            )
+            .commit()
     }
 
     private fun cerrarSesion(
@@ -200,14 +547,30 @@ class ListaEspecialidadesFragment :
             Intent(
                 requireContext(),
                 LoginActivity::class.java
-            )
+            ).apply {
+                flags =
+                    Intent.FLAG_ACTIVITY_NEW_TASK or
+                            Intent.FLAG_ACTIVITY_CLEAR_TASK
+            }
 
-        intent.flags =
-            Intent.FLAG_ACTIVITY_NEW_TASK or
-                    Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(
+            intent
+        )
 
-        startActivity(intent)
+        requireActivity()
+            .finish()
+    }
 
-        requireActivity().finish()
+    private fun solicitudVigente(
+        solicitudId: Long
+    ): Boolean {
+        return solicitudId ==
+                idSolicitud &&
+                vistaDisponible()
+    }
+
+    private fun vistaDisponible(): Boolean {
+        return isAdded &&
+                view != null
     }
 }

@@ -56,6 +56,14 @@ class PerfilFragment :
     private lateinit var btnRegresar:
             MaterialButton
 
+    private lateinit var btnEditarPerfil:
+            MaterialButton
+
+    private var usuarioActual:
+            UsuarioLoginApi? = null
+
+
+
     private lateinit var cacheManager:
             CacheManager
 
@@ -143,6 +151,18 @@ class PerfilFragment :
             view.findViewById(
                 R.id.btnRegresar
             )
+
+        btnEditarPerfil =
+            view.findViewById(
+                R.id.btnEditarPerfil
+            )
+
+        btnEditarPerfil.isEnabled =
+            false
+
+        btnEditarPerfil.setOnClickListener {
+            abrirEditarPerfil()
+        }
 
         btnRegresar.setOnClickListener {
             regresar()
@@ -233,6 +253,8 @@ class PerfilFragment :
 
         cargando =
             true
+        btnEditarPerfil.isEnabled =
+            false
 
         val tokenCarga =
             loadingController.show(
@@ -579,6 +601,14 @@ class PerfilFragment :
     private fun mostrarPerfil(
         usuario: UsuarioLoginApi
     ) {
+
+        usuarioActual =
+            usuario
+
+        btnEditarPerfil.isEnabled =
+            !mostrandoCache &&
+                    NetworkMonitor.hayInternet()
+
         tvTitulo.text =
             if (
                 usuario.rol.equals(
@@ -614,6 +644,13 @@ class PerfilFragment :
     }
 
     private fun mostrarCargando() {
+
+        usuarioActual =
+            null
+
+        btnEditarPerfil.isEnabled =
+            false
+
         tvTitulo.text =
             "Cargando perfil..."
 
@@ -640,6 +677,11 @@ class PerfilFragment :
     }
 
     private fun mostrarErrorPerfil() {
+        usuarioActual =
+            null
+
+        btnEditarPerfil.isEnabled =
+            false
         tvTitulo.text =
             "No se pudo cargar el perfil"
 
@@ -691,6 +733,46 @@ class PerfilFragment :
         }
     }
 
+    private fun abrirEditarPerfil() {
+        if (cargando) {
+            return
+        }
+
+        val usuario =
+            usuarioActual
+
+        if (usuario == null) {
+            Toast.makeText(
+                requireContext(),
+                "Primero debe cargarse correctamente el perfil.",
+                Toast.LENGTH_LONG
+            ).show()
+
+            return
+        }
+
+        if (!NetworkMonitor.hayInternet()) {
+            Toast.makeText(
+                requireContext(),
+                "Editar el perfil requiere conexión a Internet.",
+                Toast.LENGTH_LONG
+            ).show()
+
+            return
+        }
+
+        parentFragmentManager
+            .beginTransaction()
+            .replace(
+                R.id.flContenedor,
+                EditarPerfilFragment
+                    .nuevaInstancia(usuario)
+            )
+            .addToBackStack(
+                "PERFIL"
+            )
+            .commit()
+    }
     private fun regresar() {
         if (
             parentFragmentManager
