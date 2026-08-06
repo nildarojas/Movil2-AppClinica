@@ -15,6 +15,7 @@
         app:lottie_rawRes="@raw/animacion_logo"
         app:lottie_autoPlay="true"
         app:lottie_loop="false"
+        app:lottie_speed="0.8333"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"

@@ -121,4 +121,15 @@ interface ApiService {
     fun registrarHorarioAdmin(
         @Body request: CrearHorarioApiRequest
     ): Call<HorarioApiResponse>
+    @GET("api/usuarios/listar")
+    fun listarUsuariosAdmin():
+            Call<List<UsuarioListadoApiResponse>>
+
+    @GET("api/citas/todas")
+    fun listarCitasGlobalesAdmin():
+            Call<List<CitaGlobalApiResponse>>
+
+    @GET("api/recetas/mias")
+    fun listarMisRecetas():
+            Call<List<RecetaApiResponse>>
 }

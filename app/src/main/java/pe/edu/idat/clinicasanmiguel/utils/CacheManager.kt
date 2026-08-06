@@ -245,6 +245,9 @@ class CacheManager(
         const val NOTIFICACIONES =
             "notificaciones"
 
+        const val RECETAS_MEDICAS =
+            "recetas_medicas"
+
         const val PERFIL_USUARIO =
             "perfil_usuario"
     }

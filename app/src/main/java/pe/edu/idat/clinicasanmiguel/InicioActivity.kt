@@ -549,6 +549,11 @@ class InicioActivity : AppCompatActivity() {
                     HistorialCompletoFragment()
             }
 
+            R.id.itRecetas -> {
+                fragmentSeleccionado =
+                    RecetasFragment()
+            }
+
             R.id.itNotificaciones -> {
                 fragmentSeleccionado =
                     NotificacionesFragment()

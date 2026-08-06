@@ -35,9 +35,6 @@
             android:name=".ReprogramarCitaActivity"
             android:exported="false" />
         <activity
-            android:name=".RegistrarHorarioActivity"
-            android:exported="false" />
-        <activity
             android:name=".InicioActivity"
             android:exported="false" />
     </application>

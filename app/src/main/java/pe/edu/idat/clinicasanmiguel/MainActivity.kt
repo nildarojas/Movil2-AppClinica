@@ -159,6 +159,6 @@ class MainActivity : AppCompatActivity() {
             "MainActivity"
 
         private const val TIEMPO_SPLASH_MS =
-            1_500L
+            3_000L
     }
 }

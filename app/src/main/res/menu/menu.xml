@@ -35,6 +35,11 @@
                     android:title="Historial de Citas" />
 
                 <item
+                    android:id="@+id/itRecetas"
+                    android:icon="@android:drawable/ic_menu_info_details"
+                    android:title="Mis Recetas Médicas" />
+
+                <item
                     android:id="@+id/itNotificaciones"
                     android:icon="@android:drawable/ic_popup_reminder"
                     android:title="Notificaciones y Alertas" />
@@ -61,7 +66,7 @@
                 <item
                     android:id="@+id/itDoctores"
                     android:icon="@drawable/ic_person"
-                    android:title="Gestionar Doctores" />
+                    android:title="Gestionar Medicos" />
 
                 <item
                     android:id="@+id/itHorarios"
