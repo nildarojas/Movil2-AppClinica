@@ -112,4 +112,13 @@ interface ApiService {
     fun registrarMedicoAdmin(
         @Body request: CrearMedicoApiRequest
     ): Call<MedicoApiResponse>
+
+    @GET("api/horarios/listar")
+    fun listarHorariosAdmin():
+            Call<List<HorarioApiResponse>>
+
+    @POST("api/horarios/registrar")
+    fun registrarHorarioAdmin(
+        @Body request: CrearHorarioApiRequest
+    ): Call<HorarioApiResponse>
 }
