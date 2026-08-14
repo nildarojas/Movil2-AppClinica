@@ -163,18 +163,22 @@ class CitasAdapter(
             else -> {
                 holder.card.alpha = 1.0f
 
+                val mostrarAcciones =
+                    !esHistorial &&
+                            estado == "PENDIENTE"
+
                 holder.btnCancelar.visibility =
-                    if (esHistorial) {
-                        View.GONE
-                    } else {
+                    if (mostrarAcciones) {
                         View.VISIBLE
+                    } else {
+                        View.GONE
                     }
 
                 holder.btnReprogramar.visibility =
-                    if (esHistorial) {
-                        View.GONE
-                    } else {
+                    if (mostrarAcciones) {
                         View.VISIBLE
+                    } else {
+                        View.GONE
                     }
 
                 holder.tvEstado.setBackgroundColor(
@@ -189,8 +193,7 @@ class CitasAdapter(
 
         val puedeModificarCita =
             !esHistorial &&
-                    estado != "CANCELADA" &&
-                    estado != "REPROGRAMADA"
+                    estado == "PENDIENTE"
 
         val botonesHabilitados =
             puedeModificarCita &&
